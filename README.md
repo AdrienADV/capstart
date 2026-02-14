@@ -1,57 +1,131 @@
 # CapStart
 
-CapStart is a mobile-first React + Vite boilerplate with Capacitor ready for iOS and Android.
+CapStart is a starter boilerplate to ship mobile apps fast with **React + Capacitor + Supabase + shadcn/ui**.
 
 It includes:
-- React 19 + TypeScript + React Router
-- Tailwind CSS v4 + shadcn primitives
-- Capacitor 8 setup (`android/`, `ios/`, safe-area CSS, mobile dev script)
-- Starter app screens designed to be replaced quickly
+- React + Vite + TypeScript
+- Capacitor setup for iOS and Android
+- Supabase auth wiring (login, session, protected routes)
+- Tailwind CSS v4 + shadcn/ui components
+- Mobile-first layout with safe-area handling
+
+## Tech Stack
+
+- React 19
+- Vite 7
+- TypeScript 5
+- Capacitor 8
+- Supabase JS v2
+- Tailwind CSS v4
+- shadcn/ui
+
+## Prerequisites
+
+- Node.js 20+
+- npm
+- For iOS development: Xcode (macOS)
+- For Android development: Android Studio + Android SDK
 
 ## Quick Start
 
+1. Install dependencies:
+
 ```bash
 npm install
+```
+
+2. Create your local env file:
+
+```bash
+cp .env.example .env
+```
+
+3. Set your Supabase values in `.env`:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-or-publishable-key
+```
+
+4. Start the web app:
+
+```bash
 npm run dev
 ```
 
-Open `http://localhost:5173`.
+## Mobile Development
 
-## Run On Mobile (local network)
+This project already contains `ios/` and `android/` native projects.
+
+### Run Vite for live reload on a real device
 
 ```bash
 npm run dev:mobile
 ```
 
-This command starts Vite with a network URL and exposes `CAP_SERVER_URL` for Capacitor live reload.
+This script exposes Vite on your local network and sets `CAP_SERVER_URL` automatically, so your iOS/Android physical device can use Capacitor live reload.
+
+### Open native projects
+
+```bash
+npx cap open ios
+npx cap open android
+```
+
+### Build and sync web assets to native
+
+Use this before native release/testing with bundled assets:
+
+```bash
+npx cap sync
+npm run build
+```
+
+## Available Scripts
+
+- `npm run dev` - start Vite dev server
+- `npm run dev:mobile` - start Vite for Capacitor live reload on a real device
+- `npm run build` - build web assets into `dist/`
+- `npm run preview` - preview production build
+- `npm run lint` - run ESLint
 
 ## Project Structure
 
-- `src/pages`: app screens
-- `src/layouts/tab-layout.tsx`: bottom-tabs shell
-- `src/components/ui`: reusable UI primitives
-- `scripts/dev-mobile.mjs`: helper for mobile local-network dev
-- `capacitor.config.ts`: Capacitor app and plugin config
-
-## What To Customize First
-
-1. Rename app metadata in `capacitor.config.ts` (`appId`, `appName`).
-2. Replace placeholder auth flow in `src/pages/auth/login.tsx`.
-3. Replace onboarding content in `src/pages/app/home.tsx`.
-4. Wire real data/services in `src/pages/app/home/details.tsx`.
-
-## Planned Init Flags (Not Implemented Yet)
-
-If you expose an init command from your landing, these are the intended options:
-
-- `--all`: enable the full curated Capacitor plugin pack
-- `--with-supabase`: install Supabase + generate a basic auth scaffold
-
-Target usage once implemented:
-
-```bash
-npx degit adrienvillermois/capstart my-app \
-  && cd my-app \
-  && npm install \
-  && npm run init -- --all --with-supabase
+```text
+capstart/
+├── src/
+│   ├── components/        # UI components (including shadcn/ui)
+│   ├── contexts/          # React contexts (auth state)
+│   ├── layouts/           # App layouts (tab layout)
+│   ├── lib/               # Utilities, Supabase client, route guards
+│   ├── pages/             # Screens (auth + app pages)
+│   ├── app.tsx            # Root app component
+│   ├── main.tsx           # Providers + router bootstrap
+│   └── router.tsx         # Route definitions
+├── android/               # Native Android project
+├── ios/                   # Native iOS project
+├── scripts/dev-mobile.mjs # Mobile dev server helper
+├── capacitor.config.ts    # Capacitor app configuration
+└── .env.example           # Required environment variables
 ```
+
+## Authentication Flow
+
+- `AuthProvider` reads Supabase session and tracks auth state.
+- `GuestRoute` redirects logged-in users away from `/login`.
+- `ProtectedRoute` restricts `/app/*` routes to authenticated users.
+
+## Important Config to Update
+
+Before shipping your app, update:
+
+- `capacitor.config.ts`
+  - `appId` (currently `com.example.app`)
+  - `appName`
+- Supabase project URL and key in `.env`
+- App icons/splash screens in native projects (`ios/` and `android/`)
+
+## Notes
+
+- This boilerplate is mobile-first but can be developed in the browser.
+- Safe-area CSS variables are already configured for notch/status-bar devices.
