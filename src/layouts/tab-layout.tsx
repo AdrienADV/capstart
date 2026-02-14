@@ -14,14 +14,14 @@ export default function TabLayout() {
             </main>
 
             <nav className="shrink-0 border-t bg-background">
-                <div className="flex justify-around items-center pb-(--safe-area-bottom) pt-2">
+                <div className="flex pb-(--safe-area-bottom)">
                     {tabs.map((tab) => (
                         <NavLink
                             key={tab.to}
                             to={tab.to}
                             end={tab.to === "/app"}
                             className={({ isActive }) =>
-                                `flex flex-col items-center gap-1 text-xs transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`
+                                `flex-1 flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-xs transition-colors ${isActive ? "text-primary" : "text-muted-foreground"}`
                             }
                         >
                             <tab.icon className="size-5" />
