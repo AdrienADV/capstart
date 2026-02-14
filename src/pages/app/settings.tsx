@@ -1,8 +1,15 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router";
+import { supabase } from "@/lib/supabase";
 
 export default function Settings() {
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const logout = async () => {
+    setLoading(true);
+    await supabase.auth.signOut();
+    setLoading(false);
+  }
 
   return (
     <div className="pt-(--safe-area-top) p-6 space-y-5">
@@ -12,8 +19,8 @@ export default function Settings() {
         change "settings.tsx" to change this screen
       </p>
 
-      <Button className="w-full" variant="destructive" onClick={() => navigate("/login")}>
-        Back to login
+      <Button className="w-full" variant="destructive" onClick={logout} disabled={loading}>
+        {loading ? "Logging out…" : "Logout"}
       </Button>
     </div>
   );
