@@ -15,6 +15,12 @@ interface UsePushNotificationsResult {
     checkPermissions: () => Promise<void>;
 }
 
+/*
+ * TIPS
+ * - Don't ask notification permission when the app opens.
+ * - Ask permission only when the user clicks the feature that needs notifications.
+ * - On app launch, only read/check current permission state.
+ */
 export const usePushNotifications = (): UsePushNotificationsResult => {
     const [permissionStatus, setPermissionStatus] = useState<PermissionStatus | null>(null);
     const [registrationToken, setRegistrationToken] = useState<string | null>(null);
