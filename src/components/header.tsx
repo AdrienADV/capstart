@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { setDirection } from '@capgo/transitions/react';
 
 interface HeaderProps {
     title?: string;
@@ -11,6 +12,11 @@ interface HeaderProps {
 
 export default function Header({ title, children, className }: HeaderProps) {
     const navigate = useNavigate();
+
+    const goBack = () => {
+        setDirection('back');
+        navigate(-1);
+    };
 
     return (
         <header
@@ -24,7 +30,7 @@ export default function Header({ title, children, className }: HeaderProps) {
                     variant="ghost"
                     size="icon"
                     className="absolute left-4"
-                    onClick={() => navigate(-1)}
+                    onClick={goBack}
                 >
                     <ChevronLeft className="size-4" />
                 </Button>

@@ -6,6 +6,9 @@ import App from './app'
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from './components/theme-provider';
+import { initTransitions } from '@capgo/transitions/react';
+
+initTransitions({ platform: 'auto' });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

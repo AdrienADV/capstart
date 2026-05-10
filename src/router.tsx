@@ -1,3 +1,4 @@
+import type { Location } from 'react-router';
 import { Routes, Route, Navigate } from "react-router";
 import Login from "./pages/auth/login";
 import ProtectedRoute from "./lib/protected-route";
@@ -7,9 +8,13 @@ import Home from "./pages/app/home";
 import Settings from "./pages/app/settings";
 import Details from "./pages/app/home/details";
 
-export default function Router() {
+interface RouterProps {
+    location: Location;
+}
+
+export default function Router({ location }: RouterProps) {
     return (
-        <Routes>
+        <Routes location={location}>
             <Route element={<GuestRoute />}>
                 <Route path="login" element={<Login />} />
             </Route>
