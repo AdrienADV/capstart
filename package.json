@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:mobile": "node scripts/dev-mobile.mjs",
     "lint": "eslint .",
+    "sync": "npm run build && npx cap sync",
     "preview": "vite preview",
     "build": "vite build"
   },
@@ -21,6 +22,8 @@
     "@capacitor/push-notifications": "^8.0.1",
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
+    "@capgo/capacitor-transitions": "^8.0.2",
+    "@capgo/native-navigation": "^8.0.8",
     "@supabase/supabase-js": "^2.95.3",
     "@tailwindcss/vite": "^4.1.18",
     "class-variance-authority": "^0.7.1",
@@ -36,7 +39,6 @@
     "tailwindcss": "^4.1.18"
   },
   "overrides": {
-    "ajv": "^8.18.0",
     "minimatch": "^10.2.1"
   },
   "devDependencies": {
