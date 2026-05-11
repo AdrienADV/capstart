@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { setDirection } from '@capgo/transitions/react';
+import { setDirection } from '@capgo/capacitor-transitions/react';
 
 interface HeaderProps {
     title?: string;

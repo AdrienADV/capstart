@@ -6,7 +6,9 @@ import App from './app'
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from './components/theme-provider';
-import { initTransitions } from '@capgo/transitions/react';
+import { initTransitions } from '@capgo/capacitor-transitions/react';
+import '@capgo/capacitor-transitions';
+
 
 initTransitions({ platform: 'auto' });
 

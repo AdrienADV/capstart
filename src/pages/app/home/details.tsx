@@ -1,9 +1,19 @@
+import { useRef, useEffect } from 'react';
+import { setupPage } from '@capgo/capacitor-transitions/react';
 import Header from "@/components/header";
 
 export default function Details() {
+  const pageRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (pageRef.current) {
+      return setupPage(pageRef.current);
+    }
+  }, []);
+
   return (
-    <div>
+    <cap-page ref={pageRef}>
       <Header title="Details" />
-    </div>
+    </cap-page>
   );
 }

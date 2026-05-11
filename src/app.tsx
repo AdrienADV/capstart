@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useLocation } from 'react-router';
-import { setupRouterOutlet } from '@capgo/transitions/react';
+import { setupRouterOutlet } from '@capgo/capacitor-transitions/react';
 import Router from "./router";
 
 function App() {
