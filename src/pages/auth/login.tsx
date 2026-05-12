@@ -1,9 +1,8 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, type SubmitEvent } from "react";
 import { useNavigate } from "react-router";
 import { setupPage, setDirection } from '@capgo/capacitor-transitions/react';
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -20,7 +19,7 @@ export default function Login() {
     }
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
@@ -41,18 +40,18 @@ export default function Login() {
 
   return (
     <cap-page ref={pageRef}>
-      <div className="flex flex-col min-h-screen gap-6 p-6">
-        <div className="w-full max-w-sm space-y-6 pt-20">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-semibold">Welcome to CapStart</h1>
-            <p className="text-sm text-muted-foreground">
-              Sign in with your email and password
-            </p>
+      <div className="flex flex-col min-h-screen bg-white">
+        <div className="flex-1 flex flex-col justify-center px-6">
+          <div className="mb-10 space-y-1 text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900">CapStart</h1>
+            <p className="text-base text-gray-400">Sign in to continue</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -61,11 +60,14 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                className="h-14 rounded-2xl border-gray-200 bg-gray-50 px-4 text-base focus-visible:ring-red-500"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1">
+              <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -74,12 +76,19 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
+                className="h-14 rounded-2xl border-gray-200 bg-gray-50 px-4 text-base focus-visible:ring-red-500"
               />
             </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Signing in…" : "Sign in"}
-            </Button>
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-14 rounded-2xl bg-red-500 text-white font-semibold text-base active:scale-[0.98] transition-transform disabled:opacity-60 shadow-lg shadow-red-200"
+              >
+                {loading ? "Signing in…" : "Sign in"}
+              </button>
+            </div>
           </form>
         </div>
       </div>
