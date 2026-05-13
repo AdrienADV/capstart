@@ -389,7 +389,10 @@ export default function Home() {
             transition={skip ? {} : { delay: 0.85, type: 'spring', damping: 14, stiffness: 260 }}
             onClick={goToCreate}
             className="fixed z-50 size-14 rounded-full flex items-center justify-center text-white shadow-xl active:scale-95 transition-transform bg-linear-to-br from-violet-500 to-indigo-600 shadow-indigo-500/35"
-            style={{ right: 'max(1.25rem, var(--safe-area-right))', bottom: 'calc(5.25rem + var(--safe-area-bottom))' }}
+            style={{
+              right: 'max(1.25rem, var(--safe-area-right))',
+              bottom: 'calc(1rem + var(--cap-native-navigation-bottom))',
+            }}
           >
             <Plus className="size-7 stroke-[2.5]" />
           </motion.button>
