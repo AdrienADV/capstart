@@ -52,7 +52,7 @@ export default function Profile() {
 
           {/* Avatar + name */}
           <div className="flex flex-col items-center gap-2 mt-6 mb-6">
-            <div className="size-20 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <div className="size-20 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
               <span className="text-white font-bold text-[32px]">A</span>
             </div>
             <p className="font-bold text-[22px] tracking-tight">Adrien</p>

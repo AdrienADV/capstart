@@ -17,7 +17,7 @@ const NATIVE_TABS = [
     id: 'settings',
     title: 'Settings',
     icon: {
-      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+      svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 20.5 6.5 20.5 17.5 12 22 3.5 17.5 3.5 6.5"/><circle cx="12" cy="12" r="3.5"/></svg>',
     },
   },
 ] as const;
