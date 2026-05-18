@@ -4,8 +4,6 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import viteCapacitor from "@capgo/vite-capacitor"
 
-const urlOverride = process.env.CAP_SERVER_URL?.trim()
-
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -14,7 +12,7 @@ export default defineConfig({
     viteCapacitor({
       platforms: ["ios", "android"],
       cleartext: true,
-      urlOverride: urlOverride || undefined,
+      networkUrl: true,
     }),
   ],
   resolve: {
