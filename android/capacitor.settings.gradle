@@ -25,6 +25,3 @@ project(':capacitor-splash-screen').projectDir = new File('../node_modules/@capa
 
 include ':capgo-capacitor-native-navigation'
 project(':capgo-capacitor-native-navigation').projectDir = new File('../node_modules/@capgo/capacitor-native-navigation/android')
-
-include ':capgo-native-navigation'
-project(':capgo-native-navigation').projectDir = new File('../node_modules/@capgo/native-navigation/android')

@@ -17,7 +17,6 @@ dependencies {
     implementation project(':capacitor-share')
     implementation project(':capacitor-splash-screen')
     implementation project(':capgo-capacitor-native-navigation')
-    implementation project(':capgo-native-navigation')
 
 }
 

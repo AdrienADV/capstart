@@ -14,6 +14,9 @@ export default function Details() {
   return (
     <cap-page ref={pageRef}>
       <Header title="Details" />
+      <div className="p-4">
+        <p>This is a simple details page.</p>
+      </div>
     </cap-page>
   );
 }
