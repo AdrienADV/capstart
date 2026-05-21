@@ -13,7 +13,7 @@ jobs:
       pull-requests: write
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Wait for CI
         uses: lewagon/wait-on-check-action@v1.7.0
         with:
