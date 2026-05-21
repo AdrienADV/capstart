@@ -3,12 +3,8 @@ name: CI - Boilerplate
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'capstart-boilerplate/**'
   push:
     branches: [main]
-    paths:
-      - 'capstart-boilerplate/**'
 
 jobs:
   install:
