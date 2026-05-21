@@ -221,32 +221,6 @@ function Home() {
           </div>
         </section>
 
-        <section className="relative px-6 py-16 overflow-hidden">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom_right,var(--tw-gradient-stops))] from-fd-primary/15 via-transparent to-transparent" />
-          <div className="mx-auto max-w-5xl">
-            <div className="rounded-2xl border border-fd-primary/20 bg-fd-primary/5 px-8 py-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col gap-3">
-                <h2 className="text-2xl font-extrabold tracking-tight text-fd-foreground sm:text-3xl">
-                  Tired of waiting <span className="text-fd-primary">3 days</span> for Apple to approve your update?
-                </h2>
-                <p className="text-fd-muted-foreground text-base leading-relaxed max-w-lg">
-                  Push updates to your users in <strong className="text-fd-foreground">minutes</strong>, not days — no app store review, no waiting. Capgo delivers live updates to your Capacitor app instantly.
-                </p>
-              </div>
-              <div className="shrink-0">
-                <a
-                  href="https://capgo.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-fd-primary text-fd-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-fd-primary/20 whitespace-nowrap"
-                  onClick={() => window.umami?.track('cta-capgo-free')}
-                >
-                  Try Capgo for free →
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
 
         <section className="px-6 py-20">
           <div className="mx-auto max-w-5xl">
