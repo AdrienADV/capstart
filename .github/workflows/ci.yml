@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci --omit=optional
 
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci --omit=optional
       - run: npm run lint
