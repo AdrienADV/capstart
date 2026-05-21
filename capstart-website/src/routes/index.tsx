@@ -43,7 +43,7 @@ function Home() {
                   Browse →
                 </Link>
                 <a
-                  href="https://github.com/AdrienADV/capstart-docs"
+                  href="https://github.com/AdrienADV/capstart/tree/main/capstart-boilerplate"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-6 py-3 rounded-xl border border-fd-border bg-fd-background text-fd-foreground font-semibold text-sm hover:bg-fd-muted transition-colors"
