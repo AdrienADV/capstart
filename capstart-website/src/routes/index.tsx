@@ -30,7 +30,7 @@ function Home() {
                 of UI components built for CapacitorJS. Whether you're
                 targeting iOS, Android or the web, you'll find
                 production-ready components that feel native on every
-                platform — backed by real-world usage in the Capgo ecosystem.
+                platform.
               </p>
 
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
@@ -275,9 +275,9 @@ function Home() {
                       className="w-8 h-8 object-contain"
                     />
                   ),
-                  title: 'Ship without waiting',
+                  title: 'Ship with live updates',
                   description:
-                    "Don't wait 2–3 days for Apple validation to ship a new feature — use Capgo.",
+                    'Do not wait 2-3 days for App Store review to ship a web-only change: use a live update when the native shell is unchanged.',
                 },
               ].map((feature) => (
                 <div

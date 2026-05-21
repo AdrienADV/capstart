@@ -1,0 +1,85 @@
+---
+title: Deployment
+description: Prepare, build, and update a Capacitor app for iOS and Android.
+---
+
+Deploying a Capacitor app has two different rhythms:
+
+- **Store releases** for the native shell: plugins, permissions, signing, app icons, entitlements, Android manifests, iOS capabilities, and anything that changes the app installed from the stores.
+- **Web updates** for the code that lives inside the WebView: HTML, CSS, JavaScript, copy, routes, API calls, and most product UI changes.
+
+The important habit is to decide which rhythm your change actually needs. Many updates look like mobile work from the user side, but they are still web bundle changes technically.
+
+## Store Release Checklist
+
+Use a normal App Store or Play Store release when the native project changes, when the first version of the app goes live, or when the app must request new native capabilities.
+
+```bash
+npm run build
+npx cap sync
+```
+
+Then open the native project you are shipping:
+
+```bash
+npx cap open ios
+npx cap open android
+```
+
+Before archiving, check the boring details that usually cause review or build delays:
+
+- `appId` and `appName` are final in `capacitor.config.ts`.
+- Production environment variables are used for the build.
+- iOS version/build numbers and Android version codes were bumped.
+- Icons, splash screens, permissions, deep links, and signing certificates match the app you want to submit.
+- The release build was tested on a real device, not only in the browser.
+
+## When a Live Update Is Enough
+
+Most day-to-day changes in a Capacitor app are changes to the web bundle: UI layout, text, styling, screens, client-side state, API integration, and JavaScript behavior that does not require a new native plugin or permission.
+
+For those changes, I usually prefer a live update workflow instead of submitting a full native build again. It keeps small product iterations closer to a web deployment cycle while the installed native shell stays the same.
+
+Live updates are not a way to bypass store rules. Use them for web assets that are already supported by the app version users have installed. If a change adds native behavior, changes permissions, modifies entitlements, or needs a new plugin, ship a store release.
+
+| Change | Usually ship with |
+| --- | --- |
+| Copy, layout, CSS, route, screen, or JavaScript change | Live update |
+| API integration change using existing native capabilities | Live update |
+| New Capacitor plugin or native SDK | Store release |
+| New iOS entitlement, Android permission, deep link, widget, or push setup | Store release |
+| App icon, splash screen, bundle identifier, signing, or version metadata | Store release |
+
+<div className="not-prose my-6 flex flex-col gap-3 rounded-lg border border-fd-border bg-fd-card p-4 sm:flex-row sm:items-center sm:justify-between">
+  <p className="text-sm leading-relaxed text-fd-muted-foreground">
+    Capgo is one way to manage this live update workflow for Capacitor apps, especially when the release only changes the web bundle.
+  </p>
+  <a
+    href="https://capgo.app"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex shrink-0 items-center justify-center rounded-md border border-fd-border px-3 py-2 text-sm font-medium text-fd-foreground transition-colors hover:bg-fd-muted"
+  >
+    Open Capgo
+  </a>
+</div>
+
+## A Simple Release Flow
+
+For a native release:
+
+```bash
+npm run build
+npx cap sync
+npx cap open ios
+```
+
+Archive from Xcode, upload to App Store Connect, then repeat the equivalent Android release from Android Studio or your CI.
+
+For a web-only update:
+
+```bash
+npm run build
+```
+
+Publish the generated web bundle through your live update tool, then test the installed app on the channel or environment that will receive the update.
