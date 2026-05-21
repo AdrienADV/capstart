@@ -1,0 +1,203 @@
+---
+title: Transitions
+description: Add framework-agnostic page transitions to a Capacitor app.
+---
+
+`@capgo/transitions` adds native-feeling page transitions to a Capacitor app without forcing a design system or a router.
+
+It is a separate library from `@capgo/capacitor-native-navigation`. You can use both together: Native Navigation can render the native navbar and tabbar, while Transitions animates the page content underneath.
+
+## Demo
+
+<div className="flex justify-center">
+  <video autoPlay loop muted playsInline src="/transitions.mp4" className="w-64 rounded-lg" />
+</div>
+
+## What It Does
+
+- Adds iOS-style and Android-style page animations.
+- Works with React, Vue, Angular, Svelte, Solid, vanilla JavaScript, and other web frameworks.
+- Uses the Web Animations API for smooth browser animations.
+- Can use the View Transitions API when the browser supports it.
+- Keeps pages in the DOM for fast back navigation.
+- Coordinates header, content, and footer transitions.
+- Exposes lifecycle hooks such as enter and leave events.
+
+## What It Does Not Replace
+
+- It does not replace your router.
+- It does not provide a UI kit or CSS design system.
+- It does not render native bars by itself.
+- It does not require Ionic.
+
+## Installation
+
+```bash
+npm install @capgo/transitions
+```
+
+The package is published as `@capgo/transitions`. The GitHub repository is named `capacitor-transitions`.
+
+## Basic Structure
+
+Use a `cap-router-outlet` as the transition container. Each screen is a `cap-page` with optional header, content, and footer slots.
+
+```html title="page.html"
+<cap-router-outlet platform="auto">
+  <cap-page>
+    <cap-header slot="header">
+      <h1>Home</h1>
+    </cap-header>
+
+    <cap-content slot="content">
+      <p>Page content here</p>
+    </cap-content>
+
+    <cap-footer slot="footer">
+      <nav>Tab bar</nav>
+    </cap-footer>
+  </cap-page>
+</cap-router-outlet>
+```
+
+## React Setup
+
+Initialize transitions once, connect your router outlet, then set the direction before route changes.
+
+```tsx title="App.tsx"
+import { useEffect, useRef } from 'react';
+import {
+  initTransitions,
+  setupRouterOutlet,
+} from '@capgo/transitions/react';
+import '@capgo/transitions';
+
+initTransitions({ platform: 'auto' });
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const outletRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!outletRef.current) return;
+
+    return setupRouterOutlet(outletRef.current, {
+      platform: 'auto',
+    });
+  }, []);
+
+  return <cap-router-outlet ref={outletRef}>{children}</cap-router-outlet>;
+}
+```
+
+```tsx title="HomePage.tsx"
+import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { setDirection, setupPage } from '@capgo/transitions/react';
+
+export function HomePage() {
+  const navigate = useNavigate();
+  const pageRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!pageRef.current) return;
+
+    return setupPage(pageRef.current, {
+      onDidEnter: () => console.log('Home entered'),
+    });
+  }, []);
+
+  return (
+    <cap-page ref={pageRef}>
+      <cap-content slot="content">
+        <button
+          type="button"
+          onClick={() => {
+            setDirection('forward');
+            navigate('/details/1');
+          }}
+        >
+          Go to Details
+        </button>
+      </cap-content>
+    </cap-page>
+  );
+}
+```
+
+## Transition Directions
+
+| Direction | Usage |
+| --- | --- |
+| `forward` | Push a new page. On iOS, the new page slides in from the right. |
+| `back` | Return to the previous page. On iOS, the page slides back to the right. |
+| `root` | Replace the navigation stack, usually with a fade. |
+| `none` | Change page without an animation. |
+
+## Components
+
+| Component | Role |
+| --- | --- |
+| `cap-router-outlet` | Owns the transition stack and receives push, pop, and root changes. |
+| `cap-page` | Wraps one screen and emits lifecycle events. |
+| `cap-header` | Optional header slot that can animate with the page. |
+| `cap-content` | Main scrollable content slot. |
+| `cap-footer` | Optional footer slot that can animate with the page. |
+
+## Lifecycle Events
+
+`cap-page` emits lifecycle events so your app can coordinate data loading, focus, analytics, or cleanup.
+
+| Event | When it runs |
+| --- | --- |
+| `cap-will-enter` | Before the page becomes visible. |
+| `cap-did-enter` | After the page becomes visible. |
+| `cap-will-leave` | Before the page leaves. |
+| `cap-did-leave` | After the page leaves. |
+
+## Advanced Controller
+
+For lower-level control, create a transition controller and drive the stack manually.
+
+```ts title="transition-controller.ts"
+import { createTransitionController } from '@capgo/transitions';
+
+const controller = createTransitionController({
+  platform: 'auto',
+  duration: 400,
+  useViewTransitions: true,
+});
+
+await controller.push(detailPageElement, {
+  direction: 'forward',
+});
+
+await controller.pop({
+  direction: 'back',
+});
+
+await controller.setRoot(homePageElement, {
+  direction: 'root',
+});
+```
+
+## Use With Native Navigation
+
+`@capgo/transitions` and `@capgo/capacitor-native-navigation` solve different parts of the interface.
+
+| Library | Responsibility |
+| --- | --- |
+| `@capgo/transitions` | Animates web pages, headers, content, and footers inside the WebView. |
+| `@capgo/capacitor-native-navigation` | Renders native navbar and tabbar surfaces around the WebView. |
+
+When you use both together, keep the native bars outside the animated page content. Let Native Navigation own the bars, and let Transitions animate the route content.
+
+## Browser Support
+
+- Modern browsers with Web Animations API support.
+- View Transitions API support in Chrome 111+, Edge 111+, and Safari 18+.
+- Graceful fallback for browsers without View Transitions API support.
+
+## Links
+
+- [GitHub repository](https://github.com/Cap-go/capacitor-transitions)
+- [Capgo plugin page](https://capgo.app/plugins/capacitor-transitions/)

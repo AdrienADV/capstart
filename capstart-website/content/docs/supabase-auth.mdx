@@ -1,0 +1,158 @@
+---
+title: Supabase Auth
+description: Connect Capgo Social Login with Supabase Authentication in a Capacitor app.
+---
+
+This page is only about the **Capgo Social Login + Supabase Auth** integration: the native provider flow happens through `@capgo/capacitor-social-login`, then Supabase Auth creates the backend session with the returned provider identity token.
+
+Use this when you want **native Google or Apple sign-in** in a Capacitor app while keeping Supabase Auth, PostgreSQL, and Row Level Security as the backend source of truth.
+
+## What It Does
+
+- Lets a Capacitor app use **native social login providers** while Supabase Auth owns the authenticated user.
+- Uses `@capgo/capacitor-social-login` for the native provider flow.
+- Uses `@supabase/supabase-js` to call `supabase.auth.signInWithIdToken()`.
+- Handles the Supabase-specific Google nonce flow documented by Capgo.
+- Documents the Apple client ID differences between iOS, Android, and Web.
+
+## What It Does Not Replace
+
+- It does not replace Supabase provider configuration.
+- It does not create OAuth credentials for Google, Apple, or Facebook.
+- It does not remove platform-specific setup for iOS, Android, and Web.
+- It does not remove the need to validate tokens, handle redirects, or configure Row Level Security.
+
+## Installation
+
+```bash
+npm install @supabase/supabase-js @capgo/capacitor-social-login
+npx cap sync
+```
+
+## What You Need
+
+- A Supabase project.
+- The Supabase project URL and anon key.
+- The matching OAuth provider enabled in Supabase.
+- The Capgo platform-specific provider setup for Android, iOS, or Web.
+- A Capacitor app with `@capgo/capacitor-social-login` installed and synced.
+
+## Supabase Client
+
+Create the normal Supabase JavaScript client:
+
+```ts title="supabase.ts"
+import { createClient } from '@supabase/supabase-js';
+
+export const supabase = createClient(
+  'https://your-project.supabase.co',
+  'your-anon-key',
+);
+```
+
+## Google Login With Supabase
+
+Capgo documents a specific Google flow for Supabase because Supabase validates the nonce in the Google ID token. The important shape is:
+
+1. Generate a `rawNonce`.
+2. Hash it with SHA-256 to get `nonceDigest`.
+3. Pass `nonceDigest` to Google Sign-In.
+4. Validate the returned JWT audience and nonce before sending it to Supabase.
+5. Pass `rawNonce` to Supabase with `signInWithIdToken()`.
+
+```ts title="google-supabase-auth.ts"
+import { SocialLogin } from '@capgo/capacitor-social-login';
+import { supabase } from './supabase';
+
+async function getNonce() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  const rawNonce = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+  const encoded = new TextEncoder().encode(rawNonce);
+  const hash = await crypto.subtle.digest('SHA-256', encoded);
+  const nonceDigest = Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+  return { rawNonce, nonceDigest };
+}
+
+export async function signInWithGoogle() {
+  const { rawNonce, nonceDigest } = await getNonce();
+
+  await SocialLogin.initialize({
+    google: {
+      webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+      iOSClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
+      mode: 'online',
+    },
+  });
+
+  const response = await SocialLogin.login({
+    provider: 'google',
+    options: {
+      scopes: ['email', 'profile'],
+      nonce: nonceDigest,
+    },
+  });
+
+  return supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: response.result.idToken,
+    nonce: rawNonce,
+  });
+}
+```
+
+The full Capgo example also validates the JWT audience against your Google Client IDs and checks that the nonce matches. If validation fails, the example logs out from Google to clear cached tokens and retries once, which is especially important on iOS.
+
+In Supabase, Capgo documents that the Google provider should receive the client IDs for the platforms you plan to support. The guide also says **not** to configure `Client Secret (for OAuth)` or `Callback URL (for OAuth)` for this flow.
+
+## Apple Login With Supabase
+
+Capgo documents Apple Sign-In as a separate Supabase integration. The Apple provider setup depends on the platforms you support:
+
+| Platform | Supabase setup note |
+| --- | --- |
+| iOS | The Apple client ID is the app ID / bundle ID. Native Apple Sign-In uses the bundle ID automatically and does not need a redirect URL. |
+| Android | The Apple client ID is the Service ID. Capgo documents an OAuth redirect flow with a backend edge function. |
+| Web | The Apple client ID is the Service ID. Capgo documents an OAuth popup flow with the current page URL as redirect. |
+
+If you support both iOS and Android or Web, Capgo says to provide both the app ID and the Service ID in the Supabase Apple provider client ID field.
+
+The helper flow extracts the Apple identity token and signs in to Supabase with:
+
+```ts
+await supabase.auth.signInWithIdToken({
+  provider: 'apple',
+  token: appleIdentityToken,
+});
+```
+
+Capgo also documents that you do **not** have to set the Apple `Secret key (for OAuth)` for this custom backend flow.
+
+## Platform Notes
+
+| Platform | Capgo note |
+| --- | --- |
+| iOS | Google token caching can cause nonce mismatch issues; the Capgo example handles this by validating first and retrying with a fresh token. |
+| Web | Call `isLoggedIn()` on mount to handle OAuth redirects. |
+| Android | Follow the standard platform setup, including SHA-1 fingerprint configuration for Google. |
+
+## Example App
+
+Capgo keeps the complete implementation in the `@capgo/capacitor-social-login` example app. The Supabase helper includes:
+
+- nonce generation and SHA-256 hashing;
+- JWT decoding and validation;
+- Google authentication with automatic retry;
+- Apple authentication with platform-specific behavior;
+- Web redirect handling.
+
+## Links
+
+- [Capgo Social Login documentation](https://capgo.app/docs/plugins/social-login/)
+- [Supabase integration introduction](https://capgo.app/docs/plugins/social-login/supabase/introduction/)
+- [Supabase Google login setup](https://capgo.app/docs/plugins/social-login/supabase/google/general/)
+- [Supabase Apple login setup](https://capgo.app/docs/plugins/social-login/supabase/apple/general/)
+- [Social Login example app](https://github.com/Cap-go/capacitor-social-login/tree/main/example-app)
+- [Social Login repository](https://github.com/Cap-go/capacitor-social-login)

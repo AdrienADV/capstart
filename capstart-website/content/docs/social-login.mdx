@@ -1,0 +1,189 @@
+---
+title: Social Login
+description: Add native Google, Apple, Facebook, Twitter, and OAuth2 login to a Capacitor app.
+---
+
+`@capgo/capacitor-social-login` gives a Capacitor app **one native login API** for Google, Apple, Facebook, Twitter/X, and generic OAuth2 or OIDC providers.
+
+Use it when your app needs a platform-aware sign-in flow, but you still want your own app or backend to decide what happens after the provider returns a token, authorization code, or login result.
+
+## What It Does
+
+- Provides **one API** for Google, Apple, Facebook, Twitter/X, and OAuth2/OIDC providers.
+- Supports core auth actions like `initialize`, `login`, `logout`, and `isLoggedIn`.
+- Includes helper methods for auth codes, refresh, token expiry checks, JWT decoding, and web redirect callbacks.
+- Lets you configure several OAuth2 providers at once, then choose the provider at login time with `providerId`.
+- Lets you disable unused native providers in `capacitor.config` to reduce native binary size.
+
+## What It Does Not Replace
+
+- It does not create OAuth credentials for you.
+- It does not remove platform setup for iOS, Android, or Web.
+- It does not own your user database, authorization rules, or backend session.
+- It does not remove the need to validate tokens before trusting them on your backend.
+
+## Installation
+
+```bash
+npm install @capgo/capacitor-social-login
+npx cap sync
+```
+
+## Initialize The Plugin
+
+Configure only the providers your app uses. Capgo documents Google, Apple, Facebook, Twitter/X, and generic OAuth2 in the same `SocialLogin.initialize()` call:
+
+```ts
+import { SocialLogin } from '@capgo/capacitor-social-login';
+
+await SocialLogin.initialize({
+  google: {
+    webClientId: 'your-google-web-client-id',
+    iOSServerClientId: 'your-google-server-client-id',
+    mode: 'online',
+  },
+  apple: {
+    clientId: 'your-apple-service-id',
+    useProperTokenExchange: true,
+    useBroadcastChannel: true,
+  },
+  facebook: {
+    appId: 'your-facebook-app-id',
+  },
+  twitter: {
+    clientId: 'your-twitter-client-id',
+    redirectUrl: 'myapp://oauth/twitter',
+  },
+  oauth2: {
+    github: {
+      appId: 'your-github-client-id',
+      authorizationBaseUrl: 'https://github.com/login/oauth/authorize',
+      accessTokenEndpoint: 'https://github.com/login/oauth/access_token',
+      redirectUrl: 'myapp://oauth/github',
+      scope: 'read:user user:email',
+      pkceEnabled: true,
+    },
+  },
+});
+```
+
+## Login Flow
+
+The direct provider flow is intentionally small:
+
+```ts
+const googleResult = await SocialLogin.login({
+  provider: 'google',
+  options: {
+    scopes: ['profile', 'email'],
+  },
+});
+```
+
+For OAuth2 providers, use the `oauth2` provider and pass the configured `providerId`:
+
+```ts
+const githubResult = await SocialLogin.login({
+  provider: 'oauth2',
+  options: {
+    providerId: 'github',
+    scope: 'read:user user:email',
+  },
+});
+```
+
+Then hand the result to your app session layer or backend. Capgo exposes the provider result; your app still decides how users, sessions, and permissions are represented.
+
+## Session Checks
+
+Use the plugin for provider-level session checks and logout:
+
+```ts
+const status = await SocialLogin.isLoggedIn({ provider: 'google' });
+
+await SocialLogin.logout({ provider: 'google' });
+```
+
+For providers that support it, Capgo also exposes auth-code and refresh helpers:
+
+```ts
+const authCodeResult = await SocialLogin.getAuthorizationCode({
+  provider: 'google',
+});
+
+await SocialLogin.refresh({
+  provider: 'google',
+  options: {} as never,
+});
+```
+
+## Provider Notes
+
+| Provider type | Important Capgo note |
+| --- | --- |
+| Google online mode | Use `google.mode: 'online'` when the app needs token refresh helpers in the client. |
+| Google offline mode | `google.mode: 'offline'` returns `serverAuthCode`; Capgo documents this as input for backend token exchange. In this mode, logout, `isLoggedIn`, `getAuthorizationCode`, and refresh are not available. |
+| Apple | Capgo recommends `useProperTokenExchange: true` for strict token handling and `useBroadcastChannel: true` for simplified Android setup. |
+| OAuth2/OIDC | Use `issuerUrl` when the provider exposes OpenID Connect discovery; otherwise configure authorization and token endpoints manually. |
+| Web redirects | Use `flow: 'redirect'` for OAuth2 web flows that navigate away from the page, then handle the redirect callback. |
+
+## OAuth2 Providers
+
+The OAuth2 engine is useful for providers like **GitHub, Azure AD / Microsoft Entra ID, Auth0, Okta, Keycloak, and custom OAuth2 or OIDC servers**.
+
+Before configuring one, collect:
+
+- Your OAuth client ID.
+- A redirect URL that matches your app scheme or web callback URL.
+- An authorization endpoint.
+- A token endpoint for authorization code flow, or an `issuerUrl` for OIDC discovery.
+- The scopes your app needs, such as `openid profile email`.
+
+```ts
+await SocialLogin.initialize({
+  oauth2: {
+    keycloak: {
+      issuerUrl: 'https://sso.example.com/realms/mobile',
+      clientId: 'mobile-app',
+      redirectUrl: 'myapp://oauth/keycloak',
+      scope: 'openid profile email offline_access',
+      pkceEnabled: true,
+    },
+  },
+});
+```
+
+## Capacitor Configuration
+
+Disable providers you do not ship:
+
+```ts title="capacitor.config.ts"
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.example.app',
+  appName: 'My App',
+  webDir: 'dist',
+  plugins: {
+    SocialLogin: {
+      providers: {
+        google: true,
+        facebook: true,
+        apple: true,
+        twitter: false,
+      },
+    },
+  },
+};
+
+export default config;
+```
+
+## Links
+
+- [Capgo Social Login documentation](https://capgo.app/docs/plugins/social-login/)
+- [Getting started guide](https://capgo.app/docs/plugins/social-login/getting-started/)
+- [Google login setup](https://capgo.app/docs/plugins/social-login/google/general/)
+- [Apple login setup](https://capgo.app/docs/plugins/social-login/apple/general/)
+- [OAuth2 and OIDC providers](https://capgo.app/docs/plugins/social-login/oauth2/)
+- [Social Login repository](https://github.com/Cap-go/capacitor-social-login)

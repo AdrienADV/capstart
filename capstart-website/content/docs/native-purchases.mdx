@@ -1,0 +1,145 @@
+---
+title: Native Purchases
+description: Add native in-app purchases and subscriptions to a Capacitor app.
+---
+
+`@capgo/native-purchases` adds native in-app purchases and subscriptions to Capacitor apps using StoreKit on iOS and Google Play Billing on Android.
+
+The GitHub repository is named `capacitor-native-purchases`, but the package installed by the docs is `@capgo/native-purchases`.
+
+Use it when your app needs one-time purchases, paid upgrades, subscriptions, restore purchases, subscription management, or native store purchase sheets without adding a paid purchase SDK.
+
+## What It Does
+
+- Loads product information from the App Store or Google Play.
+- Starts native purchase flows for one-time products.
+- Starts native subscription flows.
+- Restores purchases.
+- Opens native subscription management.
+- Supports StoreKit 2 on iOS and Google Play Billing on Android.
+- Exposes receipt, JWS, and purchase token data for backend validation.
+- Supports iOS monthly subscription commitment plans when StoreKit exposes them.
+
+## What It Does Not Replace
+
+- It does not create products in App Store Connect or Google Play Console.
+- It does not remove the need for purchase validation on your backend.
+- It does not let you hardcode prices safely. Store metadata should come from the plugin.
+- It does not replace App Store or Play Store compliance work.
+
+## Installation
+
+```bash
+npm install @capgo/native-purchases
+npx cap sync
+```
+
+## Android Setup
+
+Add the Google Play Billing permission:
+
+```xml title="AndroidManifest.xml"
+<uses-permission android:name="com.android.vending.BILLING" />
+```
+
+For subscriptions on Android, the `planIdentifier` is important. It must match the Base Plan ID configured in Google Play Console.
+
+## iOS Setup
+
+Add the **In-App Purchase** capability in Xcode:
+
+1. Open the iOS project in Xcode.
+2. Select the app target.
+3. Go to **Signing & Capabilities**.
+4. Add **In-App Purchase**.
+
+App Store review expects product names and prices to be displayed from store data, such as `product.title` and `product.priceString`, not hardcoded copy.
+
+## Load Products
+
+Always load product metadata before rendering your paywall:
+
+```ts title="purchases.ts"
+import { NativePurchases, PURCHASE_TYPE } from '@capgo/native-purchases';
+
+const { isBillingSupported } = await NativePurchases.isBillingSupported();
+
+if (!isBillingSupported) {
+  throw new Error('Billing is not supported on this device.');
+}
+
+const { products } = await NativePurchases.getProducts({
+  productIdentifiers: ['com.yourapp.premium.monthly', 'com.yourapp.premium.yearly'],
+  productType: PURCHASE_TYPE.SUBS,
+});
+
+for (const product of products) {
+  console.log(product.title, product.priceString);
+}
+```
+
+## Purchase A One-Time Product
+
+One-time in-app products use `PURCHASE_TYPE.INAPP` and do not need a `planIdentifier`.
+
+```ts
+const transaction = await NativePurchases.purchaseProduct({
+  productIdentifier: 'com.yourapp.premium_features',
+  productType: PURCHASE_TYPE.INAPP,
+  quantity: 1,
+});
+
+console.log('Purchase transaction', transaction.transactionId);
+```
+
+## Purchase A Subscription
+
+Subscriptions use `PURCHASE_TYPE.SUBS`. On Android, pass the Base Plan ID as `planIdentifier`.
+
+```ts
+const transaction = await NativePurchases.purchaseProduct({
+  productIdentifier: 'com.yourapp.premium.monthly',
+  planIdentifier: 'monthly-plan',
+  productType: PURCHASE_TYPE.SUBS,
+  quantity: 1,
+});
+
+console.log('Subscription transaction', transaction.transactionId);
+```
+
+## Restore And Manage Purchases
+
+```ts
+await NativePurchases.restorePurchases();
+
+const { purchases } = await NativePurchases.getPurchases({
+  productType: PURCHASE_TYPE.SUBS,
+});
+
+await NativePurchases.manageSubscriptions();
+```
+
+## Backend Validation
+
+Use the transaction data to validate purchases on your server:
+
+| Platform | Data to validate |
+| --- | --- |
+| iOS | StoreKit receipt or JWS representation. |
+| Android | Google Play purchase token and product identifier. |
+
+Do not unlock long-lived subscriptions based only on client state. The client can update UI immediately after purchase, but the backend should verify and persist entitlement state.
+
+## Purchase Types
+
+| Purchase type | `productType` | Notes |
+| --- | --- | --- |
+| One-time purchase | `PURCHASE_TYPE.INAPP` | Premium features, remove ads, content packs. |
+| Subscription | `PURCHASE_TYPE.SUBS` | Monthly or yearly access. Android subscriptions require `planIdentifier`. |
+
+## Links
+
+- [GitHub repository](https://github.com/Cap-go/capacitor-native-purchases/)
+- [Capgo documentation](https://capgo.app/docs/plugins/native-purchases/)
+- [Android subscription setup](https://capgo.app/docs/plugins/native-purchases/android-create-subscription/)
+- [Android introductory offer setup](https://capgo.app/docs/plugins/native-purchases/android-introductory-offer/)

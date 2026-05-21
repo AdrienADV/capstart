@@ -1,0 +1,260 @@
+---
+title: Installation
+description: An opinionated Vite React and Capacitor installation setup for mobile apps.
+---
+
+**Capacitor is extremely permissive.** It does not force a UI framework, a router, a rendering model, or a design system. You can **literally build any kind of app** with it: a simple Tailwind UI, a fully custom canvas experience, a Vue, Svelte, Solid, Angular, React, or vanilla JavaScript app, or a **web-first mobile app with native plugins only where they matter**.
+
+That freedom is the point: Capacitor gives you a native shell and access to native APIs, but it does not impose a very specific app architecture. Your app can stay close to the web stack you already like, and you can decide case by case when native capabilities are useful.
+
+You can start from the **Capstart boilerplate** or follow the **manual setup** below. The manual path is only one opinionated approach. It is not the Capacitor way, because there is no single Capacitor way. It keeps the app simple: Vite React for the web app, Capacitor for the native shell, Tailwind with optional shadcn/ui, and **native libraries when you need them**: notifications, RevenueCat integration, social login, or any other mobile capability your app depends on.
+
+## Choose your starting point
+
+<div className="not-prose grid gap-4 md:grid-cols-2">
+  <div className="flex flex-col gap-4 rounded-lg border border-fd-border bg-fd-card p-5">
+    <div className="flex flex-col gap-2">
+      <h3 className="text-lg font-semibold text-fd-foreground">Capstart boilerplate</h3>
+      <p className="text-sm leading-relaxed text-fd-muted-foreground">
+        Start from a product-ready app with React, Capacitor, Supabase auth, Tailwind v4, shadcn/ui, protected routes, and native iOS/Android projects already wired together.
+      </p>
+    </div>
+    <a className="mt-auto inline-flex text-sm font-medium text-fd-primary" href="#capstart-boilerplate">
+      Use Capstart
+    </a>
+  </div>
+
+  <div className="flex flex-col gap-4 rounded-lg border border-fd-border bg-fd-card p-5">
+    <div className="flex flex-col gap-2">
+      <h3 className="text-lg font-semibold text-fd-foreground">Manual setup</h3>
+      <p className="text-sm leading-relaxed text-fd-muted-foreground">
+        Build the stack yourself when you want to understand every layer or adapt the setup to an existing backend, router, design system, or app structure.
+      </p>
+    </div>
+    <a className="mt-auto inline-flex text-sm font-medium text-fd-primary" href="#1-create-a-vite-react-app">
+      Follow the manual steps
+    </a>
+  </div>
+</div>
+
+## Capstart boilerplate
+
+Use Capstart when you want a product app baseline immediately: Supabase session handling, protected routes, shadcn/ui components, and native iOS/Android projects are already in place.
+
+<div className="flex justify-center">
+  <video autoPlay loop muted playsInline src="/capstart-demo.mp4" className="w-full max-w-64 rounded-lg" />
+</div>
+
+```bash
+git clone https://github.com/AdrienADV/capstart.git my-app
+cd my-app
+npm install
+cp .env.example .env
+npm run dev
+```
+
+After cloning, fill the Supabase values in `.env`, then update `appId` and `appName` in `capacitor.config.ts` before shipping.
+
+[Open Capstart on GitHub](https://github.com/AdrienADV/capstart)
+
+## Manual setup
+
+## 1. Create a Vite React app
+
+```bash
+npm create vite@latest my-app -- --template react-ts
+cd my-app
+npm install
+npm run build
+```
+
+Vite gives you a **fast React app with normal web tooling**. That is the main advantage of Capacitor: your **screens, state, styling, API calls, auth, and AI-assisted UI work stay in the web ecosystem**.
+
+## 2. Add Capacitor
+
+```bash
+npm install @capacitor/core @capacitor/cli
+npx cap init
+
+npm install @capacitor/ios @capacitor/android
+npx cap add ios
+npx cap add android
+```
+
+For a Vite app, the **production web build usually lives in `dist`**. Make sure your Capacitor config points to that folder:
+
+```ts title="capacitor.config.ts"
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.example.app',
+  appName: 'My App',
+  webDir: 'dist',
+};
+
+export default config;
+```
+
+## 3. Add recommended Capacitor base plugins
+
+Before adding UI libraries, I recommend installing a small set of **baseline Capacitor plugins** that almost every mobile app ends up needing:
+
+```bash
+npm install @capacitor/keyboard @capacitor/network @capacitor/device @capacitor/splash-screen @capacitor/status-bar
+npx cap sync
+```
+
+These are not UI libraries by themselves. They are the **native app basics** I would add early so the app can handle mobile behavior cleanly:
+
+| Plugin | Why install it by default | Docs |
+| --- | --- | --- |
+| `@capacitor/keyboard` | Handles keyboard show/hide events, resize behavior, and keyboard-specific UI adjustments. | [Keyboard docs](https://capacitorjs.com/docs/apis/keyboard) |
+| `@capacitor/network` | Lets the app react to online/offline state and degraded connectivity. | [Network docs](https://capacitorjs.com/docs/apis/network) |
+| `@capacitor/device` | Reads device information such as platform, model, OS version, and app/device identifiers. | [Device docs](https://capacitorjs.com/docs/apis/device) |
+| `@capacitor/splash-screen` | Controls when the native splash screen is shown or hidden during app startup. | [Splash Screen docs](https://capacitorjs.com/docs/apis/splash-screen) |
+| `@capacitor/status-bar` | Controls status bar color, style, overlays, and light/dark appearance. | [Status Bar docs](https://capacitorjs.com/docs/apis/status-bar) |
+
+After installing them, extend `capacitor.config.ts` with the native defaults worth locking in. In this set, `Keyboard`, `SplashScreen`, and `StatusBar` are the plugins with configuration values that affect the native shell:
+
+```ts title="capacitor.config.ts"
+import type { CapacitorConfig } from '@capacitor/cli';
+import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
+import { Style } from '@capacitor/status-bar';
+
+const config: CapacitorConfig = {
+  appId: 'com.example.app',
+  appName: 'My App',
+  webDir: 'dist',
+  plugins: {
+    Keyboard: {
+      resize: KeyboardResize.Native,
+      style: KeyboardStyle.Default,
+      resizeOnFullScreen: true,
+    },
+    SplashScreen: {
+      launchAutoHide: true,
+      launchShowDuration: 500,
+      launchFadeOutDuration: 200,
+      backgroundColor: '#ffffff',
+      showSpinner: false,
+    },
+    StatusBar: {
+      overlaysWebView: false,
+      style: Style.Default,
+      backgroundColor: '#ffffff',
+    },
+  },
+};
+
+export default config;
+```
+
+`Network` and `Device` do not need entries in `capacitor.config.ts`; they are runtime APIs you call from your app code. On recent Android versions, `StatusBar.overlaysWebView` and `StatusBar.backgroundColor` can be limited by enforced edge-to-edge system UI, so still design screens with safe areas in mind.
+
+## 4. Configure Tailwind and aliases
+
+```bash
+npm install tailwindcss @tailwindcss/vite
+```
+
+Update `vite.config.ts` so Vite loads Tailwind and resolves the `@/` import alias used by shadcn/ui:
+
+```ts title="vite.config.ts"
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'node:path';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});
+```
+
+Then update `tsconfig.app.json` so TypeScript understands the same alias. Keep the rest of the file as generated by Vite:
+
+```json title="tsconfig.app.json"
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+## 5. Add shadcn/ui, optionally
+
+This starter configures Tailwind and the `@/` alias, but it does not duplicate the shadcn/ui installation flow. If you want to add shadcn/ui, follow the official Vite guide: [shadcn/ui Vite installation](https://ui.shadcn.com/docs/installation/vite).
+
+Use that page as the source of truth for the current `shadcn` commands and component setup.
+
+## 6. Add the mobile-specific layer
+
+Install **only the pieces your app actually needs**:
+
+```bash
+npm install @capgo/vite-capacitor @capgo/capacitor-transitions
+npx cap sync
+```
+
+For `@capgo/vite-capacitor`, add the Vite plugin so Capacitor can automatically point the native app to your local Vite server during development:
+
+```ts title="vite.config.ts"
+import viteCapacitor from '@capgo/vite-capacitor';
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'node:path';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+    viteCapacitor({
+      platforms: ['ios', 'android'],
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});
+```
+
+Then start Vite normally:
+
+```bash
+npm run dev
+```
+
+For testing on a physical device, expose Vite on your local network and ask the plugin to use the LAN URL:
+
+```ts title="vite.config.ts"
+viteCapacitor({
+  platforms: ['ios', 'android'],
+  cleartext: true,
+  networkUrl: true,
+});
+```
+
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+The shared `capacitor.config.ts` stays simple. The plugin updates the native copies created by Capacitor, then restores them when Vite stops.
+
+Recommended roles:
+
+| Library | Use it for |
+| --- | --- |
+| `@capgo/vite-capacitor` | The simplest **live reload loop** while testing the app inside a native Capacitor shell. |
+| `@capgo/capacitor-transitions` | **Screen transitions** that feel closer to iOS and Android while your web router still owns navigation. |
+
+**You do not have to make every surface native.** For this starter, keep navigation simple: a **Tailwind bottom bar is enough for most apps**, while `@capgo/capacitor-transitions` handles the screen transitions.

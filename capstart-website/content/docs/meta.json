@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "installation",
+    "---Components---",
+    "transitions",
+    "native-bar",
+    "---Auth & Monetization---",
+    "social-login",
+    "supabase-auth",
+    "native-purchases",
+    "revenuecat",
+    "---Advanced Surfaces---",
+    "live-activities",
+    "widget-kit"
+  ]
+}
