@@ -1,0 +1,155 @@
+---
+title: RevenueCat Integration
+description: Add RevenueCat purchases, subscriptions, entitlements, and hosted purchase infrastructure to a Capacitor app.
+---
+
+`@revenuecat/purchases-capacitor` is the official RevenueCat Capacitor SDK. It wraps StoreKit and Google Play Billing while syncing purchases with RevenueCat's backend.
+
+Use it when you want **subscriptions, entitlements, receipt validation, customer history, analytics, webhooks, and purchase infrastructure** without building the full in-app purchase backend yourself.
+
+## What It Does
+
+- Fetches products and offerings configured in RevenueCat.
+- Starts native purchase flows on iOS and Android.
+- Syncs purchase tokens with RevenueCat's backend.
+- Tracks subscription status through `CustomerInfo`.
+- Restores purchases from the user's App Store or Google Play account.
+- Lets you unlock features with **entitlements** instead of hardcoding product IDs everywhere.
+- Gives you dashboard visibility, customer history, analytics, integrations, and webhooks.
+
+## What It Does Not Replace
+
+- It does not create products in App Store Connect or Google Play Console.
+- It does not remove App Store or Play Store compliance work.
+- It does not replace your app's auth model; you still decide how to map users to `appUserID`.
+- It does not remove the need to test real store configuration before release.
+
+## Installation
+
+```bash
+npm install @revenuecat/purchases-capacitor
+npx cap sync
+```
+
+## Configure Purchases
+
+Configure RevenueCat once, usually early in the app lifecycle. Use the **public SDK key** from RevenueCat, and use the platform-specific key for iOS or Android.
+
+```ts title="revenuecat.ts"
+import { Capacitor } from '@capacitor/core';
+import { LOG_LEVEL, Purchases } from '@revenuecat/purchases-capacitor';
+
+export async function configureRevenueCat(appUserID?: string) {
+  await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+
+  if (Capacitor.getPlatform() === 'ios') {
+    await Purchases.configure({
+      apiKey: 'public_apple_api_key',
+      appUserID,
+    });
+  }
+
+  if (Capacitor.getPlatform() === 'android') {
+    await Purchases.configure({
+      apiKey: 'public_google_api_key',
+      appUserID,
+    });
+  }
+}
+```
+
+If your app has authentication, pass your own user identifier as `appUserID`, or call `Purchases.logIn()` after the user signs in. If your app does not pass one, RevenueCat can generate an anonymous identifier.
+
+## Android Setup
+
+RevenueCat recommends keeping the Android Activity `launchMode` as `standard` or `singleTop`. Some Google Play payment methods send the user to another app for verification; other launch modes can cause the purchase to be cancelled when your app backgrounds.
+
+```xml title="AndroidManifest.xml"
+<activity
+    android:name="com.your.Activity"
+    android:launchMode="standard" />
+```
+
+`singleTop` is also supported if that is the better fit for your app.
+
+## iOS Setup
+
+Enable **In-App Purchase** capability in Xcode:
+
+1. Open the iOS project in Xcode.
+2. Select the app target.
+3. Go to **Signing & Capabilities**.
+4. Add **In-App Purchase**.
+
+RevenueCat also documents that `purchases-capacitor` needs the Swift language version set to `5.0` when it is not already configured.
+
+## Import Purchases
+
+The package ships TypeScript types:
+
+```ts
+import {
+  Purchases,
+  type PurchasesOfferings,
+} from '@revenuecat/purchases-capacitor';
+```
+
+For Vue apps using `reactive` or `readonly`, RevenueCat notes that raw objects should be passed to Capacitor plugin methods instead of Vue `Proxy` objects.
+
+## Offerings And Purchases
+
+RevenueCat recommends building purchase UI from **Offerings** and checking access through **Entitlements**.
+
+```ts title="paywall.ts"
+import { Purchases } from '@revenuecat/purchases-capacitor';
+
+const { current } = await Purchases.getOfferings();
+const packageToBuy = current?.availablePackages[0];
+
+if (packageToBuy) {
+  const { customerInfo } = await Purchases.purchasePackage({
+    aPackage: packageToBuy,
+  });
+
+  const hasPro = Boolean(customerInfo.entitlements.active.pro);
+  console.log('Pro access', hasPro);
+}
+```
+
+## Check Access
+
+Use `CustomerInfo` to decide what the user can access:
+
+```ts
+const { customerInfo } = await Purchases.getCustomerInfo();
+
+const hasPro = Boolean(customerInfo.entitlements.active.pro);
+```
+
+If you are not using entitlements, RevenueCat also exposes active subscriptions and purchased product identifiers, but entitlements are usually the cleaner app-level abstraction.
+
+## Restore Purchases
+
+Apps should provide a restore action. RevenueCat notes that Apple requires a restore mechanism when users lose access after reinstalling, switching devices, or losing account state.
+
+```ts
+const { customerInfo } = await Purchases.restorePurchases();
+
+const hasPro = Boolean(customerInfo.entitlements.active.pro);
+```
+
+## RevenueCat Or Native Purchases
+
+| Need | Recommended path |
+| --- | --- |
+| You want hosted receipt validation, entitlements, analytics, customer history, webhooks, and fewer backend responsibilities. | RevenueCat |
+| You want direct StoreKit / Google Play Billing access and will build your own purchase validation and entitlement backend. | Native Purchases |
+| You already have a full purchase backend and only need Capacitor access to native store APIs. | Native Purchases |
+| You want to move faster on subscriptions and product experiments. | RevenueCat |
+
+## Links
+
+- [RevenueCat Capacitor installation](https://www.revenuecat.com/docs/getting-started/installation/capacitor)
+- [RevenueCat SDK quickstart](https://www.revenuecat.com/docs/getting-started/quickstart)
+- [Configure the RevenueCat SDK](https://www.revenuecat.com/docs/getting-started/configuring-sdk)
+- [RevenueCat Capacitor repository](https://github.com/RevenueCat/purchases-capacitor)

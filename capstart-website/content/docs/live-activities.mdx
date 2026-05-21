@@ -1,0 +1,122 @@
+---
+title: Live Activities
+description: Drive iOS Live Activities and Dynamic Island surfaces from a Capacitor app.
+---
+
+`@capgo/capacitor-live-activities` starts, updates, and ends iOS Live Activities from JavaScript. It lets a Capacitor app expose important live state outside the WebView, including Lock Screen and Dynamic Island surfaces.
+
+Use it for flows where the user should keep seeing progress after leaving the app: delivery tracking, workouts, timers, rides, orders, audio sessions, sports scores, or any state that should remain glanceable.
+
+## Demo
+
+<div className="flex justify-center">
+  <div className="flex h-48 w-full max-w-sm items-center justify-center rounded-lg border border-dashed border-fd-border bg-fd-muted/40 text-sm text-fd-muted-foreground">
+    Demo coming soon
+  </div>
+</div>
+
+## What It Does
+
+- Starts Live Activities with a layout and data payload.
+- Updates an existing activity when app state changes.
+- Ends an activity when the live flow is complete.
+- Supports Dynamic Island layouts for expanded, compact, and minimal states.
+- Can save images into a shared App Group container for Live Activity rendering.
+- Includes timer sequence helpers for workouts, countdowns, and step-based flows.
+
+## What It Does Not Replace
+
+- It does not render normal in-app screens.
+- It does not replace push notifications.
+- It does not remove the need for native iOS configuration.
+- It is not a cross-platform UI component for Android and Web. Android support is limited to fallback notification-style behavior for specific timer flows.
+
+## Installation
+
+```bash
+npm install @capgo/capacitor-live-activities
+npx cap sync
+```
+
+## Minimal Usage
+
+Start a Live Activity with a simple layout and dynamic data:
+
+```ts title="live-activity.ts"
+import { CapgoLiveActivities } from '@capgo/capacitor-live-activities';
+
+const { activityId } = await CapgoLiveActivities.startActivity({
+  layout: {
+    type: 'container',
+    direction: 'horizontal',
+    children: [
+      { type: 'text', content: 'Order #{{orderNumber}}', fontSize: 16, fontWeight: 'bold' },
+      { type: 'text', content: '{{status}}', fontSize: 14, color: '#666666' },
+    ],
+  },
+  dynamicIslandLayout: {
+    expanded: {
+      leading: { type: 'image', source: 'sfSymbol', value: 'box.truck' },
+      trailing: { type: 'text', content: '{{eta}}' },
+      center: { type: 'text', content: '{{status}}' },
+      bottom: { type: 'progress', value: 'progress' },
+    },
+    compactLeading: { type: 'image', source: 'sfSymbol', value: 'box.truck' },
+    compactTrailing: { type: 'text', content: '{{eta}}' },
+    minimal: { type: 'image', source: 'sfSymbol', value: 'box.truck' },
+  },
+  data: {
+    orderNumber: '12345',
+    status: 'On the way',
+    eta: '10 min',
+    progress: 0.6,
+  },
+});
+```
+
+Update the activity when the state changes:
+
+```ts
+await CapgoLiveActivities.updateActivity({
+  activityId,
+  data: {
+    status: 'Arrived',
+    eta: 'Now',
+    progress: 1,
+  },
+});
+```
+
+End it when the flow is done:
+
+```ts
+await CapgoLiveActivities.endActivity({
+  activityId,
+  data: { status: 'Delivered' },
+});
+```
+
+## Platforms
+
+| Platform | Role |
+| --- | --- |
+| iOS | Primary target. Uses Live Activities and Dynamic Island when supported. |
+| Android | Fallback behavior for timer-style foreground notification flows. |
+| Web | Not a meaningful UI target for Live Activities. |
+
+## Core API
+
+| Method or event | Usage |
+| --- | --- |
+| `areActivitiesSupported()` | Checks whether Live Activities can run on the current device. |
+| `startActivity()` | Starts a new Live Activity with layout and data. |
+| `updateActivity()` | Updates an existing Live Activity. |
+| `endActivity()` | Ends a Live Activity. |
+| `getAllActivities()` | Lists currently active activities. |
+| `saveImage()` | Saves an image for Live Activity rendering. |
+| `startTimerSequence()` | Starts a timer sequence for workout or countdown flows. |
+
+## Links
+
+- [GitHub repository](https://github.com/Cap-go/capacitor-live-activities)
+- [Capgo documentation](https://capgo.app/docs/plugins/live-activities/)

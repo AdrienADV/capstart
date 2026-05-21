@@ -1,0 +1,81 @@
+---
+title: Introduction
+description: A practical guide to UI libraries and starter patterns for Capacitor apps.
+---
+
+Capstart Components is a catalog of libraries and patterns for building Capacitor apps that keep the **product UI in the web layer** while adding **native interface surfaces** only where they improve the mobile experience.
+
+Use these pages to understand what each component does, when it is useful, and how it fits into a Capacitor app where your **web framework keeps owning routes and content**.
+
+## Getting Started
+
+<Cards>
+  <Card
+    title="Installation"
+    href="/docs/installation"
+    description="An opinionated Vite React + Capacitor setup with the base plugins and mobile libraries I recommend."
+  />
+</Cards>
+
+## Components
+
+<Cards>
+  <Card
+    title="Transitions"
+    href="/docs/transitions"
+    description="Framework-agnostic page transitions for Capacitor apps."
+  />
+  <Card
+    title="Native Bar"
+    href="/docs/native-bar"
+    description="Navbar, tabbar, safe areas, and native transitions over a Capacitor WebView."
+  />
+</Cards>
+
+## Advanced Surfaces
+
+<Cards>
+  <Card
+    title="Live Activities"
+    href="/docs/live-activities"
+    description="iOS Live Activities and Dynamic Island surfaces driven from a Capacitor app."
+  />
+  <Card
+    title="Widget Kit"
+    href="/docs/widget-kit"
+    description="WidgetKit and Live Activity surfaces with SVG templates or full-native state sync."
+  />
+</Cards>
+
+## Auth & Monetization
+
+<Cards>
+  <Card
+    title="Social Login"
+    href="/docs/social-login"
+    description="Native Google, Apple, Facebook, Twitter, and OAuth2 login for Capacitor apps."
+  />
+  <Card
+    title="Supabase Auth"
+    href="/docs/supabase-auth"
+    description="Connect Capgo Social Login provider tokens to Supabase Auth."
+  />
+  <Card
+    title="Native Purchases"
+    href="/docs/native-purchases"
+    description="In-app purchases and subscriptions using StoreKit and Google Play Billing."
+  />
+  <Card
+    title="RevenueCat"
+    href="/docs/revenuecat"
+    description="Hosted purchase backend, entitlements, subscriptions, and analytics for Capacitor apps."
+  />
+</Cards>
+
+## How To Use This Catalog
+
+Start with **Installation** if you are creating a new app from scratch. It gives you a simple baseline with Vite React, Capacitor, shadcn/ui, useful Capacitor plugins, live reload, and screen transitions.
+
+Then add components only when they solve a real mobile problem. Some apps only need Tailwind and a few Capacitor plugins. Others benefit from native surfaces, platform-aware transitions, or a native app frame.
+
+Each component page should explain **what the component does**, **when to use it**, **how to install it**, and provide a **minimal example ready to adapt**.

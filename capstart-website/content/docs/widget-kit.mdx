@@ -1,0 +1,154 @@
+---
+title: Widget Kit
+description: Build WidgetKit and Live Activity surfaces from a Capacitor app.
+---
+
+`@capgo/capacitor-widget-kit` lets a Capacitor app drive WidgetKit and Live Activity surfaces. It supports SVG-driven templates for fast dynamic surfaces and full-native widget sessions when the widget UI needs to stay native.
+
+Use it when your app should extend beyond the main WebView: home-screen widgets, Lock Screen widgets, interactive Live Activities, workout controls, delivery cards, timers, or compact glanceable app state.
+
+## Demo
+
+<div className="flex justify-center">
+  <video autoPlay loop muted playsInline src="/widget-kit-demo.mp4" className="w-64 rounded-lg" />
+</div>
+
+## What It Does
+
+- Starts WidgetKit or Live Activity sessions from JavaScript.
+- Renders widget surfaces from SVG templates when that is enough.
+- Syncs JSON state between the app and native widget code.
+- Supports interactive hotspots, frame switches, and timer mutations.
+- Lets widgets emit events that the app can process later.
+- Supports full-native widget sessions when the UI should be implemented in native code.
+
+## What It Does Not Replace
+
+- It does not replace your in-app UI.
+- It does not remove the need for iOS WidgetKit setup.
+- It does not magically turn React components into native widgets.
+- It does not have to be used for every app. It is for apps with a clear widget or Live Activity use case.
+
+## Installation
+
+```bash
+npm install @capgo/capacitor-widget-kit
+npx cap sync
+```
+
+## iOS Setup
+
+For WidgetKit and Live Activities, configure the native targets first:
+
+- Add `NSSupportsLiveActivities` when using ActivityKit.
+- Add the same App Group to the app target and the widget extension target.
+- Set `CapgoWidgetKitAppGroup` in both `Info.plist` files.
+
+```xml title="Info.plist"
+<key>CapgoWidgetKitAppGroup</key>
+<string>group.app.capgo.widgetkit.exampleapp.widgetkit</string>
+```
+
+## Minimal Usage
+
+Start a template-backed activity from JavaScript:
+
+```ts title="widget-kit.ts"
+import { CapgoWidgetKit } from '@capgo/capacitor-widget-kit';
+
+const { activity } = await CapgoWidgetKit.startTemplateActivity({
+  activityId: 'workout-session-1',
+  openUrl: 'myapp://workout/session-1',
+  state: {
+    title: 'Chest Day',
+    frame: 'summary',
+    restDurationMs: 90000,
+  },
+  definition: {
+    id: 'workout-card',
+    timers: [
+      {
+        id: 'rest',
+        durationPath: 'state.restDurationMs',
+      },
+    ],
+    actions: [
+      {
+        id: 'toggle-rest',
+        eventName: 'widget.timer.toggled',
+        timerMutations: [
+          {
+            op: 'toggle',
+            timerId: 'rest',
+          },
+        ],
+      },
+    ],
+    layouts: {
+      lockScreen: {
+        width: 100,
+        height: 40,
+        frameIdPath: 'state.frame',
+        frames: [
+          {
+            id: 'summary',
+            hotspots: [{ id: 'pause-play', actionId: 'toggle-rest', x: 0, y: 0, width: 100, height: 40 }],
+            svg: '<svg viewBox="0 0 100 40"><text x="6" y="22">{{state.title}}</text></svg>',
+          },
+        ],
+      },
+    },
+  },
+});
+```
+
+Update the widget state from the app:
+
+```ts
+await CapgoWidgetKit.updateTemplateActivity({
+  activityId: activity.activityId,
+  state: {
+    title: 'Back Day',
+    frame: 'summary',
+    restDurationMs: 120000,
+  },
+});
+```
+
+Process widget-originated events when the app resumes:
+
+```ts
+const { events } = await CapgoWidgetKit.listTemplateEvents({
+  activityId: activity.activityId,
+  unacknowledgedOnly: true,
+});
+
+await CapgoWidgetKit.acknowledgeTemplateEvents({
+  activityId: activity.activityId,
+});
+```
+
+## Modes
+
+| Mode | Best for |
+| --- | --- |
+| SVG template activity | Live Activities or widget surfaces that can render from generated SVG strings. |
+| Full-native widget session | Widget UIs built in native code that still need shared state and app-to-widget messages. |
+
+## Core API
+
+| Method or event | Usage |
+| --- | --- |
+| `areActivitiesSupported()` | Checks whether the native activity bridge can run. |
+| `startTemplateActivity()` | Starts a template-backed activity. |
+| `updateTemplateActivity()` | Updates template activity state or definition. |
+| `endTemplateActivity()` | Ends a template activity. |
+| `performTemplateAction()` | Runs frame, timer, or state mutations. |
+| `listTemplateEvents()` | Reads events emitted by widget interactions. |
+| `startWidgetSession()` | Starts a full-native widget session backed by shared JSON state. |
+| `sendWidgetMessage()` | Sends messages between the app and widget code. |
+
+## Links
+
+- [GitHub repository](https://github.com/Cap-go/capacitor-widget-kit)
+- [Capgo documentation](https://capgo.app/docs/plugins/widget-kit/)

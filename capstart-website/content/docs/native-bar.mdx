@@ -1,0 +1,198 @@
+---
+title: Native Bar
+description: Add a native navbar, tabbar, and transition shell to a Capacitor app.
+---
+
+`@capgo/capacitor-native-navigation` renders a native top navigation bar, a native bottom tab bar, and native transition shells with iOS and Android UI components.
+
+Your web app keeps control of routes, pages, and content. The plugin only owns the native frame around the WebView: bars, buttons, tabs, safe areas, and transition animations.
+
+## Demo
+
+<div className="flex justify-center">
+  <video autoPlay loop muted playsInline src="/native-bar.mp4" className="w-96 rounded-lg object-cover object-bottom" style={{ height: '180px' }} />
+</div>
+
+## What It Does
+
+- Renders a native navbar at the top of the screen.
+- Renders a native tabbar at the bottom of the screen.
+- Emits JavaScript events when the user taps back, a navbar action, or a tab.
+- Exposes CSS variables so web content does not hide behind native bars.
+- Captures the WebView to create transitions that feel closer to a native app.
+- Works with React, Vue, Angular, Svelte, Solid, vanilla JavaScript, and any router that can call imperative methods.
+
+## What It Does Not Replace
+
+- It does not replace your router.
+- It does not create one native WebView per route.
+- It does not turn React, Vue, or Svelte components into native icons. Icons must be serializable descriptors: SVG strings, iOS SF Symbols, or Android resources.
+
+## Installation
+
+```bash
+bun add @capgo/capacitor-native-navigation
+bunx cap sync
+```
+
+The current package targets Capacitor 8 with `@capacitor/core >= 8.0.0`.
+
+## Minimal Configuration
+
+Initialize the plugin when the app starts. `contentInsetMode: 'css'` tells the plugin to write native insets into CSS variables.
+
+```ts title="native-navigation.ts"
+import { NativeNavigation } from '@capgo/capacitor-native-navigation';
+
+await NativeNavigation.configure({
+  contentInsetMode: 'css',
+  animationDuration: 360,
+});
+```
+
+## Native Navbar
+
+The navbar is updated from JavaScript. It can display a title, subtitle, back button, and actions.
+
+```ts
+await NativeNavigation.setNavbar({
+  title: 'Home',
+  subtitle: 'Native chrome',
+  transparent: true,
+  backButton: { visible: false },
+  rightItems: [
+    {
+      id: 'compose',
+      title: 'Compose',
+      icon: {
+        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+      },
+    },
+  ],
+});
+```
+
+## Native Tabbar
+
+The tabbar receives a serializable list of tabs. The plugin renders the active tab, labels, badges, icons, and native colors.
+
+```ts
+await NativeNavigation.setTabbar({
+  selectedId: 'home',
+  labelVisibilityMode: 'labeled',
+  icons: true,
+  colors: {
+    dynamic: true,
+  },
+  tabs: [
+    {
+      id: 'home',
+      title: 'Home',
+      icon: {
+        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>',
+      },
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      icon: {
+        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+      },
+    },
+  ],
+});
+```
+
+## Connect Your Router
+
+Native bars do not navigate by themselves. They emit user intent, then your router changes the web page.
+
+```ts
+await NativeNavigation.addListener('navbarBack', () => {
+  router.back();
+});
+
+await NativeNavigation.addListener('navbarItemTap', ({ id }) => {
+  if (id === 'compose') router.push('/compose');
+});
+
+await NativeNavigation.addListener('tabSelect', ({ id }) => {
+  router.push(`/${id}`);
+});
+```
+
+## CSS Insets
+
+With `contentInsetMode: 'css'`, the plugin updates variables on `document.documentElement`.
+
+```css
+.app-scroll {
+  height: 100dvh;
+  overflow: auto;
+  padding-top: calc(var(--cap-native-navigation-top) + 24px);
+  padding-bottom: calc(var(--cap-native-navigation-bottom) + 24px);
+}
+```
+
+Available variables:
+
+| Variable | Role |
+| --- | --- |
+| `--cap-native-navigation-top` | Space occupied by the navbar and top safe area. |
+| `--cap-native-navigation-right` | Native space on the right. |
+| `--cap-native-navigation-bottom` | Space occupied by the tabbar and bottom safe area. |
+| `--cap-native-navigation-left` | Native space on the left. |
+| `--cap-native-navbar-height` | Height of the native navbar. |
+| `--cap-native-tabbar-height` | Height of the native tabbar. |
+
+## Transitions
+
+A native transition wraps a normal web navigation: capture the current state, change the route, then finish the animation.
+
+```ts
+const transition = await NativeNavigation.beginTransition({
+  direction: 'forward',
+});
+
+router.push('/detail');
+await router.ready?.();
+
+await NativeNavigation.setNavbar({
+  title: 'Detail',
+  backButton: { visible: true, title: 'Back' },
+});
+
+await NativeNavigation.finishTransition({
+  id: transition.id,
+  direction: 'forward',
+});
+```
+
+## Platforms
+
+| Platform | Implementation |
+| --- | --- |
+| iOS | `UINavigationBar` and `UITabBar`. iOS 26+ uses the system Liquid Glass behavior for the tabbar. |
+| Android | AppCompat `Toolbar` and a native tabbar with edge-to-edge placement. |
+| Web | No native bars; useful development fallback with events and inset variables. |
+
+## Core API
+
+| Method or event | Usage |
+| --- | --- |
+| `configure()` | Enables the native host and configures insets. |
+| `setNavbar()` | Updates the native navbar. |
+| `setTabbar()` | Updates the native tabbar. |
+| `beginTransition()` | Captures the WebView before a route change. |
+| `finishTransition()` | Animates toward the updated WebView. |
+| `getPluginVersion()` | Returns the native plugin version marker. |
+| `navbarBack` | Event for the native back button. |
+| `navbarItemTap` | Event for a navbar action button. |
+| `tabSelect` | Event for tab selection. |
+| `safeAreaChanged` | Event for inset changes. |
+| `transitionStart` / `transitionEnd` | Events for the native transition lifecycle. |
+
+## Links
+
+- [GitHub repository](https://github.com/Cap-go/capacitor-native-navigation)
+- [Capgo documentation](https://capgo.app/docs/plugins/native-navigation/)

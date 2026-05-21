@@ -1,0 +1,183 @@
+---
+title: Sheets
+description: Add sheets, drawers, dialogs, and overlay primitives to a Capacitor app.
+---
+
+`@capgo/capacitor-sheets` adds framework-agnostic sheets, drawers, dialogs, toasts, lightboxes, cards, page overlays, and scroll helpers to a Capacitor app.
+
+It runs in the WebView with custom elements. Your app keeps owning routes, content, and styling, while the library handles mobile overlay behavior such as detents, gestures, safe areas, keyboard-aware layout, focus, backdrop dimming, and outside-content inertness.
+
+## Demo
+
+<div className="flex justify-center">
+  <div className="flex h-48 w-full max-w-sm items-center justify-center rounded-lg border border-dashed border-fd-border bg-fd-muted/40 text-sm text-fd-muted-foreground">
+    Demo coming soon
+  </div>
+</div>
+
+## What It Does
+
+- Renders bottom sheets, top sheets, side drawers, centered dialogs, cards, lightboxes, and toast-like overlays.
+- Supports detents with modern CSS lengths such as `em`, `rem`, `dvh`, `svh`, `lvh`, `calc()`, and CSS variables.
+- Handles touch, pointer, wheel, and trackpad gestures for dragging, stepping, overshoot, and dismissal.
+- Provides modal behavior: focus trap, focus restore, Escape dismissal, outside-click dismissal, and inert outside content.
+- Applies Capacitor-friendly safe-area defaults using `env(safe-area-inset-*)` and `--safe-area-inset-*` fallback variables.
+- Keeps focused inputs visible above the keyboard using `visualViewport` resize and scroll events.
+- Exposes stack, outlet, and scroll primitives for depth, parallax, and progress-driven effects.
+- Works with React, Vue, Angular, Svelte, Solid, vanilla JavaScript, and any design system.
+
+## What It Does Not Replace
+
+- It does not render native UIKit or Android bottom sheet components.
+- It does not replace your router.
+- It does not provide a full UI kit or a fixed visual design.
+- It does not require Ionic.
+- It does not turn web components into native screens. It gives the WebView better mobile overlay primitives.
+
+## Installation
+
+```bash
+npm install @capgo/capacitor-sheets
+npx cap sync
+```
+
+## Capacitor Setup
+
+Add `viewport-fit=cover` so iOS exposes safe-area insets to CSS:
+
+```html title="index.html"
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+```
+
+Safe areas are enabled by default. For most apps, `safe-area="auto"` is enough. You can opt out or choose explicit edges per sheet:
+
+```html
+<cap-sheet safe-area="none"></cap-sheet>
+<cap-sheet safe-area="bottom left right"></cap-sheet>
+```
+
+For apps that overlay native system bars or need keyboard resizing, keep the native Capacitor plugins responsible for exposing correct insets:
+
+```ts title="capacitor.config.ts"
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  plugins: {
+    StatusBar: {
+      overlaysWebView: true,
+    },
+    Keyboard: {
+      resize: 'body',
+      resizeOnFullScreen: true,
+    },
+  },
+};
+
+export default config;
+```
+
+## React Setup
+
+Use `@capgo/capacitor-sheets/react` for JSX typing and small helpers. The sheet is still a custom element; React only owns the render tree and event handlers.
+
+```tsx title="FiltersSheet.tsx"
+import '@capgo/capacitor-sheets';
+import {
+  dismissSheet,
+  presentSheet,
+  setupSheet,
+} from '@capgo/capacitor-sheets/react';
+import { useEffect, useRef, useState } from 'react';
+
+export function FiltersSheet() {
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!sheetRef.current) return;
+
+    return setupSheet(sheetRef.current, {
+      defaultActiveDetent: 1,
+      onPresentedChange: ({ presented }) => setOpen(presented),
+    });
+  }, []);
+
+  return (
+    <>
+      <button type="button" onClick={() => presentSheet('filters-sheet')}>
+        Filters
+      </button>
+
+      <cap-sheet
+        id="filters-sheet"
+        ref={sheetRef}
+        detents="18em 32em"
+        content-placement="bottom"
+      >
+        <cap-sheet-portal>
+          <cap-sheet-view>
+            <cap-sheet-backdrop />
+            <cap-sheet-content>
+              <cap-sheet-handle />
+              <cap-sheet-title>Filters</cap-sheet-title>
+              <p>{open ? 'Sheet is open' : 'Sheet is closed'}</p>
+              <button type="button" onClick={() => dismissSheet('filters-sheet')}>
+                Apply
+              </button>
+            </cap-sheet-content>
+          </cap-sheet-view>
+        </cap-sheet-portal>
+      </cap-sheet>
+    </>
+  );
+}
+```
+
+## Common Patterns
+
+| Pattern | Setup |
+| --- | --- |
+| Bottom sheet | Default `content-placement="bottom"` with one or more `detents`. |
+| Side drawer | `content-placement="left"` or `content-placement="right"`. |
+| Top sheet | `content-placement="top"`. |
+| Dialog, card, or lightbox | `content-placement="center"` with a backdrop and compact content. |
+| Toast-like overlay | `inert-outside="false"`, `focus-trap="false"`, and `close-on-outside-click="false"`. |
+| Persistent sheet | `default-presented`, `swipe-dismissal="false"`, and `inert-outside="false"`. |
+| Depth or parallax | `cap-sheet-outlet` receives progress variables for the page behind the sheet. |
+| Scroll progress | `cap-scroll` and `cap-scroll-content` expose scroll progress and distance helpers. |
+
+## Core Elements
+
+| Element | Role |
+| --- | --- |
+| `cap-sheet` | Owns state, detents, placement, gestures, modal behavior, and lifecycle events. |
+| `cap-sheet-trigger` | Declarative present, dismiss, toggle, and step actions. |
+| `cap-sheet-portal` | Optional body portal for overlay layering. |
+| `cap-sheet-view` | Viewport overlay host that applies safe-area and keyboard offsets. |
+| `cap-sheet-backdrop` | Progress-synced modal backdrop. |
+| `cap-sheet-content` | Accessible sheet surface. |
+| `cap-sheet-handle` | Draggable and keyboard-accessible detent handle. |
+| `cap-sheet-title` / `cap-sheet-description` | Accessible naming for dialog-like sheets. |
+| `cap-sheet-stack` | Coordinates multiple stacked sheets. |
+| `cap-sheet-outlet` | Exposes sheet progress to page, depth, and parallax effects. |
+| `cap-scroll` / `cap-scroll-content` | Scroll progress and distance helpers. |
+
+## Events And Methods
+
+| Method or event | Usage |
+| --- | --- |
+| `present()` | Presents a sheet programmatically. |
+| `dismiss()` | Dismisses a sheet programmatically. |
+| `toggle()` | Switches between presented and dismissed states. |
+| `stepTo(index)` | Moves to a specific detent index. |
+| `step(direction)` | Moves to the next or previous detent. |
+| `cap-sheet-presented-change` | Emits when presentation state changes. |
+| `cap-sheet-active-detent-change` | Emits when the active detent changes. |
+| `cap-sheet-travel` | Emits continuous progress, offset, detent, and status details. |
+| `cap-sheet-drag-start` / `cap-sheet-drag-end` | Emits around gesture travel. |
+| `cap-scroll` | Emits scroll progress and distance details. |
+
+## Links
+
+- [GitHub repository](https://github.com/Cap-go/capacitor-sheets)
+- [Capgo documentation](https://capgo.app/docs/plugins/sheets/)
