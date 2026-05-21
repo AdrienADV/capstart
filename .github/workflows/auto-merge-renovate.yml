@@ -8,13 +8,12 @@ jobs:
   auto-merge:
     runs-on: ubuntu-latest
     if: github.actor == 'renovate[bot]'
-    needs: []
     permissions:
       pull-requests: write
       contents: write
     steps:
-      - uses: actions/checkout@v6
-      - name: Wait for CI
+      - uses: actions/checkout@v4
+      - name: Wait for boilerplate CI
         uses: lewagon/wait-on-check-action@v1.7.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}

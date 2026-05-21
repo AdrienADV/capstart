@@ -1,10 +1,14 @@
-name: CI
+name: CI - Website
 
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'capstart-website/**'
   push:
     branches: [main]
+    paths:
+      - 'capstart-website/**'
 
 permissions:
   contents: read
@@ -14,16 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: oven-sh/setup-bun@v2
-  #       with:
-  #         bun-version: latest
-  #     - run: bun install --frozen-lockfile
-  #     - run: bun run lint
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -32,4 +26,6 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
+        working-directory: capstart-website
       - run: bun run build
+        working-directory: capstart-website
