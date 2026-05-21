@@ -8,7 +8,7 @@ import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import appCss from "@/styles/app.css?url";
 
 const siteUrl = "https://capstart.dev";
-const siteTitle = "Capstart - Native app components for CapacitorJS";
+const siteTitle = "Capstart - A simple guide to build CapacitorJS Apps";
 const siteDescription =
   "Build beautiful native iOS, Android, and web apps with Capstart, a curated CapacitorJS component library.";
 const socialImage = `${siteUrl}/og-image.png`;
