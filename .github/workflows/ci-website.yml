@@ -3,12 +3,8 @@ name: CI - Website
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'capstart-website/**'
   push:
     branches: [main]
-    paths:
-      - 'capstart-website/**'
 
 permissions:
   contents: read
