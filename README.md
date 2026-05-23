@@ -1,8 +1,10 @@
 # Capstart
 
-Capstart is a web-first toolkit and documentation project for building polished mobile apps with **CapacitorJS**.
+Capstart is a web-first ecosystem for building polished mobile apps with **CapacitorJS**.
 
-It helps web teams ship native-feeling iOS/Android experiences without abandoning their existing React/web workflow.
+It combines:
+- a **production-oriented boilerplate** you can start from,
+- and a **documentation website** that explains patterns, components, and integration choices.
 
 ## Project Intent
 
@@ -21,19 +23,38 @@ In practice, Capstart focuses on production-ready patterns for:
 
 ## Repository Structure
 
-This repository currently contains:
+This repository currently contains two main packages:
 
 ```txt
 capstart/
-└── capstart-website/   # Documentation website and component guides
+├── capstart-boilerplate/   # Starter app (Capacitor + React) for real projects
+└── capstart-website/       # Documentation website and component guides
 ```
 
-## Main Package: `capstart-website`
+## Package Overview
 
-The `capstart-website` package is the official docs site.
+### `capstart-boilerplate`
 
-### Stack
+A starter project intended to bootstrap a Capacitor app quickly with an opinionated web stack and native-ready setup.
 
+What it includes (high level):
+- Capacitor project scaffolding with `android/` and `ios/` native folders,
+- React + TypeScript app structure,
+- routing, UI components, and app pages,
+- baseline configuration to start building and shipping mobile features.
+
+Useful paths:
+- `capstart-boilerplate/src/`
+- `capstart-boilerplate/android/`
+- `capstart-boilerplate/ios/`
+- `capstart-boilerplate/capacitor.config.ts`
+- `capstart-boilerplate/README.md`
+
+### `capstart-website`
+
+The official docs site for Capstart components and patterns.
+
+Stack:
 - React 19 + TypeScript 6
 - TanStack Router + TanStack Start
 - Fumadocs (MDX docs)
@@ -41,16 +62,15 @@ The `capstart-website` package is the official docs site.
 - Vite 8
 - Cloudflare Workers (Wrangler)
 
-### Key Paths
-
-- `capstart-website/content/docs/`: MDX guides
-- `capstart-website/src/routes/`: file-based app routes
-- `capstart-website/public/`: static assets
-- `capstart-website/package.json`: scripts and dependencies
+Useful paths:
+- `capstart-website/content/docs/`
+- `capstart-website/src/routes/`
+- `capstart-website/public/`
+- `capstart-website/package.json`
 
 ## Quick Start
 
-From the repository root:
+### 1) Run the documentation site
 
 ```bash
 cd capstart-website
@@ -60,30 +80,50 @@ bun run dev
 
 Dev server default: `http://localhost:3000`
 
+### 2) Explore the boilerplate
+
+```bash
+cd capstart-boilerplate
+npm install
+npm run dev
+```
+
+Then follow `capstart-boilerplate/README.md` for native sync/build steps.
+
 ## Common Commands
+
+### Website
 
 ```bash
 cd capstart-website
-bun run dev          # Start dev server
-bun run build        # Production build + TS check
-bun run start        # Preview built app
-bun run lint         # Biome checks
-bun run types:check  # MDX + TypeScript checks
-bun run deploy       # Deploy to Cloudflare Workers
+bun run dev
+bun run build
+bun run start
+bun run lint
+bun run types:check
+bun run deploy
+```
+
+### Boilerplate
+
+```bash
+cd capstart-boilerplate
+npm run dev
+npm run build
+npm run lint
 ```
 
 ## Contribution Guidelines
 
-1. Add or update docs in `capstart-website/content/docs/*.mdx`.
-2. Update docs navigation in `capstart-website/content/docs/meta.json` when needed.
-3. Run checks before opening a PR.
-4. Keep changes focused and include clear PR context.
+1. If you change guides/content, edit files in `capstart-website/content/docs/*.mdx`.
+2. If you add new docs pages, update `capstart-website/content/docs/meta.json`.
+3. If you improve starter experience, update files in `capstart-boilerplate/` and keep its README in sync.
+4. Run relevant checks before opening a PR.
+5. Keep each PR focused and explain intent + impact clearly.
 
 ## Deployment
 
-The canonical deployment target is **Cloudflare Workers**.
-
-Use:
+The documentation site deployment target is **Cloudflare Workers**:
 
 ```bash
 cd capstart-website
@@ -95,4 +135,3 @@ bun run deploy
 - Public docs repository: https://github.com/AdrienADV/capstart-docs
 - CapacitorJS: https://capacitorjs.com
 - Fumadocs: https://fumadocs.vercel.app
-
