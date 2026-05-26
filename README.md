@@ -1,5 +1,7 @@
 # Capstart
 
+![Capstart — build native apps with CapacitorJS using web UI](./capstart-hero.png)
+
 Capstart is a web-first ecosystem for building polished mobile apps with **CapacitorJS**.
 
 It combines:
