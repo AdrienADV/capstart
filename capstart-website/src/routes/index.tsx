@@ -1,10 +1,62 @@
+import { useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { CodeBlock, CodeBlockTab, CodeBlockTabs, CodeBlockTabsList, CodeBlockTabsTrigger, Pre } from 'fumadocs-ui/components/codeblock';
 import { baseOptions } from '@/lib/layout.shared';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
+
+function StartBuildingSection() {
+  const [appName, setAppName] = useState('');
+  const name = appName.trim() || 'Facebook';
+
+  return (
+    <section className="px-6 py-12">
+      <div className="mx-auto max-w-xl flex flex-col items-center gap-4 text-center">
+        <p className="text-xl font-bold text-fd-primary">Start building</p>
+        <div className="flex items-center gap-3 text-sm">
+          <label htmlFor="app-name" className="text-fd-muted-foreground shrink-0">
+            What are you building?
+          </label>
+          <input
+            id="app-name"
+            type="text"
+            value={appName}
+            onChange={(e) => setAppName(e.target.value)}
+            placeholder="Facebook"
+            className="w-40 px-3 py-1.5 rounded-lg border border-fd-border bg-fd-background text-fd-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-fd-ring/50"
+          />
+        </div>
+        <div className="w-full text-left">
+          <CodeBlockTabs defaultValue="npx">
+            <CodeBlockTabsList>
+              <CodeBlockTabsTrigger value="npx">npx</CodeBlockTabsTrigger>
+              <CodeBlockTabsTrigger value="bunx">bunx</CodeBlockTabsTrigger>
+              <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+            </CodeBlockTabsList>
+            <CodeBlockTab value="npx">
+              <CodeBlock viewportProps={{ className: 'px-4' }}>
+                <Pre>{`npx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+              </CodeBlock>
+            </CodeBlockTab>
+            <CodeBlockTab value="bunx">
+              <CodeBlock viewportProps={{ className: 'px-4' }}>
+                <Pre>{`bunx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+              </CodeBlock>
+            </CodeBlockTab>
+            <CodeBlockTab value="pnpm">
+              <CodeBlock viewportProps={{ className: 'px-4' }}>
+                <Pre>{`pnpm dlx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+              </CodeBlock>
+            </CodeBlockTab>
+          </CodeBlockTabs>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function Home() {
   return (
@@ -128,6 +180,8 @@ function Home() {
             </div>
           </div>
         </section>
+
+        <StartBuildingSection />
 
         <section className="bg-fd-muted/30 px-6 py-20">
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
