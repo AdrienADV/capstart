@@ -4,6 +4,6 @@ export const docsImageRoute = '/og/docs';
 
 export const gitConfig = {
   user: 'AdrienADV',
-  repo: 'capstart-docs',
+  repo: 'capstart',
   branch: 'main',
 };
