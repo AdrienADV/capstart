@@ -114,6 +114,12 @@ These are not UI libraries by themselves. They are the **native app basics** I w
 | `@capacitor/splash-screen` | Controls when the native splash screen is shown or hidden during app startup. | [Splash Screen docs](https://capacitorjs.com/docs/apis/splash-screen) |
 | `@capacitor/status-bar` | Controls status bar color, style, overlays, and light/dark appearance. | [Status Bar docs](https://capacitorjs.com/docs/apis/status-bar) |
 
+Also install `@capgo/vite-capacitor` as a dev dependency. It is a **Vite plugin**, not a Capacitor runtime plugin, but it belongs here because it solves a friction point that shows up immediately after step 2: during development the native apps need to point at Vite's dev server URL, and that URL changes depending on your host and port. This plugin writes it into the native config files when `npm run dev` starts and restores the originals when it stops, so you never manually edit those files.
+
+```bash
+npm install --save-dev @capgo/vite-capacitor
+```
+
 After installing them, extend `capacitor.config.ts` with the native defaults worth locking in. In this set, `Keyboard`, `SplashScreen`, and `StatusBar` are the plugins with configuration values that affect the native shell:
 
 ```ts title="capacitor.config.ts"
@@ -160,13 +166,14 @@ npm install tailwindcss @tailwindcss/vite
 Update `vite.config.ts` so Vite loads Tailwind and resolves the `@/` import alias used by shadcn/ui:
 
 ```ts title="vite.config.ts"
+import viteCapacitor from '@capgo/vite-capacitor';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), viteCapacitor({ platforms: ['ios', 'android'] })],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

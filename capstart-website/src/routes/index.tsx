@@ -12,6 +12,12 @@ function StartBuildingSection() {
   const [appName, setAppName] = useState('');
   const name = appName.trim() || 'Facebook';
 
+  const copyActions = ({ className, children }: { className?: string; children?: React.ReactNode }) => (
+    <div className={className} onClick={() => window.umami?.track('start-building-copy')}>
+      {children}
+    </div>
+  );
+
   return (
     <section className="px-6 py-12">
       <div className="mx-auto max-w-xl flex flex-col items-center gap-4 text-center">
@@ -37,17 +43,17 @@ function StartBuildingSection() {
               <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
             </CodeBlockTabsList>
             <CodeBlockTab value="npx">
-              <CodeBlock viewportProps={{ className: 'px-4' }}>
+              <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions}>
                 <Pre>{`npx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
               </CodeBlock>
             </CodeBlockTab>
             <CodeBlockTab value="bunx">
-              <CodeBlock viewportProps={{ className: 'px-4' }}>
+              <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions}>
                 <Pre>{`bunx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
               </CodeBlock>
             </CodeBlockTab>
             <CodeBlockTab value="pnpm">
-              <CodeBlock viewportProps={{ className: 'px-4' }}>
+              <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions}>
                 <Pre>{`pnpm dlx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
               </CodeBlock>
             </CodeBlockTab>
