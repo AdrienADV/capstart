@@ -1,0 +1,243 @@
+# CapStart Development Guide
+
+## Scope
+
+CapStart is a mobile-first starter for iOS and Android apps. The application UI is a
+React/Vite single-page app rendered inside Capacitor native shells. Prefer changes in
+`src/` and keep native edits limited to platform configuration or code that cannot live
+in the web layer.
+
+Read `README.md` before starting. This file is the source of truth for implementation
+conventions and verification.
+
+## Stack
+
+- React 19, Vite 8, and TypeScript 6
+- Capacitor 8 with committed `ios/` and `android/` shells
+- React Router 7
+- Supabase Auth
+- Tailwind CSS v4 and shadcn/ui
+- Capgo transitions and native navigation
+
+## Project Map
+
+```text
+src/
+├── components/        Shared components and shadcn/ui source files
+├── contexts/          Global React providers, including auth
+├── hooks/             Reusable hooks, including native integrations
+├── layouts/           Persistent layouts such as the bottom tab bar
+├── lib/               Supabase client, route guards, and utilities
+├── pages/             Route-level mobile screens
+├── app.tsx            Native transition outlet
+├── main.tsx           Provider bootstrap
+└── router.tsx         Route definitions
+android/               Android native shell
+ios/                   iOS native shell
+capacitor.config.ts    Shared Capacitor configuration
+components.json        shadcn/ui configuration
+```
+
+## Setup And Commands
+
+Use Bun; `bun.lock` is committed.
+
+```bash
+bun install
+cp .env.example .env
+bun run dev
+```
+
+Set both Supabase variables in `.env` before exercising auth:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-or-publishable-key
+```
+
+Common commands:
+
+```bash
+bun run dev       # Start Vite for browser development
+bun run lint      # Run ESLint
+bun run typecheck # Run the TypeScript compiler without emitting files
+bun run build     # Build web assets into dist/
+bun run sync      # Build web assets, then sync both native shells
+bunx cap open ios
+bunx cap open android
+```
+
+`bun run sync` is the canonical sync command. A plain `bunx cap sync` copies the current
+`dist/`; it does not build fresh web assets first.
+
+There is currently no automated test script. Add focused tests when introducing logic
+that is not adequately covered by lint, build, and manual smoke testing.
+
+## Routing And Screens
+
+Define routes in `src/router.tsx`. Authenticated routes belong under `/app`.
+
+- Put primary tab screens inside the `TabLayout` route.
+- Put drill-down screens outside the `TabLayout` child route when the bottom tabs
+  should disappear.
+- Preserve the single `<cap-router-outlet>` in `src/app.tsx`.
+- Use `GuestRoute` and `ProtectedRoute` for auth redirects instead of duplicating
+  session checks in screens.
+
+Every route-level screen must register with Capgo transitions:
+
+```tsx
+import { useEffect, useRef } from "react"
+import { setupPage } from "@capgo/capacitor-transitions/react"
+
+export default function ExampleScreen() {
+  const pageRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (pageRef.current) {
+      return setupPage(pageRef.current)
+    }
+  }, [])
+
+  return <cap-page ref={pageRef}>{/* screen content */}</cap-page>
+}
+```
+
+Set transition direction immediately before navigation:
+
+- `setDirection("forward")` for drill-down navigation.
+- `setDirection("back")` before navigating back. Reuse `src/components/header.tsx`
+  for standard back navigation.
+- `setDirection("none")` for redirects such as auth state changes.
+
+## Mobile Layout
+
+Safe-area CSS variables are declared in `src/index.css`:
+
+- `--safe-area-top`
+- `--safe-area-bottom`
+- `--safe-area-left`
+- `--safe-area-right`
+
+Apply them to screen content and fixed controls where needed, for example
+`pt-(--safe-area-top)` or `pb-(--safe-area-bottom)`. Do not add top padding twice:
+`Header` already handles the top inset, and `TabLayout` already handles the bottom
+inset for the tab bar. Check landscape layouts when adding edge-to-edge content.
+
+Browser checks are useful for fast iteration, but they do not replace a simulator or
+device check for safe areas, keyboard behavior, permissions, or native plugins.
+
+## UI Conventions
+
+This is a Vite SPA, not a React Server Components project. Do not add `"use client"`
+directives.
+
+- Reuse components in `src/components/ui/` before creating custom primitives.
+- Add shadcn/ui source components with `bunx --bun shadcn@latest add <component>`,
+  then read the generated files before using them.
+- Keep shadcn aliases from `components.json`; use `@/` imports.
+- Keep Tailwind v4 theme variables and global styles in `src/index.css`.
+- Prefer semantic tokens such as `bg-background`, `text-muted-foreground`, and
+  `border-border` over raw color utilities.
+- Use `cn()` from `src/lib/utils.ts` for conditional classes.
+- Use `gap-*` for layout spacing and `size-*` when width and height match.
+- Use `lucide-react` for icons. Let shadcn components size icons when possible.
+- Use the configured Sonner toaster for transient feedback.
+
+## Auth And Environment
+
+`AuthProvider` owns the current Supabase session. `GuestRoute` redirects authenticated
+users away from `/login`; `ProtectedRoute` prevents anonymous access to `/app/*`.
+Preserve the loading state before rendering protected content.
+
+Never commit `.env`. Values prefixed with `VITE_` are embedded into the client bundle,
+so they are public at runtime. Only store the Supabase URL and anon/publishable key
+there. Never store a service-role key, private API key, or server secret in the app.
+Do not commit test credentials or prefill real credentials in forms.
+
+## Capacitor And Native APIs
+
+Installed Capacitor integrations include Device, Dialog, Keyboard, Network, Push
+Notifications, Share, Splash Screen, Capgo native navigation, and Capgo transitions.
+
+When calling a native API:
+
+- Guard native-only behavior with `Capacitor.isNativePlatform()` or an equivalent
+  platform check.
+- Keep a usable web fallback when browser development is expected.
+- Ask for permissions when the user enables the related feature, not on first launch.
+- Remove plugin listeners during React effect cleanup.
+- Verify behavior on each affected native platform.
+
+`src/hooks/use-notifications.tsx` is the reference for permission timing, listener
+registration, cleanup, and web guards. Complete the backend token upload before
+shipping notifications. Android push also requires `android/app/google-services.json`;
+iOS push requires the appropriate signing capabilities and APNs setup.
+
+When adding or removing a Capacitor plugin:
+
+1. Change the Bun dependency.
+2. Add the web-layer integration and platform permissions or capabilities.
+3. Run `bun run sync`.
+4. Inspect generated diffs.
+5. Build and smoke-test each affected native platform.
+
+## Native Files
+
+Do not hand-edit CLI-managed files:
+
+- `android/capacitor.settings.gradle`
+- `android/app/capacitor.build.gradle`
+- `ios/App/CapApp-SPM/Package.swift`
+- Copied web assets and generated Capacitor config files ignored by native
+  `.gitignore` files
+
+Make source changes in `package.json`, `capacitor.config.ts`, or the plugin integration,
+then run `bun run sync`.
+
+Manual native edits are appropriate when a feature requires them, including:
+
+- `android/app/src/main/AndroidManifest.xml`
+- `android/app/build.gradle`
+- Android resources under `android/app/src/main/res/`
+- `ios/App/App/Info.plist`
+- `ios/App/App/AppDelegate.swift`
+- Xcode project settings and signing capabilities
+
+## Productizing A New App
+
+Replace the starter identity before shipping. Changing `capacitor.config.ts` alone
+does not rename already-generated native projects.
+
+- Update `appId` and `appName` in `capacitor.config.ts`.
+- Update Android `namespace`, `applicationId`, strings, Java package declaration, and
+  Java source folder currently using `com.example.app`.
+- Update the iOS bundle identifier and display name in the Xcode project.
+- Replace iOS and Android icons and splash assets.
+- Configure version numbers, signing, release settings, and store metadata.
+- Remove placeholder copy and confirm that no credentials remain in source control.
+
+## Verification
+
+For every change:
+
+```bash
+bun run lint
+bun run typecheck
+bun run build
+```
+
+Also run `bun run sync` and validate the affected native project when changing routes,
+safe-area behavior, Capacitor config, dependencies, plugins, permissions, native code,
+or release assets.
+
+Before handing off a mobile feature, smoke-test:
+
+- Fresh launch and auth redirect
+- Login and logout
+- Tab navigation
+- Forward and back transitions
+- Notch and bottom safe areas
+- Keyboard behavior on forms
+- Dark and light themes when UI changed
+- Web fallback and affected iOS/Android paths for native features
