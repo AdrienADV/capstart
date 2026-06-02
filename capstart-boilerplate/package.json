@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:mobile": "node scripts/dev-mobile.mjs",
     "lint": "eslint .",
     "sync": "npm run build && npx cap sync",
     "preview": "vite preview",

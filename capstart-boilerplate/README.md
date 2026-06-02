@@ -12,8 +12,8 @@ It includes:
 ## Tech Stack
 
 - React 19
-- Vite 7
-- TypeScript 5
+- Vite 8
+- TypeScript 6
 - Capacitor 8
 - Supabase JS v2
 - Tailwind CSS v4
@@ -57,14 +57,6 @@ npm run dev
 
 This project already contains `ios/` and `android/` native projects.
 
-### Run Vite for live reload on a real device
-
-```bash
-npm run dev:mobile
-```
-
-This script exposes Vite on your local network and sets `CAP_SERVER_URL` automatically, so your iOS/Android physical device can use Capacitor live reload.
-
 ### Open native projects
 
 ```bash
@@ -84,7 +76,6 @@ npm run build
 ## Available Scripts
 
 - `npm run dev` - start Vite dev server
-- `npm run dev:mobile` - start Vite for Capacitor live reload on a real device
 - `npm run build` - build web assets into `dist/`
 - `npm run preview` - preview production build
 - `npm run lint` - run ESLint
@@ -104,7 +95,6 @@ capstart/
 │   └── router.tsx         # Route definitions
 ├── android/               # Native Android project
 ├── ios/                   # Native iOS project
-├── scripts/dev-mobile.mjs # Mobile dev server helper
 ├── capacitor.config.ts    # Capacitor app configuration
 └── .env.example           # Required environment variables
 ```
