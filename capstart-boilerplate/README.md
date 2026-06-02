@@ -12,8 +12,8 @@ It includes:
 ## Tech Stack
 
 - React 19
-- Vite 7
-- TypeScript 5
+- Vite 8
+- TypeScript 6
 - Capacitor 8
 - Supabase JS v2
 - Tailwind CSS v4
@@ -22,7 +22,7 @@ It includes:
 ## Prerequisites
 
 - Node.js 20+
-- npm
+- Bun
 - For iOS development: Xcode (macOS)
 - For Android development: Android Studio + Android SDK
 
@@ -31,7 +31,7 @@ It includes:
 1. Install dependencies:
 
 ```bash
-npm install
+bun install
 ```
 
 2. Create your local env file:
@@ -50,26 +50,18 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-or-publishable-key
 4. Start the web app:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 ## Mobile Development
 
 This project already contains `ios/` and `android/` native projects.
 
-### Run Vite for live reload on a real device
-
-```bash
-npm run dev:mobile
-```
-
-This script exposes Vite on your local network and sets `CAP_SERVER_URL` automatically, so your iOS/Android physical device can use Capacitor live reload.
-
 ### Open native projects
 
 ```bash
-npx cap open ios
-npx cap open android
+bunx cap open ios
+bunx cap open android
 ```
 
 ### Build and sync web assets to native
@@ -77,17 +69,17 @@ npx cap open android
 Use this before native release/testing with bundled assets:
 
 ```bash
-npx cap sync
-npm run build
+bun run sync
 ```
 
 ## Available Scripts
 
-- `npm run dev` - start Vite dev server
-- `npm run dev:mobile` - start Vite for Capacitor live reload on a real device
-- `npm run build` - build web assets into `dist/`
-- `npm run preview` - preview production build
-- `npm run lint` - run ESLint
+- `bun run dev` - start Vite dev server
+- `bun run build` - build web assets into `dist/`
+- `bun run typecheck` - run the TypeScript compiler without emitting files
+- `bun run sync` - build web assets and sync them to native projects
+- `bun run preview` - preview production build
+- `bun run lint` - run ESLint
 
 ## Project Structure
 
@@ -104,7 +96,6 @@ capstart/
 │   └── router.tsx         # Route definitions
 ├── android/               # Native Android project
 ├── ios/                   # Native iOS project
-├── scripts/dev-mobile.mjs # Mobile dev server helper
 ├── capacitor.config.ts    # Capacitor app configuration
 └── .env.example           # Required environment variables
 ```
