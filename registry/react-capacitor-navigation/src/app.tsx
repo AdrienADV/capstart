@@ -21,7 +21,7 @@ export default function App() {
 
   return (
     <cap-router-outlet ref={outletRef}>
-      <Router location={location} />
+      <Router key={location.pathname} location={location} />
     </cap-router-outlet>
   )
 }
