@@ -84,11 +84,6 @@
           "path": "registry/react-capacitor-navigation/src/pages/app/home/details.tsx",
           "type": "registry:file",
           "target": "~/src/pages/app/home/details.tsx"
-        },
-        {
-          "path": "registry/react-capacitor-navigation/src/capgo-transitions.d.ts",
-          "type": "registry:file",
-          "target": "~/src/capgo-transitions.d.ts"
         }
       ],
       "docs": "This item installs a starter navigation shell and targets index.html, src/main.tsx, src/app.tsx and src/router.tsx. Run `shadcn add AdrienADV/capstart/react-capacitor-navigation --dry-run` first in existing projects. For Capacitor 8 safe areas, index.html includes `viewport-fit=cover`; the registry injects the safe-area and full-height shell rules into the project's configured global CSS file. Use the default `SystemBars.insetsHandling = \"css\"` behavior so Android can inject `--safe-area-inset-*` variables."
