@@ -6,7 +6,6 @@ import "@capgo/capacitor-transitions"
 
 import App from "./app"
 import "./index.css"
-import "./styles/capacitor-safe-area.css"
 
 initTransitions({ platform: "auto" })
 
