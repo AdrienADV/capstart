@@ -20,7 +20,7 @@ export default function CapacitorTabBar() {
               to={tab.to}
               end={tab.to === "/app"}
               replace
-              onClick={() => setNavigation("root", "forward")}
+              onClick={() => setNavigation("root", "none")}
               className={({ isActive }) =>
                 cn(
                   "flex h-14 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors",
