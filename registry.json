@@ -1,0 +1,92 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "capstart",
+  "homepage": "https://github.com/AdrienADV/capstart",
+  "items": [
+    {
+      "name": "react-capacitor-navigation",
+      "type": "registry:item",
+      "title": "React Capacitor Navigation",
+      "description": "Mobile-first React Router shell for Capacitor apps with Capgo transitions, a tab layout, a native-feeling header, safe-area variables, and example screens.",
+      "dependencies": [
+        "@capacitor/core",
+        "@capgo/capacitor-transitions",
+        "lucide-react",
+        "react-router"
+      ],
+      "registryDependencies": [
+        "button"
+      ],
+      "css": {
+        ":root": {
+          "--safe-area-top": "var(--safe-area-inset-top, env(safe-area-inset-top, 0px))",
+          "--safe-area-bottom": "var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))"
+        },
+        "html, body, #root": {
+          "height": "100%"
+        },
+        "body": {
+          "margin": "0",
+          "overflow": "hidden"
+        },
+        "cap-router-outlet": {
+          "display": "block",
+          "height": "100%"
+        }
+      },
+      "files": [
+        {
+          "path": "registry/react-capacitor-navigation/index.html",
+          "type": "registry:file",
+          "target": "~/index.html"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/main.tsx",
+          "type": "registry:file",
+          "target": "~/src/main.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/app.tsx",
+          "type": "registry:file",
+          "target": "~/src/app.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/router.tsx",
+          "type": "registry:file",
+          "target": "~/src/router.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/components/capacitor-header.tsx",
+          "type": "registry:file",
+          "target": "~/src/components/capacitor-header.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/hooks/use-capacitor-page.ts",
+          "type": "registry:file",
+          "target": "~/src/hooks/use-capacitor-page.ts"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/components/capacitor-tab-bar.tsx",
+          "type": "registry:file",
+          "target": "~/src/components/capacitor-tab-bar.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/pages/app/home.tsx",
+          "type": "registry:file",
+          "target": "~/src/pages/app/home.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/pages/app/settings.tsx",
+          "type": "registry:file",
+          "target": "~/src/pages/app/settings.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/pages/app/home/details.tsx",
+          "type": "registry:file",
+          "target": "~/src/pages/app/home/details.tsx"
+        }
+      ],
+      "docs": "This item installs a starter navigation shell and targets index.html, src/main.tsx, src/app.tsx and src/router.tsx. Run `shadcn add AdrienADV/capstart/react-capacitor-navigation --dry-run` first in existing projects. For Capacitor 8 safe areas, index.html includes `viewport-fit=cover`; the registry injects the safe-area and full-height shell rules into the project's configured global CSS file. Use the default `SystemBars.insetsHandling = \"css\"` behavior so Android can inject `--safe-area-inset-*` variables."
+    }
+  ]
+}
