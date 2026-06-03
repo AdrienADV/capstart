@@ -1,0 +1,80 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "capstart",
+  "homepage": "https://github.com/AdrienADV/capstart",
+  "items": [
+    {
+      "name": "react-capacitor-navigation",
+      "type": "registry:item",
+      "title": "React Capacitor Navigation",
+      "description": "Mobile-first React Router shell for Capacitor apps with Capgo transitions, a tab layout, a native-feeling header, safe-area variables, and example screens.",
+      "dependencies": [
+        "@capacitor/core",
+        "@capgo/capacitor-transitions",
+        "lucide-react",
+        "react-router"
+      ],
+      "registryDependencies": [
+        "button"
+      ],
+      "files": [
+        {
+          "path": "registry/react-capacitor-navigation/src/main.tsx",
+          "type": "registry:file",
+          "target": "~/src/main.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/app.tsx",
+          "type": "registry:file",
+          "target": "~/src/app.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/router.tsx",
+          "type": "registry:file",
+          "target": "~/src/router.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/components/capacitor-header.tsx",
+          "type": "registry:file",
+          "target": "~/src/components/capacitor-header.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/hooks/use-capacitor-page.ts",
+          "type": "registry:file",
+          "target": "~/src/hooks/use-capacitor-page.ts"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/components/capacitor-tab-bar.tsx",
+          "type": "registry:file",
+          "target": "~/src/components/capacitor-tab-bar.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/pages/app/home.tsx",
+          "type": "registry:file",
+          "target": "~/src/pages/app/home.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/pages/app/settings.tsx",
+          "type": "registry:file",
+          "target": "~/src/pages/app/settings.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/pages/app/home/details.tsx",
+          "type": "registry:file",
+          "target": "~/src/pages/app/home/details.tsx"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/styles/capacitor-safe-area.css",
+          "type": "registry:file",
+          "target": "~/src/styles/capacitor-safe-area.css"
+        },
+        {
+          "path": "registry/react-capacitor-navigation/src/capgo-transitions.d.ts",
+          "type": "registry:file",
+          "target": "~/src/capgo-transitions.d.ts"
+        }
+      ],
+      "docs": "This item installs a starter navigation shell and targets src/main.tsx, src/app.tsx and src/router.tsx. Run `shadcn add AdrienADV/capstart/react-capacitor-navigation --dry-run` first in existing projects."
+    }
+  ]
+}
