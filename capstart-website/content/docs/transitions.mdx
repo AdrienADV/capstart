@@ -3,7 +3,7 @@ title: Transitions
 description: Add framework-agnostic page transitions to a Capacitor app.
 ---
 
-`@capgo/transitions` adds native-feeling page transitions to a Capacitor app without forcing a design system or a router.
+`@capgo/capacitor-transitions` adds native-feeling page transitions to a Capacitor app without forcing a design system or a router.
 
 It is a separate library from `@capgo/capacitor-native-navigation`. You can use both together: Native Navigation can render the native navbar and tabbar, while Transitions animates the page content underneath.
 
@@ -32,11 +32,23 @@ It is a separate library from `@capgo/capacitor-native-navigation`. You can use 
 
 ## Installation
 
+### Vite + Capacitor + shadcn/ui
+
+If you use Vite, Capacitor, React, and shadcn/ui, install the complete React navigation shell from the Capstart registry:
+
 ```bash
-npm install @capgo/transitions
+npx shadcn@latest add AdrienADV/capstart/react-capacitor-navigation
 ```
 
-The package is published as `@capgo/transitions`. The GitHub repository is named `capacitor-transitions`.
+The registry installs the transition setup, a React Router shell, a bottom tab bar, a native-feeling header, example screens, `viewport-fit=cover`, and the minimal safe-area CSS variables needed by the layout.
+
+### Manual installation
+
+```bash
+npm install @capgo/capacitor-transitions
+```
+
+The package is published as `@capgo/capacitor-transitions`. The GitHub repository is named `capacitor-transitions`.
 
 ## Basic Structure
 
@@ -69,8 +81,8 @@ import { useEffect, useRef } from 'react';
 import {
   initTransitions,
   setupRouterOutlet,
-} from '@capgo/transitions/react';
-import '@capgo/transitions';
+} from '@capgo/capacitor-transitions/react';
+import '@capgo/capacitor-transitions';
 
 initTransitions({ platform: 'auto' });
 
@@ -92,7 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 ```tsx title="HomePage.tsx"
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setDirection, setupPage } from '@capgo/transitions/react';
+import { setDirection, setupPage } from '@capgo/capacitor-transitions/react';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -159,7 +171,7 @@ export function HomePage() {
 For lower-level control, create a transition controller and drive the stack manually.
 
 ```ts title="transition-controller.ts"
-import { createTransitionController } from '@capgo/transitions';
+import { createTransitionController } from '@capgo/capacitor-transitions';
 
 const controller = createTransitionController({
   platform: 'auto',
@@ -182,11 +194,11 @@ await controller.setRoot(homePageElement, {
 
 ## Use With Native Navigation
 
-`@capgo/transitions` and `@capgo/capacitor-native-navigation` solve different parts of the interface.
+`@capgo/capacitor-transitions` and `@capgo/capacitor-native-navigation` solve different parts of the interface.
 
 | Library | Responsibility |
 | --- | --- |
-| `@capgo/transitions` | Animates web pages, headers, content, and footers inside the WebView. |
+| `@capgo/capacitor-transitions` | Animates web pages, headers, content, and footers inside the WebView. |
 | `@capgo/capacitor-native-navigation` | Renders native navbar and tabbar surfaces around the WebView. |
 
 When you use both together, keep the native bars outside the animated page content. Let Native Navigation own the bars, and let Transitions animate the route content.
