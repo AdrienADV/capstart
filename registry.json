@@ -74,7 +74,7 @@
           "target": "~/src/capgo-transitions.d.ts"
         }
       ],
-      "docs": "This item installs a starter navigation shell and targets src/main.tsx, src/app.tsx and src/router.tsx. Run `shadcn add AdrienADV/capstart/react-capacitor-navigation --dry-run` first in existing projects."
+      "docs": "This item installs a starter navigation shell and targets src/main.tsx, src/app.tsx and src/router.tsx. Run `shadcn add AdrienADV/capstart/react-capacitor-navigation --dry-run` first in existing projects. For Capacitor 8 safe areas, keep `viewport-fit=cover` in index.html and use the default `SystemBars.insetsHandling = \"css\"` behavior so Android can inject `--safe-area-inset-*` variables."
     }
   ]
 }
