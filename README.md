@@ -132,6 +132,10 @@ cd capstart-website
 bun run deploy
 ```
 
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
 ## Links
 
 - Public docs repository: https://github.com/AdrienADV/capstart-docs
