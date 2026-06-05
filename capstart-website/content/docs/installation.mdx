@@ -45,7 +45,7 @@ Use Capstart when you want a product app baseline immediately: Supabase session 
   <video autoPlay loop muted playsInline src="/capstart-demo.mp4" className="w-full max-w-64 rounded-lg" />
 </div>
 
-```bash
+```npm
 npx degit AdrienADV/capstart/capstart-boilerplate my-app
 cd my-app
 npm install
@@ -61,7 +61,7 @@ After cloning, fill the Supabase values in `.env`, then update `appId` and `appN
 
 ## 1. Create a Vite React app
 
-```bash
+```npm
 npm create vite@latest my-app -- --template react-ts
 cd my-app
 npm install
@@ -72,7 +72,7 @@ Vite gives you a **fast React app with normal web tooling**. That is the main ad
 
 ## 2. Add Capacitor
 
-```bash
+```npm
 npm install @capacitor/core @capacitor/cli
 npx cap init
 
@@ -99,7 +99,7 @@ export default config;
 
 Before adding UI libraries, I recommend installing a small set of **baseline Capacitor plugins** that almost every mobile app ends up needing:
 
-```bash
+```npm
 npm install @capacitor/keyboard @capacitor/network @capacitor/device @capacitor/splash-screen @capacitor/status-bar
 npx cap sync
 ```
@@ -114,9 +114,9 @@ These are not UI libraries by themselves. They are the **native app basics** I w
 | `@capacitor/splash-screen` | Controls when the native splash screen is shown or hidden during app startup. | [Splash Screen docs](https://capacitorjs.com/docs/apis/splash-screen) |
 | `@capacitor/status-bar` | Controls status bar color, style, overlays, and light/dark appearance. | [Status Bar docs](https://capacitorjs.com/docs/apis/status-bar) |
 
-Also install `@capgo/vite-capacitor` as a dev dependency. It is a **Vite plugin**, not a Capacitor runtime plugin, but it belongs here because it solves a friction point that shows up immediately after step 2: during development the native apps need to point at Vite's dev server URL, and that URL changes depending on your host and port. This plugin writes it into the native config files when `npm run dev` starts and restores the originals when it stops, so you never manually edit those files.
+Also install `@capgo/vite-capacitor` as a dev dependency. It is a **Vite plugin**, not a Capacitor runtime plugin, but it belongs here because it solves a friction point that shows up immediately after step 2: during development the native apps need to point at Vite's dev server URL, and that URL changes depending on your host and port. This plugin writes it into the native config files when your dev script starts and restores the originals when it stops, so you never manually edit those files.
 
-```bash
+```npm
 npm install --save-dev @capgo/vite-capacitor
 ```
 
@@ -159,7 +159,7 @@ export default config;
 
 ## 4. Configure Tailwind and aliases
 
-```bash
+```npm
 npm install tailwindcss @tailwindcss/vite
 ```
 
@@ -207,7 +207,7 @@ At this point, keep the installation focused on the stable base: the web app, Ca
 
 Build the web bundle, sync it into the native projects, then open the platform you want to test:
 
-```bash
+```npm
 npm run build
 npx cap sync
 npx cap open ios

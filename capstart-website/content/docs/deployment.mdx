@@ -14,14 +14,14 @@ The important habit is to decide which rhythm your change actually needs. Many u
 
 Use a normal App Store or Play Store release when the native project changes, when the first version of the app goes live, or when the app must request new native capabilities.
 
-```bash
+```npm
 npm run build
 npx cap sync
 ```
 
 Then open the native project you are shipping:
 
-```bash
+```npm
 npx cap open ios
 npx cap open android
 ```
@@ -68,7 +68,7 @@ Live updates are not a way to bypass store rules. Use them for web assets that a
 
 For a native release:
 
-```bash
+```npm
 npm run build
 npx cap sync
 npx cap open ios
@@ -78,7 +78,7 @@ Archive from Xcode, upload to App Store Connect, then repeat the equivalent Andr
 
 For a web-only update:
 
-```bash
+```npm
 npm run build
 ```
 
