@@ -47,7 +47,9 @@ npx capstart init ..
 
 The CLI displays the detected framework and asks for confirmation before
 configuring the project. If detection is refused, it offers Next.js and
-TanStack Start as explicit choices.
+TanStack Start as explicit choices. It also offers a minimal setup or a
+recommended setup that includes common Capacitor plugins for keyboard, network,
+device, splash screen, and status bar behavior.
 
 Useful path:
 - `cli/README.md`

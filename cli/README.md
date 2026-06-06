@@ -10,6 +10,15 @@ Capstart detects the framework and package manager, configures a static or SPA
 build, installs Capacitor, adds native projects, builds the web application, and
 runs `cap sync`.
 
+In an interactive terminal, Capstart also asks which setup to install:
+
+- `minimal`: Capacitor core, CLI, and the selected native platforms;
+- `recommended`: the minimal setup plus Keyboard, Network, Device, Splash
+  Screen, and Status Bar plugins.
+
+The recommended setup is pre-selected in the interactive prompt. Non-interactive
+usage keeps the existing minimal setup unless `--setup recommended` is passed.
+
 Installation, build, and Capacitor command output is hidden by default. Capstart
 shows a single setup progress line and only prints a short command summary when
 something fails.
@@ -19,7 +28,8 @@ Each main installation operation has its own step:
 ```text
 ◇ Configure Next.js
 ◇ Configure Capacitor
-◇ Install Capacitor packages
+◇ Configure safe area insets
+◇ Install Capacitor packages (recommended)
 ◇ Build the web app
 ◇ Prepare iOS and Android projects
 ◇ Synchronize native projects
@@ -41,7 +51,8 @@ TanStack Start.
 ## Supported frameworks
 
 - Next.js projects that can use static export
-- TanStack Start projects that can use SPA mode
+- TanStack Start projects that can use SPA mode. Capstart uses `.output/public`
+  when the Vite config includes Nitro, and `dist/client` otherwise.
 
 Server-only features must remain hosted remotely and be called from the mobile
 application over HTTP.
@@ -58,6 +69,7 @@ Examples:
 npx capstart init .
 npx capstart init ../my-app --app-id com.example.myapp
 npx capstart init . --platforms ios
+npx capstart init . --setup recommended
 npx capstart init . --framework tanstack-start --dry-run
 npx capstart init . --yes
 ```
@@ -69,6 +81,9 @@ Useful options:
 --app-id <id>
 --app-name <name>
 --platforms <ios,android>
+--setup <minimal|recommended>
+--safe-area
+--no-safe-area
 --skip-install
 --skip-build
 --skip-native
@@ -80,6 +95,36 @@ Use `--yes` to accept a single automatically detected framework in CI or other
 non-interactive environments. Use `--framework` to bypass detection
 confirmation and select an adapter explicitly.
 
+Use `--setup recommended` to install these baseline runtime plugins:
+
+```text
+@capacitor/keyboard
+@capacitor/network
+@capacitor/device
+@capacitor/splash-screen
+@capacitor/status-bar
+```
+
+The recommended setup also adds baseline `Keyboard`, `SplashScreen`, and
+`StatusBar` options to `capacitor.config.ts`. Existing plugin configuration is
+merged so unrelated plugins and properties are preserved.
+
+Capstart can also add global top and bottom safe area padding. It uses the
+Capacitor 8 System Bars variables with browser fallbacks:
+
+```css
+html {
+  padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+```
+
+When selected, Capstart configures `SystemBars.insetsHandling` as `css` and adds
+`viewport-fit=cover`. Use `--safe-area` or `--no-safe-area` to bypass the
+interactive question. See the
+[Capacitor 8 System Bars documentation](https://capacitorjs.com/docs/apis/system-bars)
+for the underlying edge-to-edge behavior.
+
 After a successful interactive initialization, Capstart detects whether GitHub
 CLI is installed and optionally proposes starring
 [AdrienADV/capstart](https://github.com/AdrienADV/capstart). The repository is
@@ -88,7 +133,7 @@ only starred after explicit confirmation, and this step never runs in CI.
 The final output includes:
 
 - the scripts added to `package.json` and a short explanation of each one;
-- recommended Capacitor packages and production guidance at
+- recommended Capacitor packages, native configuration, and production guidance at
   [capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins](https://capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins);
 - an `Important` section explaining which framework server features must remain
   remotely hosted.

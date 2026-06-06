@@ -3,7 +3,11 @@
 import { Command, InvalidArgumentError } from "commander";
 import { initCommand } from "./commands/init.js";
 import { logger } from "./core/logger.js";
-import type { FrameworkId, Platform } from "./core/types.js";
+import type {
+  FrameworkId,
+  Platform,
+  SetupProfile,
+} from "./core/types.js";
 
 const program = new Command();
 
@@ -29,6 +33,13 @@ program
     parsePlatforms,
     ["ios", "android"],
   )
+  .option(
+    "--setup <setup>",
+    "Capacitor setup profile: minimal or recommended",
+    parseSetup,
+  )
+  .option("--safe-area", "add global top and bottom safe area padding")
+  .option("--no-safe-area", "do not add global safe area padding")
   .option("--skip-install", "do not install Capacitor packages")
   .option("--skip-build", "do not build the web application")
   .option("--skip-native", "do not add or synchronize native projects")
@@ -42,6 +53,8 @@ program
       dryRun: commandOptions.dryRun ?? false,
       framework: commandOptions.framework,
       platforms: commandOptions.platforms,
+      safeArea: commandOptions.safeArea,
+      setup: commandOptions.setup,
       skipBuild: commandOptions.skipBuild ?? false,
       skipInstall: commandOptions.skipInstall ?? false,
       skipNative: commandOptions.skipNative ?? false,
@@ -79,4 +92,13 @@ function parsePlatforms(value: string): Platform[] {
   }
 
   return [...new Set(platforms)] as Platform[];
+}
+
+function parseSetup(value: string): SetupProfile {
+  if (value === "minimal" || value === "recommended") {
+    return value;
+  }
+  throw new InvalidArgumentError(
+    'Setup must be "minimal" or "recommended".',
+  );
 }

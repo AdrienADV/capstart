@@ -6,16 +6,26 @@ import {
   runCommand,
   runScriptCommand,
 } from "../core/process.js";
-import type { Platform, ProjectContext } from "../core/types.js";
+import type {
+  Platform,
+  ProjectContext,
+  SetupProfile,
+} from "../core/types.js";
+
+export const recommendedCapacitorPlugins = [
+  "@capacitor/keyboard",
+  "@capacitor/network",
+  "@capacitor/device",
+  "@capacitor/splash-screen",
+  "@capacitor/status-bar",
+] as const;
 
 export async function installCapacitor(
   project: ProjectContext,
   platforms: Platform[],
+  setup: SetupProfile = "minimal",
 ): Promise<void> {
-  const runtimePackages = [
-    "@capacitor/core",
-    ...platforms.map((platform) => `@capacitor/${platform}`),
-  ];
+  const runtimePackages = getCapacitorRuntimePackages(platforms, setup);
 
   await run(project, installCommand(project.packageManager, runtimePackages, false));
 
@@ -23,6 +33,17 @@ export async function installCapacitor(
     project,
     installCommand(project.packageManager, ["@capacitor/cli"], true),
   );
+}
+
+export function getCapacitorRuntimePackages(
+  platforms: Platform[],
+  setup: SetupProfile,
+): string[] {
+  return [
+    "@capacitor/core",
+    ...platforms.map((platform) => `@capacitor/${platform}`),
+    ...(setup === "recommended" ? recommendedCapacitorPlugins : []),
+  ];
 }
 
 export async function buildProject(project: ProjectContext): Promise<void> {

@@ -1,3 +1,4 @@
+import path from "node:path";
 import { detectAdapters } from "../adapters/index.js";
 import { configureCapacitor } from "../capacitor/configure.js";
 import {
@@ -15,15 +16,20 @@ import {
   getProjectName,
   loadProject,
 } from "../core/project.js";
+import { configureSafeArea } from "../core/safe-area.js";
+import { chooseSafeArea } from "../core/safe-area-selection.js";
+import { chooseSetup } from "../core/setup-selection.js";
 import type {
   ConfigureResult,
   Disclaimer,
   FrameworkAdapter,
   InitOptions,
+  SetupProfile,
 } from "../core/types.js";
 
 export async function initCommand(options: InitOptions): Promise<void> {
   const project = await loadProject(options.directory);
+  const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
 
   logger.heading("Capstart");
   const detected = detectAdapters(project);
@@ -32,9 +38,18 @@ export async function initCommand(options: InitOptions): Promise<void> {
   const adapter = await chooseAdapter({
     acceptDetected: options.yes,
     detected,
-    interactive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
+    interactive,
     requested: options.framework,
   });
+  const setup = await chooseSetup({
+    interactive,
+    requested: options.setup,
+  });
+  const safeArea = await chooseSafeArea({
+    interactive,
+    requested: options.safeArea,
+  });
+  const webDir = await adapter.resolveWebDir(project);
 
   if (!detected.includes(adapter)) {
     logger.warning(`${adapter.label} was selected but was not automatically detected.`);
@@ -49,6 +64,9 @@ export async function initCommand(options: InitOptions): Promise<void> {
   if (errors.length > 0) {
     throw new Error(errors.map((error) => error.message).join("\n"));
   }
+  const safeAreaResult = safeArea
+    ? await configureSafeArea(project, adapter.id, true)
+    : undefined;
 
   const appId = options.appId ?? createDefaultAppId(project);
   const appName = options.appName ?? getProjectName(project);
@@ -61,12 +79,22 @@ export async function initCommand(options: InitOptions): Promise<void> {
       appName,
       dryRun: true,
       platforms: options.platforms,
-      webDir: adapter.webDir,
+      safeArea,
+      setup,
+      webDir,
     });
-
     logger.heading("Planned changes");
     logger.info(`Configure ${adapter.label} for Capacitor`);
-    logger.info(`Configure Capacitor with webDir "${adapter.webDir}"`);
+    logger.info(`Configure Capacitor with webDir "${webDir}"`);
+    if (setup === "recommended") {
+      logger.info("Install recommended Capacitor base plugins");
+      logger.info("Configure recommended Capacitor plugin defaults");
+    }
+    if (safeAreaResult) {
+      logger.info(
+        `Add top and bottom safe area padding to ${path.relative(project.root, safeAreaResult.cssPath)}`,
+      );
+    }
     logger.success("Dry run complete. No files were changed.");
     printFinalGuidance(frameworkResult.disclaimers);
     return;
@@ -78,10 +106,17 @@ export async function initCommand(options: InitOptions): Promise<void> {
     appName,
     options,
     project,
+    safeArea,
+    setup,
+    webDir,
   });
 
   logger.heading("Ready");
-  logger.success("Your base Capacitor setup is ready.");
+  logger.success(
+    setup === "recommended"
+      ? "Your recommended Capacitor setup is ready."
+      : "Your base Capacitor setup is ready.",
+  );
 
   logger.heading("Scripts added");
   logger.command(
@@ -103,7 +138,9 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
   logger.heading("Next steps");
   logger.info(
-    "Review recommended plugins, native configuration, and production setup:",
+    setup === "recommended"
+      ? "Review native configuration and production setup:"
+      : "Review recommended plugins, native configuration, and production setup:",
   );
   logger.link(
     "https://capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins",
@@ -111,7 +148,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
 
   await offerGithubStar({
     cwd: project.root,
-    interactive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
+    interactive,
   });
 
   printFinalGuidance(frameworkResult.disclaimers);
@@ -123,8 +160,12 @@ async function runSetup(context: {
   appName: string;
   options: InitOptions;
   project: Awaited<ReturnType<typeof loadProject>>;
+  safeArea: boolean;
+  setup: SetupProfile;
+  webDir: string;
 }): Promise<ConfigureResult> {
-  const { adapter, appId, appName, options, project } = context;
+  const { adapter, appId, appName, options, project, safeArea, setup, webDir } =
+    context;
   const progress = createProgress(Boolean(process.stdout.isTTY));
 
   const frameworkResult = await runStep(
@@ -139,13 +180,21 @@ async function runSetup(context: {
       appName,
       dryRun: false,
       platforms: options.platforms,
-      webDir: adapter.webDir,
+      safeArea,
+      setup,
+      webDir,
     }),
   );
 
+  if (safeArea) {
+    await runStep(progress, "Configure safe area insets", () =>
+      configureSafeArea(project, adapter.id, false),
+    );
+  }
+
   if (!options.skipInstall) {
-    await runStep(progress, "Install Capacitor packages", () =>
-      installCapacitor(project, options.platforms),
+    await runStep(progress, `Install Capacitor packages (${setup})`, () =>
+      installCapacitor(project, options.platforms, setup),
     );
   }
   if (!options.skipBuild) {

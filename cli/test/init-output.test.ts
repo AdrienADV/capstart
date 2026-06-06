@@ -74,6 +74,49 @@ test("prints a concise final flow with the disclaimer last", async () => {
   );
 });
 
+test("prints recommended setup guidance when requested", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "capstart-output-test-"));
+  await writeFile(
+    path.join(root, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "example-app",
+        dependencies: { next: "^16.0.0" },
+        scripts: { build: "next build" },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  const output: string[] = [];
+  const originalLog = console.log;
+  console.log = (...values: unknown[]) => {
+    output.push(values.map(String).join(" "));
+  };
+
+  try {
+    await initCommand({
+      directory: root,
+      dryRun: false,
+      framework: "nextjs",
+      platforms: ["ios"],
+      setup: "recommended",
+      skipBuild: true,
+      skipInstall: true,
+      skipNative: true,
+      yes: false,
+    });
+  } finally {
+    console.log = originalLog;
+  }
+
+  const text = stripAnsi(output.join("\n"));
+  assert.match(text, /Your recommended Capacitor setup is ready\./);
+  assert.match(text, /Review native configuration and production setup:/);
+  assert.doesNotMatch(text, /Review recommended plugins/);
+});
+
 function stripAnsi(value: string): string {
   return value.replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "");
 }
