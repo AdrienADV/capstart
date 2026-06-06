@@ -137,9 +137,31 @@ The exact package-manager prefix is generated for npm, pnpm, Yarn, or Bun.
 
 ```bash
 cd cli
-npm install
-npm run typecheck
-npm test
-npm run build
-node dist/cli.js --help
+bun install
+bun run typecheck
+bun test
+bun run build
+bun dist/cli.js --help
+```
+
+## Publishing to npm
+
+The CLI uses Bun for development and publishing. The published package remains
+compatible with both `bunx` and `npx`.
+
+```bash
+cd cli
+bun install
+bun publish --dry-run
+bun publish
+```
+
+`prepublishOnly` automatically runs the typecheck, tests, and build before
+publishing.
+
+After publishing:
+
+```bash
+bunx capstart@latest --help
+npx capstart@latest --help
 ```
