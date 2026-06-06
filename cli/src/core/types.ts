@@ -1,6 +1,7 @@
 export type FrameworkId = "nextjs" | "tanstack-start";
 export type Platform = "ios" | "android";
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
+export type SetupProfile = "minimal" | "recommended";
 
 export interface PackageJson {
   name?: string;
@@ -34,10 +35,10 @@ export interface Disclaimer {
 export interface FrameworkAdapter {
   id: FrameworkId;
   label: string;
-  webDir: string;
   detect(project: ProjectContext): boolean;
   validate(project: ProjectContext): Promise<Diagnostic[]>;
   configure(project: ProjectContext, dryRun: boolean): Promise<ConfigureResult>;
+  resolveWebDir(project: ProjectContext): Promise<string> | string;
 }
 
 export interface InitOptions {
@@ -48,6 +49,8 @@ export interface InitOptions {
   framework?: FrameworkId;
   yes: boolean;
   platforms: Platform[];
+  safeArea?: boolean;
+  setup?: SetupProfile;
   skipBuild: boolean;
   skipInstall: boolean;
   skipNative: boolean;

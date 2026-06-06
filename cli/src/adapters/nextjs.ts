@@ -21,10 +21,13 @@ const configNames = [
 export const nextjsAdapter: FrameworkAdapter = {
   id: "nextjs",
   label: "Next.js",
-  webDir: "out",
 
   detect(project) {
     return hasDependency(project, "next");
+  },
+
+  resolveWebDir() {
+    return "out";
   },
 
   async validate(project) {

@@ -18,10 +18,17 @@ const configNames = [
 export const tanstackStartAdapter: FrameworkAdapter = {
   id: "tanstack-start",
   label: "TanStack Start",
-  webDir: "dist/client",
 
   detect(project) {
     return hasDependency(project, "@tanstack/react-start");
+  },
+
+  async resolveWebDir(project) {
+    const configPath = await findConfigFile(project.root, configNames);
+    if (configPath && usesNitro(configPath)) {
+      return ".output/public";
+    }
+    return "dist/client";
   },
 
   async validate(project) {
@@ -111,4 +118,29 @@ function findTanstackStartCall(configPath: string) {
   return loadSourceFile(configPath)
     .getDescendantsOfKind(SyntaxKind.CallExpression)
     .find((candidate) => candidate.getExpression().getText() === "tanstackStart");
+}
+
+function usesNitro(configPath: string): boolean {
+  const sourceFile = loadSourceFile(configPath);
+  const nitroNames = new Set(
+    sourceFile
+      .getImportDeclarations()
+      .filter(
+        (declaration) =>
+          declaration.getModuleSpecifierValue() === "nitro/vite",
+      )
+      .flatMap((declaration) =>
+        declaration
+          .getNamedImports()
+          .filter((namedImport) => namedImport.getName() === "nitro")
+          .map(
+            (namedImport) =>
+              namedImport.getAliasNode()?.getText() ?? namedImport.getName(),
+          ),
+      ),
+  );
+
+  return sourceFile
+    .getDescendantsOfKind(SyntaxKind.CallExpression)
+    .some((call) => nitroNames.has(call.getExpression().getText()));
 }
