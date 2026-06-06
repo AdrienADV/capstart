@@ -1,0 +1,50 @@
+{
+  "name": "capstart",
+  "version": "0.1.0",
+  "description": "Add Capacitor to existing web framework projects.",
+  "type": "module",
+  "bin": {
+    "capstart": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "capacitor",
+    "cli",
+    "mobile",
+    "nextjs",
+    "tanstack-start"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AdrienADV/capstart.git",
+    "directory": "cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/cli.ts --format esm --dts --clean",
+    "dev": "node --import tsx src/cli.ts",
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.0.0",
+    "commander": "^14.0.2",
+    "picocolors": "^1.1.1",
+    "ts-morph": "^27.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

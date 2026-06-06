@@ -25,15 +25,32 @@ In practice, Capstart focuses on production-ready patterns for:
 
 ## Repository Structure
 
-This repository currently contains two main packages:
+This repository currently contains three main packages:
 
 ```txt
 capstart/
+├── cli/                    # CLI that adds Capacitor to existing applications
 ├── capstart-boilerplate/   # Starter app (Capacitor + React) for real projects
 └── capstart-website/       # Documentation website and component guides
 ```
 
 ## Package Overview
+
+### `cli`
+
+The `capstart` command-line tool configures existing Next.js and TanStack Start
+applications for Capacitor.
+
+```bash
+npx capstart init ..
+```
+
+The CLI displays the detected framework and asks for confirmation before
+configuring the project. If detection is refused, it offers Next.js and
+TanStack Start as explicit choices.
+
+Useful path:
+- `cli/README.md`
 
 ### `capstart-boilerplate`
 
@@ -93,6 +110,15 @@ npm run dev
 Then follow `capstart-boilerplate/README.md` for native sync/build steps.
 
 ## Common Commands
+
+### CLI
+
+```bash
+cd cli
+npm run typecheck
+npm test
+npm run build
+```
 
 ### Website
 
