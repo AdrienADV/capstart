@@ -1,0 +1,145 @@
+# Capstart CLI
+
+Add Capacitor to an existing Next.js or TanStack Start application.
+
+```bash
+npx capstart init ..
+```
+
+Capstart detects the framework and package manager, configures a static or SPA
+build, installs Capacitor, adds native projects, builds the web application, and
+runs `cap sync`.
+
+Installation, build, and Capacitor command output is hidden by default. Capstart
+shows a single setup progress line and only prints a short command summary when
+something fails.
+
+Each main installation operation has its own step:
+
+```text
+◇ Configure Next.js
+◇ Configure Capacitor
+◇ Install Capacitor packages
+◇ Build the web app
+◇ Prepare iOS and Android projects
+◇ Synchronize native projects
+```
+
+The commands executed inside each step remain hidden.
+
+The detected framework is always shown and must be confirmed before Capstart
+changes the project:
+
+```text
+✓ Detected Next.js
+? Use the detected framework Next.js? Yes
+```
+
+If the detection is refused, Capstart lets you choose between Next.js and
+TanStack Start.
+
+## Supported frameworks
+
+- Next.js projects that can use static export
+- TanStack Start projects that can use SPA mode
+
+Server-only features must remain hosted remotely and be called from the mobile
+application over HTTP.
+
+## Usage
+
+```bash
+npx capstart init [directory] [options]
+```
+
+Examples:
+
+```bash
+npx capstart init .
+npx capstart init ../my-app --app-id com.example.myapp
+npx capstart init . --platforms ios
+npx capstart init . --framework tanstack-start --dry-run
+npx capstart init . --yes
+```
+
+Useful options:
+
+```text
+--framework <nextjs|tanstack-start>
+--app-id <id>
+--app-name <name>
+--platforms <ios,android>
+--skip-install
+--skip-build
+--skip-native
+--dry-run
+--yes
+```
+
+Use `--yes` to accept a single automatically detected framework in CI or other
+non-interactive environments. Use `--framework` to bypass detection
+confirmation and select an adapter explicitly.
+
+After a successful interactive initialization, Capstart detects whether GitHub
+CLI is installed and optionally proposes starring
+[AdrienADV/capstart](https://github.com/AdrienADV/capstart). The repository is
+only starred after explicit confirmation, and this step never runs in CI.
+
+The final output includes:
+
+- the scripts added to `package.json` and a short explanation of each one;
+- recommended Capacitor packages and production guidance at
+  [capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins](https://capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins);
+- an `Important` section explaining which framework server features must remain
+  remotely hosted.
+
+Example:
+
+```text
+Ready
+✓ Your base Capacitor setup is ready.
+
+Scripts added
+  npm run cap:sync
+    Build the web app and sync the native projects.
+  npm run cap:ios
+    Build, sync, and open the iOS project in Xcode.
+  npm run cap:android
+    Build, sync, and open the Android project in Android Studio.
+
+Next steps
+• Review recommended plugins, native configuration, and production setup:
+  https://capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins
+
+Important
+! Next.js request-time features do not run inside the Capacitor app.
+  • Replace request-time Server Components and Server Actions with client-side
+    calls to API endpoints.
+  • Deploy those APIs, API routes, middleware, ISR, and other request-time logic
+    on a remote backend.
+  • Configure the mobile app with an HTTPS API base URL that is reachable from
+    the device.
+  • Do not use "localhost" for the backend URL: on a phone or emulator, it
+    points to the device itself.
+```
+
+After initialization:
+
+```bash
+npm run cap:sync
+npm run cap:ios
+npm run cap:android
+```
+
+The exact package-manager prefix is generated for npm, pnpm, Yarn, or Bun.
+
+## Development
+
+```bash
+cd cli
+npm install
+npm run typecheck
+npm test
+npm run build
+node dist/cli.js --help
+```
