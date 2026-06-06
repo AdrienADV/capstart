@@ -54,7 +54,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
   validateAppId(appId);
 
   const frameworkResult = await adapter.configure(project, options.dryRun);
-  const capacitorChanges = await configureCapacitor(project, {
+  await configureCapacitor(project, {
     appId,
     appName,
     dryRun: options.dryRun,
@@ -62,15 +62,21 @@ export async function initCommand(options: InitOptions): Promise<void> {
     webDir: adapter.webDir,
   });
 
-  for (const change of [...frameworkResult.changes, ...capacitorChanges]) {
-    logger.success(options.dryRun ? `[dry-run] ${change}` : change);
-  }
-  for (const warning of frameworkResult.warnings) {
-    logger.warning(warning);
-  }
+  logger.heading(options.dryRun ? "Planned changes" : "Configuration");
+  logger.success(
+    options.dryRun
+      ? `Would configure ${adapter.label} for Capacitor`
+      : `Configured ${adapter.label} for Capacitor`,
+  );
+  logger.success(
+    options.dryRun
+      ? `Would configure Capacitor with webDir "${adapter.webDir}"`
+      : `Configured Capacitor with webDir "${adapter.webDir}"`,
+  );
 
   if (options.dryRun) {
     logger.success("Dry run complete. No files were changed.");
+    printFinalGuidance(frameworkResult.disclaimers);
     return;
   }
 
@@ -87,18 +93,38 @@ export async function initCommand(options: InitOptions): Promise<void> {
   }
 
   logger.heading("Ready");
-  logger.success(`Capacitor is configured with webDir "${adapter.webDir}".`);
+  logger.success("Your base Capacitor setup is ready.");
+
+  logger.heading("Scripts added");
+  logger.command(
+    `${project.packageManager} run cap:sync`,
+    "Build the web app and sync the native projects.",
+  );
   if (options.platforms.includes("ios")) {
-    logger.info(`Run ${project.packageManager} run cap:ios to open Xcode.`);
+    logger.command(
+      `${project.packageManager} run cap:ios`,
+      "Build, sync, and open the iOS project in Xcode.",
+    );
   }
   if (options.platforms.includes("android")) {
-    logger.info(`Run ${project.packageManager} run cap:android to open Android Studio.`);
+    logger.command(
+      `${project.packageManager} run cap:android`,
+      "Build, sync, and open the Android project in Android Studio.",
+    );
   }
+
+  logger.heading("Next steps");
+  logger.info(
+    "Review recommended plugins, native configuration, and production setup:",
+  );
+  logger.link("https://capstart.dev/docs/installation");
 
   await offerGithubStar({
     cwd: project.root,
     interactive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
   });
+
+  printFinalGuidance(frameworkResult.disclaimers);
 }
 
 function logDetection(detected: ReturnType<typeof detectAdapters>): void {
@@ -122,5 +148,16 @@ function validateAppId(appId: string): void {
     throw new Error(
       `Invalid app id "${appId}". Use reverse-domain notation, for example com.example.app.`,
     );
+  }
+}
+
+function printFinalGuidance(disclaimers: string[]): void {
+  if (disclaimers.length === 0) {
+    return;
+  }
+
+  logger.heading("Important");
+  for (const disclaimer of disclaimers) {
+    logger.warning(disclaimer);
   }
 }

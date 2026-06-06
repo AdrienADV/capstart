@@ -23,8 +23,7 @@ export interface Diagnostic {
 }
 
 export interface ConfigureResult {
-  changes: string[];
-  warnings: string[];
+  disclaimers: string[];
 }
 
 export interface FrameworkAdapter {

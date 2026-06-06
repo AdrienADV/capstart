@@ -30,8 +30,7 @@ export async function configureCapacitor(
     platforms: Platform[];
     webDir: string;
   },
-): Promise<string[]> {
-  const changes: string[] = [];
+): Promise<void> {
   const configPath = await findConfigFile(project.root, configNames);
 
   if (!configPath) {
@@ -52,7 +51,6 @@ export async function configureCapacitor(
         ].join("\n"),
       );
     }
-    changes.push("Created capacitor.config.ts");
   } else if (configPath.endsWith(".json")) {
     const config = JSON.parse(await readFile(configPath, "utf8")) as Record<
       string,
@@ -62,7 +60,6 @@ export async function configureCapacitor(
     if (!options.dryRun) {
       await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`);
     }
-    changes.push(`Updated webDir in ${path.basename(configPath)}`);
   } else {
     const sourceFile = loadSourceFile(configPath);
     const config = findExportedObject(sourceFile);
@@ -75,7 +72,6 @@ export async function configureCapacitor(
     if (!options.dryRun) {
       await sourceFile.save();
     }
-    changes.push(`Updated webDir in ${path.basename(configPath)}`);
   }
 
   project.packageJson.scripts ??= {};
@@ -89,7 +85,4 @@ export async function configureCapacitor(
   }
 
   await savePackageJson(project, options.dryRun);
-  changes.push("Added Capacitor scripts to package.json");
-
-  return changes;
 }

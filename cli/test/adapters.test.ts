@@ -30,13 +30,14 @@ test("configures a standard Next.js project", async () => {
   assert.equal(nextjsAdapter.detect(project), true);
   assert.deepEqual(await nextjsAdapter.validate(project), []);
 
-  await nextjsAdapter.configure(project, false);
+  const result = await nextjsAdapter.configure(project, false);
   const config = await readFile(configPath, "utf8");
 
   assert.match(config, /output: "export"/);
   assert.match(config, /trailingSlash: true/);
   assert.match(config, /unoptimized: true/);
   assert.match(config, /reactStrictMode: true/);
+  assert.match(result.disclaimers[0], /require a remote server/);
 });
 
 test("configures TanStack Start SPA mode without removing prerender options", async () => {
@@ -66,13 +67,14 @@ test("configures TanStack Start SPA mode without removing prerender options", as
   assert.equal(tanstackStartAdapter.detect(project), true);
   assert.deepEqual(await tanstackStartAdapter.validate(project), []);
 
-  await tanstackStartAdapter.configure(project, false);
+  const result = await tanstackStartAdapter.configure(project, false);
   const config = await readFile(configPath, "utf8");
 
   assert.match(config, /spa: \{/);
   assert.match(config, /enabled: true/);
   assert.match(config, /outputPath: "\/index\.html"/);
   assert.match(config, /prerender: \{ enabled: true \}/);
+  assert.match(result.disclaimers[0], /require a remote server/);
 });
 
 test("dry-run does not write framework configuration", async () => {

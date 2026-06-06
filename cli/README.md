@@ -69,6 +69,36 @@ CLI is installed and optionally proposes starring
 [AdrienADV/capstart](https://github.com/AdrienADV/capstart). The repository is
 only starred after explicit confirmation, and this step never runs in CI.
 
+The final output includes:
+
+- the scripts added to `package.json` and a short explanation of each one;
+- recommended Capacitor packages and production guidance at
+  [capstart.dev/docs/installation](https://capstart.dev/docs/installation);
+- an `Important` section explaining which framework server features must remain
+  remotely hosted.
+
+Example:
+
+```text
+Ready
+✓ Your base Capacitor setup is ready.
+
+Scripts added
+  npm run cap:sync
+    Build the web app and sync the native projects.
+  npm run cap:ios
+    Build, sync, and open the iOS project in Xcode.
+  npm run cap:android
+    Build, sync, and open the Android project in Android Studio.
+
+Next steps
+• Review recommended plugins, native configuration, and production setup:
+  https://capstart.dev/docs/installation
+
+Important
+! Next.js server features require a remote server.
+```
+
 After initialization:
 
 ```bash

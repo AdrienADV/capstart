@@ -1,4 +1,3 @@
-import path from "node:path";
 import { Node, SyntaxKind } from "ts-morph";
 import {
   findConfigFile,
@@ -93,11 +92,8 @@ export const tanstackStartAdapter: FrameworkAdapter = {
     }
 
     return {
-      changes: [
-        `Enabled TanStack Start SPA mode in ${path.basename(configPath)}`,
-      ],
-      warnings: [
-        "TanStack Start server functions and server routes must remain on a remote server.",
+      disclaimers: [
+        "TanStack Start server functions and server routes require a remote server. The mobile app should access them over HTTPS.",
       ],
     };
   },

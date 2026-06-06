@@ -52,9 +52,8 @@ export const nextjsAdapter: FrameworkAdapter = {
   },
 
   async configure(project, dryRun) {
-    const changes: string[] = [];
-    const warnings = [
-      "Next.js Server Actions, API routes, middleware, ISR, and request-time rendering must remain on a remote server.",
+    const disclaimers = [
+      "Next.js Server Actions, API routes, middleware, ISR, and request-time rendering require a remote server. The mobile app should access them over HTTPS.",
     ];
     const configPath = await findConfigFile(project.root, configNames);
 
@@ -78,8 +77,7 @@ export const nextjsAdapter: FrameworkAdapter = {
           ].join("\n"),
         );
       }
-      changes.push("Created next.config.mjs with static export enabled");
-      return { changes, warnings };
+      return { disclaimers };
     }
 
     const sourceFile = loadSourceFile(configPath);
@@ -96,8 +94,7 @@ export const nextjsAdapter: FrameworkAdapter = {
     if (!dryRun) {
       await sourceFile.save();
     }
-    changes.push(`Updated ${path.basename(configPath)} for static export`);
 
-    return { changes, warnings };
+    return { disclaimers };
   },
 };
