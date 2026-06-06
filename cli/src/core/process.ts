@@ -1,19 +1,29 @@
 import { spawn } from "node:child_process";
 import type { PackageManager } from "./types.js";
 
+const maxErrorLines = 12;
+const maxCapturedOutput = 64_000;
+
 export async function runCommand(
   command: string,
   args: string[],
   cwd: string,
 ): Promise<void> {
   await new Promise<void>((resolve, reject) => {
+    let output = "";
     const child = spawn(command, args, {
       cwd,
       shell: process.platform === "win32",
-      stdio: "inherit",
+      stdio: ["ignore", "pipe", "pipe"],
     });
 
     child.on("error", reject);
+    child.stdout?.on("data", (chunk: Buffer) => {
+      output = appendOutput(output, chunk.toString());
+    });
+    child.stderr?.on("data", (chunk: Buffer) => {
+      output = appendOutput(output, chunk.toString());
+    });
     child.on("exit", (code) => {
       if (code === 0) {
         resolve();
@@ -22,11 +32,30 @@ export async function runCommand(
 
       reject(
         new Error(
-          `Command failed with exit code ${code ?? "unknown"}: ${command} ${args.join(" ")}`,
+          [
+            `Command failed: ${command} ${args.join(" ")}`,
+            getErrorSummary(output),
+          ]
+            .filter(Boolean)
+            .join("\n"),
         ),
       );
     });
   });
+}
+
+function appendOutput(current: string, chunk: string): string {
+  return `${current}${chunk}`.slice(-maxCapturedOutput);
+}
+
+function getErrorSummary(output: string): string {
+  return output
+    .replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "")
+    .split(/[\r\n]+/)
+    .map((line) => line.trim().slice(0, 300))
+    .filter(Boolean)
+    .slice(-maxErrorLines)
+    .join("\n");
 }
 
 export async function commandExists(

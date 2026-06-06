@@ -53,7 +53,16 @@ export const nextjsAdapter: FrameworkAdapter = {
 
   async configure(project, dryRun) {
     const disclaimers = [
-      "Next.js Server Actions, API routes, middleware, ISR, and request-time rendering require a remote server. The mobile app should access them over HTTPS.",
+      {
+        title:
+          "Next.js request-time features do not run inside the Capacitor app.",
+        details: [
+          "Replace request-time Server Components and Server Actions with client-side calls to API endpoints.",
+          "Deploy those APIs, API routes, middleware, ISR, and other request-time logic on a remote backend.",
+          "Configure the mobile app with an HTTPS API base URL that is reachable from the device.",
+          'Do not use "localhost" for the backend URL: on a phone or emulator, it points to the device itself.',
+        ],
+      },
     ];
     const configPath = await findConfigFile(project.root, configNames);
 

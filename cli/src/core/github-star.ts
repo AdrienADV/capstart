@@ -12,7 +12,7 @@ export const terminalGithubStarPrompt: GithubStarPrompt = {
   async confirmStar() {
     const answer = await confirm({
       message: "Would you like to star Capstart on GitHub?",
-      initialValue: false,
+      initialValue: true,
     });
     return isCancel(answer) ? false : answer;
   },

@@ -37,7 +37,8 @@ test("configures a standard Next.js project", async () => {
   assert.match(config, /trailingSlash: true/);
   assert.match(config, /unoptimized: true/);
   assert.match(config, /reactStrictMode: true/);
-  assert.match(result.disclaimers[0], /require a remote server/);
+  assert.match(result.disclaimers[0].title, /do not run inside the Capacitor app/);
+  assert.match(result.disclaimers[0].details.join(" "), /reachable from the device/);
 });
 
 test("configures TanStack Start SPA mode without removing prerender options", async () => {
@@ -74,7 +75,8 @@ test("configures TanStack Start SPA mode without removing prerender options", as
   assert.match(config, /enabled: true/);
   assert.match(config, /outputPath: "\/index\.html"/);
   assert.match(config, /prerender: \{ enabled: true \}/);
-  assert.match(result.disclaimers[0], /require a remote server/);
+  assert.match(result.disclaimers[0].title, /do not run inside the Capacitor app/);
+  assert.match(result.disclaimers[0].details.join(" "), /reachable from the device/);
 });
 
 test("dry-run does not write framework configuration", async () => {

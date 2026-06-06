@@ -10,11 +10,27 @@ Capstart detects the framework and package manager, configures a static or SPA
 build, installs Capacitor, adds native projects, builds the web application, and
 runs `cap sync`.
 
+Installation, build, and Capacitor command output is hidden by default. Capstart
+shows a single setup progress line and only prints a short command summary when
+something fails.
+
+Each main installation operation has its own step:
+
+```text
+◇ Configure Next.js
+◇ Configure Capacitor
+◇ Install Capacitor packages
+◇ Build the web app
+◇ Prepare iOS and Android projects
+◇ Synchronize native projects
+```
+
+The commands executed inside each step remain hidden.
+
 The detected framework is always shown and must be confirmed before Capstart
 changes the project:
 
 ```text
-• Inspecting . for a supported framework
 ✓ Detected Next.js
 ? Use the detected framework Next.js? Yes
 ```
@@ -73,7 +89,7 @@ The final output includes:
 
 - the scripts added to `package.json` and a short explanation of each one;
 - recommended Capacitor packages and production guidance at
-  [capstart.dev/docs/installation](https://capstart.dev/docs/installation);
+  [capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins](https://capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins);
 - an `Important` section explaining which framework server features must remain
   remotely hosted.
 
@@ -93,10 +109,18 @@ Scripts added
 
 Next steps
 • Review recommended plugins, native configuration, and production setup:
-  https://capstart.dev/docs/installation
+  https://capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins
 
 Important
-! Next.js server features require a remote server.
+! Next.js request-time features do not run inside the Capacitor app.
+  • Replace request-time Server Components and Server Actions with client-side
+    calls to API endpoints.
+  • Deploy those APIs, API routes, middleware, ISR, and other request-time logic
+    on a remote backend.
+  • Configure the mobile app with an HTTPS API base URL that is reachable from
+    the device.
+  • Do not use "localhost" for the backend URL: on a phone or emulator, it
+    points to the device itself.
 ```
 
 After initialization:

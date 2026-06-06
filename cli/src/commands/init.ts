@@ -1,28 +1,31 @@
-import path from "node:path";
 import { detectAdapters } from "../adapters/index.js";
 import { configureCapacitor } from "../capacitor/configure.js";
 import {
   addNativePlatforms,
   buildProject,
   installCapacitor,
+  syncNativeProjects,
 } from "../capacitor/install.js";
 import { chooseAdapter } from "../core/framework-selection.js";
 import { offerGithubStar } from "../core/github-star.js";
 import { logger } from "../core/logger.js";
+import { createProgress } from "../core/progress.js";
 import {
   createDefaultAppId,
   getProjectName,
   loadProject,
 } from "../core/project.js";
-import type { InitOptions } from "../core/types.js";
+import type {
+  ConfigureResult,
+  Disclaimer,
+  FrameworkAdapter,
+  InitOptions,
+} from "../core/types.js";
 
 export async function initCommand(options: InitOptions): Promise<void> {
   const project = await loadProject(options.directory);
 
   logger.heading("Capstart");
-  logger.info(
-    `Inspecting ${path.relative(process.cwd(), project.root) || "."} for a supported framework`,
-  );
   const detected = detectAdapters(project);
   logDetection(detected);
 
@@ -36,8 +39,6 @@ export async function initCommand(options: InitOptions): Promise<void> {
   if (!detected.includes(adapter)) {
     logger.warning(`${adapter.label} was selected but was not automatically detected.`);
   }
-  logger.success(`Using ${adapter.label}`);
-  logger.info(`Package manager: ${project.packageManager}`);
 
   const diagnostics = await adapter.validate(project);
   for (const warning of diagnostics.filter((item) => item.level === "warning")) {
@@ -53,44 +54,31 @@ export async function initCommand(options: InitOptions): Promise<void> {
   const appName = options.appName ?? getProjectName(project);
   validateAppId(appId);
 
-  const frameworkResult = await adapter.configure(project, options.dryRun);
-  await configureCapacitor(project, {
-    appId,
-    appName,
-    dryRun: options.dryRun,
-    platforms: options.platforms,
-    webDir: adapter.webDir,
-  });
-
-  logger.heading(options.dryRun ? "Planned changes" : "Configuration");
-  logger.success(
-    options.dryRun
-      ? `Would configure ${adapter.label} for Capacitor`
-      : `Configured ${adapter.label} for Capacitor`,
-  );
-  logger.success(
-    options.dryRun
-      ? `Would configure Capacitor with webDir "${adapter.webDir}"`
-      : `Configured Capacitor with webDir "${adapter.webDir}"`,
-  );
-
   if (options.dryRun) {
+    const frameworkResult = await adapter.configure(project, true);
+    await configureCapacitor(project, {
+      appId,
+      appName,
+      dryRun: true,
+      platforms: options.platforms,
+      webDir: adapter.webDir,
+    });
+
+    logger.heading("Planned changes");
+    logger.info(`Configure ${adapter.label} for Capacitor`);
+    logger.info(`Configure Capacitor with webDir "${adapter.webDir}"`);
     logger.success("Dry run complete. No files were changed.");
     printFinalGuidance(frameworkResult.disclaimers);
     return;
   }
 
-  if (!options.skipInstall) {
-    await installCapacitor(project, options.platforms);
-  }
-
-  if (!options.skipBuild) {
-    await buildProject(project);
-  }
-
-  if (!options.skipNative) {
-    await addNativePlatforms(project, options.platforms);
-  }
+  const frameworkResult = await runSetup({
+    adapter,
+    appId,
+    appName,
+    options,
+    project,
+  });
 
   logger.heading("Ready");
   logger.success("Your base Capacitor setup is ready.");
@@ -117,7 +105,9 @@ export async function initCommand(options: InitOptions): Promise<void> {
   logger.info(
     "Review recommended plugins, native configuration, and production setup:",
   );
-  logger.link("https://capstart.dev/docs/installation");
+  logger.link(
+    "https://capstart.dev/docs/installation/#3-add-recommended-capacitor-base-plugins",
+  );
 
   await offerGithubStar({
     cwd: project.root,
@@ -125,6 +115,76 @@ export async function initCommand(options: InitOptions): Promise<void> {
   });
 
   printFinalGuidance(frameworkResult.disclaimers);
+}
+
+async function runSetup(context: {
+  adapter: FrameworkAdapter;
+  appId: string;
+  appName: string;
+  options: InitOptions;
+  project: Awaited<ReturnType<typeof loadProject>>;
+}): Promise<ConfigureResult> {
+  const { adapter, appId, appName, options, project } = context;
+  const progress = createProgress(Boolean(process.stdout.isTTY));
+
+  const frameworkResult = await runStep(
+    progress,
+    `Configure ${adapter.label}`,
+    () => adapter.configure(project, false),
+  );
+
+  await runStep(progress, "Configure Capacitor", () =>
+    configureCapacitor(project, {
+      appId,
+      appName,
+      dryRun: false,
+      platforms: options.platforms,
+      webDir: adapter.webDir,
+    }),
+  );
+
+  if (!options.skipInstall) {
+    await runStep(progress, "Install Capacitor packages", () =>
+      installCapacitor(project, options.platforms),
+    );
+  }
+  if (!options.skipBuild) {
+    await runStep(progress, "Build the web app", () => buildProject(project));
+  }
+  if (!options.skipNative) {
+    await runStep(
+      progress,
+      `Prepare ${formatPlatforms(options.platforms)} projects`,
+      () => addNativePlatforms(project, options.platforms),
+    );
+    await runStep(progress, "Synchronize native projects", () =>
+      syncNativeProjects(project),
+    );
+  }
+
+  return frameworkResult;
+}
+
+async function runStep<T>(
+  progress: ReturnType<typeof createProgress>,
+  label: string,
+  action: () => Promise<T>,
+): Promise<T> {
+  progress.start(label);
+  try {
+    const result = await action();
+    progress.stop(label);
+    return result;
+  } catch (error) {
+    progress.stop(`${label} failed`);
+    throw error;
+  }
+}
+
+function formatPlatforms(platforms: InitOptions["platforms"]): string {
+  return platforms
+    .map((platform) => (platform === "ios" ? "iOS" : "Android"))
+    .join(" and ");
 }
 
 function logDetection(detected: ReturnType<typeof detectAdapters>): void {
@@ -151,13 +211,16 @@ function validateAppId(appId: string): void {
   }
 }
 
-function printFinalGuidance(disclaimers: string[]): void {
+function printFinalGuidance(disclaimers: Disclaimer[]): void {
   if (disclaimers.length === 0) {
     return;
   }
 
   logger.heading("Important");
   for (const disclaimer of disclaimers) {
-    logger.warning(disclaimer);
+    logger.warning(disclaimer.title);
+    for (const detail of disclaimer.details) {
+      logger.detail(detail);
+    }
   }
 }

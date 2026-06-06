@@ -93,7 +93,15 @@ export const tanstackStartAdapter: FrameworkAdapter = {
 
     return {
       disclaimers: [
-        "TanStack Start server functions and server routes require a remote server. The mobile app should access them over HTTPS.",
+        {
+          title:
+            "TanStack Start server features do not run inside the Capacitor app.",
+          details: [
+            "Move server functions and server routes to a deployed backend.",
+            "Configure the mobile app to call an HTTPS API URL that is reachable from the device.",
+            'Do not use "localhost" for the backend URL: on a phone or emulator, it points to the device itself.',
+          ],
+        },
       ],
     };
   },

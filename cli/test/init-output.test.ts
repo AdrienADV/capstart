@@ -42,7 +42,9 @@ test("prints a concise final flow with the disclaimer last", async () => {
   }
 
   const text = stripAnsi(output.join("\n"));
-  assert.match(text, /Configuration\n✓ Configured Next\.js for Capacitor/);
+  assert.doesNotMatch(text, /Package manager/);
+  assert.doesNotMatch(text, /Configuration/);
+  assert.doesNotMatch(text, /Inspecting/);
   assert.match(text, /Ready\n✓ Your base Capacitor setup is ready\./);
   assert.match(
     text,
@@ -57,11 +59,17 @@ test("prints a concise final flow with the disclaimer last", async () => {
     /npm run cap:android\n    Build, sync, and open the Android project in Android Studio\./,
   );
   assert.match(text, /Next steps/);
-  assert.match(text, /https:\/\/capstart\.dev\/docs\/installation/);
+  assert.match(
+    text,
+    /https:\/\/capstart\.dev\/docs\/installation\/#3-add-recommended-capacitor-base-plugins/,
+  );
   assert.doesNotMatch(text, /Added Capacitor scripts/);
   assert.ok(
-    text.trim().endsWith(
-      "The mobile app should access them over HTTPS.",
+    text
+      .trim()
+      .replace(/\s+/g, " ")
+      .endsWith(
+      'Do not use "localhost" for the backend URL: on a phone or emulator, it points to the device itself.',
     ),
   );
 });

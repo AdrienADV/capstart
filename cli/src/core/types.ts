@@ -23,7 +23,12 @@ export interface Diagnostic {
 }
 
 export interface ConfigureResult {
-  disclaimers: string[];
+  disclaimers: Disclaimer[];
+}
+
+export interface Disclaimer {
+  details: string[];
+  title: string;
 }
 
 export interface FrameworkAdapter {
