@@ -115,9 +115,9 @@ Then follow `capstart-boilerplate/README.md` for native sync/build steps.
 
 ```bash
 cd cli
-npm run typecheck
-npm test
-npm run build
+bun run typecheck
+bun test
+bun run build
 ```
 
 ### Website
