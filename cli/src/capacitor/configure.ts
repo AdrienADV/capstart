@@ -103,7 +103,6 @@ function createCapacitorConfig(options: ConfigureCapacitorOptions): string {
   if (options.setup === "recommended") {
     lines.push(
       'import { KeyboardResize, KeyboardStyle } from "@capacitor/keyboard";',
-      'import { Style } from "@capacitor/status-bar";',
     );
   }
 
@@ -138,11 +137,6 @@ function createCapacitorConfig(options: ConfigureCapacitorOptions): string {
         '      backgroundColor: "#ffffff",',
         "      showSpinner: false,",
         "    },",
-        "    StatusBar: {",
-        "      overlaysWebView: false,",
-        "      style: Style.Default,",
-        '      backgroundColor: "#ffffff",',
-        "    },",
       );
     }
     lines.push("  },");
@@ -162,7 +156,6 @@ function applyRecommendedSourceConfig(
       "KeyboardResize",
       "KeyboardStyle",
     ]);
-    addNamedImports(sourceFile, "@capacitor/status-bar", ["Style"]);
   }
 
   const plugins = getOrCreateNestedObject(config, "plugins");
@@ -185,15 +178,6 @@ function applyRecommendedSourceConfig(
   setObjectProperty(splashScreen, "launchFadeOutDuration", "200");
   setObjectProperty(splashScreen, "backgroundColor", JSON.stringify("#ffffff"));
   setObjectProperty(splashScreen, "showSpinner", "false");
-
-  const statusBar = getOrCreateNestedObject(plugins, "StatusBar");
-  setObjectProperty(statusBar, "overlaysWebView", "false");
-  setObjectProperty(
-    statusBar,
-    "style",
-    useEnumImports ? "Style.Default" : JSON.stringify("DEFAULT"),
-  );
-  setObjectProperty(statusBar, "backgroundColor", JSON.stringify("#ffffff"));
 }
 
 function addNamedImports(
@@ -237,11 +221,6 @@ function applyRecommendedJsonConfig(config: Record<string, unknown>): void {
     launchFadeOutDuration: 200,
     backgroundColor: "#ffffff",
     showSpinner: false,
-  });
-  Object.assign(getOrCreateRecord(plugins, "StatusBar"), {
-    overlaysWebView: false,
-    style: "DEFAULT",
-    backgroundColor: "#ffffff",
   });
 }
 
