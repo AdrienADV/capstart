@@ -184,13 +184,12 @@ test("creates recommended Capacitor plugin configuration", async () => {
     config,
     /import \{ KeyboardResize, KeyboardStyle \} from "@capacitor\/keyboard";/,
   );
-  assert.match(config, /import \{ Style \} from "@capacitor\/status-bar";/);
+  assert.doesNotMatch(config, /@capacitor\/status-bar/);
   assert.match(config, /resize: KeyboardResize\.Native/);
   assert.match(config, /style: KeyboardStyle\.Default/);
   assert.match(config, /launchShowDuration: 500/);
   assert.match(config, /launchFadeOutDuration: 200/);
-  assert.match(config, /overlaysWebView: false/);
-  assert.match(config, /style: Style\.Default/);
+  assert.doesNotMatch(config, /StatusBar:/);
 });
 
 test("merges recommended plugin defaults into an existing Capacitor config", async () => {
@@ -209,6 +208,7 @@ test("merges recommended plugin defaults into an existing Capacitor config", asy
       "  plugins: {",
       "    CustomPlugin: { enabled: true },",
       "    Keyboard: { customSetting: true, resizeOnFullScreen: false },",
+      "    StatusBar: { customSetting: true },",
       "  },",
       "};",
       "",
@@ -243,7 +243,8 @@ test("merges recommended plugin defaults into an existing Capacitor config", asy
   assert.match(config, /customSetting: true/);
   assert.match(config, /resizeOnFullScreen: true/);
   assert.match(config, /SplashScreen: \{/);
-  assert.match(config, /StatusBar: \{/);
+  assert.match(config, /StatusBar: \{ customSetting: true \}/);
+  assert.doesNotMatch(config, /@capacitor\/status-bar/);
   assert.equal(
     config.match(/from "@capacitor\/keyboard"/g)?.length,
     1,
@@ -263,6 +264,7 @@ test("merges serialized recommended defaults into a JSON Capacitor config", asyn
         plugins: {
           CustomPlugin: { enabled: true },
           Keyboard: { customSetting: true },
+          StatusBar: { customSetting: true },
         },
         webDir: "dist",
       },
@@ -293,7 +295,8 @@ test("merges serialized recommended defaults into a JSON Capacitor config", asyn
   assert.equal(config.plugins.Keyboard.resize, "native");
   assert.equal(config.plugins.Keyboard.style, "DEFAULT");
   assert.equal(config.plugins.SplashScreen.launchShowDuration, 500);
-  assert.equal(config.plugins.StatusBar.style, "DEFAULT");
+  assert.equal(config.plugins.StatusBar.customSetting, true);
+  assert.equal(config.plugins.StatusBar.style, undefined);
 });
 
 async function createProject(packageJson: Record<string, unknown>) {

@@ -105,9 +105,9 @@ Use `--setup recommended` to install these baseline runtime plugins:
 @capacitor/status-bar
 ```
 
-The recommended setup also adds baseline `Keyboard`, `SplashScreen`, and
-`StatusBar` options to `capacitor.config.ts`. Existing plugin configuration is
-merged so unrelated plugins and properties are preserved.
+The recommended setup also adds baseline `Keyboard` and `SplashScreen` options
+to `capacitor.config.ts`. Existing plugin configuration is merged so unrelated
+plugins and properties are preserved.
 
 Capstart can also add global top and bottom safe area padding. It uses the
 Capacitor 8 System Bars variables with browser fallbacks:

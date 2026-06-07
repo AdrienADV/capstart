@@ -47,6 +47,7 @@ export interface InitOptions {
   directory: string;
   dryRun: boolean;
   framework?: FrameworkId;
+  interactive?: boolean;
   yes: boolean;
   platforms: Platform[];
   safeArea?: boolean;
