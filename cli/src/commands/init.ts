@@ -29,7 +29,8 @@ import type {
 
 export async function initCommand(options: InitOptions): Promise<void> {
   const project = await loadProject(options.directory);
-  const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+  const interactive =
+    options.interactive ?? Boolean(process.stdin.isTTY && process.stdout.isTTY);
 
   logger.heading("Capstart");
   const detected = detectAdapters(project);
@@ -104,6 +105,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
     adapter,
     appId,
     appName,
+    interactive,
     options,
     project,
     safeArea,
@@ -158,15 +160,25 @@ async function runSetup(context: {
   adapter: FrameworkAdapter;
   appId: string;
   appName: string;
+  interactive: boolean;
   options: InitOptions;
   project: Awaited<ReturnType<typeof loadProject>>;
   safeArea: boolean;
   setup: SetupProfile;
   webDir: string;
 }): Promise<ConfigureResult> {
-  const { adapter, appId, appName, options, project, safeArea, setup, webDir } =
-    context;
-  const progress = createProgress(Boolean(process.stdout.isTTY));
+  const {
+    adapter,
+    appId,
+    appName,
+    interactive,
+    options,
+    project,
+    safeArea,
+    setup,
+    webDir,
+  } = context;
+  const progress = createProgress(interactive);
 
   const frameworkResult = await runStep(
     progress,
