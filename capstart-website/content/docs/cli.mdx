@@ -1,0 +1,160 @@
+---
+title: CLI
+description: Add Capacitor to an existing Next.js or TanStack Start app with Capstart CLI.
+---
+
+Capstart CLI turns an existing **Next.js** or **TanStack Start** project into a Capacitor app. It detects the framework and package manager, configures a client-side production build, installs Capacitor, creates the native projects, and adds scripts for the day-to-day mobile workflow.
+
+Use the CLI when you already have a web application and want to keep its existing structure. For a new React app with auth and native projects already configured, use the [Capstart boilerplate](/docs/installation#capstart-boilerplate) instead.
+
+## Quick Start
+
+Run Capstart from the root of the web project:
+
+```npm
+npx capstart init .
+```
+
+Before changing files, Capstart confirms the detected framework and asks which setup and safe-area behavior to use. It then runs the complete setup:
+
+```text
+Configure the framework
+Configure Capacitor
+Configure safe area insets, when selected
+Install Capacitor packages
+Build the web app
+Prepare the iOS and Android projects
+Synchronize the native projects
+```
+
+Review the changes before committing them. Framework and Capacitor configuration is merged into existing files when it can be updated safely.
+
+## Supported Frameworks
+
+| Framework | What Capstart configures | Capacitor `webDir` |
+| --- | --- | --- |
+| Next.js | Static export, trailing slashes, and unoptimized images | `out` |
+| TanStack Start | SPA mode and an `/index.html` prerender output | `.output/public` with Nitro, otherwise `dist/client` |
+
+Capacitor embeds generated web files. Request-time framework features do not run inside the installed app:
+
+- Next.js Server Actions, API routes, middleware, ISR, and request-time Server Components must stay on a deployed backend.
+- TanStack Start server functions and server routes must stay on a deployed backend.
+- The mobile app must call an HTTPS API URL reachable from the device. Do not use `localhost`, because it points to the phone or emulator itself.
+
+## Setup Profiles
+
+Capstart offers two installation profiles:
+
+| Profile | Packages and configuration |
+| --- | --- |
+| `minimal` | Capacitor core, CLI, and the selected native platforms |
+| `recommended` | Minimal setup plus Keyboard, Network, Device, Splash Screen, and Status Bar plugins |
+
+The interactive prompt pre-selects `recommended`. Non-interactive runs use `minimal` unless you pass `--setup recommended`.
+
+```npm
+npx capstart init . --setup recommended
+```
+
+The recommended profile adds baseline `Keyboard` and `SplashScreen` options to `capacitor.config.ts`. It installs `@capacitor/status-bar` without imposing a `StatusBar` configuration. Existing plugin configuration and unrelated properties are preserved.
+
+## Safe Areas
+
+When safe areas are enabled, Capstart:
+
+- adds `viewport-fit=cover`;
+- configures `SystemBars.insetsHandling` as `css`;
+- adds top and bottom padding with Capacitor 8 System Bars variables and browser fallbacks.
+
+```css
+/* Capstart safe area insets */
+html {
+  padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+}
+```
+
+Use an explicit option when scripting the setup:
+
+```npm
+npx capstart init . --safe-area
+npx capstart init . --no-safe-area
+```
+
+Capstart must be able to find a global CSS file and a safe place to configure the viewport. If your project uses a custom structure, run with `--no-safe-area` and add the insets manually.
+
+## Command Reference
+
+```npm
+npx capstart init [directory] [options]
+```
+
+| Option | Purpose |
+| --- | --- |
+| `--framework <nextjs\|tanstack-start>` | Select the framework without detection confirmation |
+| `--app-id <id>` | Set the reverse-domain native app identifier |
+| `--app-name <name>` | Set the native app name |
+| `--platforms <ios,android>` | Choose one or both native platforms |
+| `--setup <minimal\|recommended>` | Select the Capacitor package profile |
+| `--safe-area` | Add global top and bottom safe-area handling |
+| `--no-safe-area` | Skip safe-area changes |
+| `--skip-install` | Do not install Capacitor packages |
+| `--skip-build` | Do not build the web application |
+| `--skip-native` | Do not add or synchronize native projects |
+| `--dry-run` | Show planned configuration changes without writing files |
+| `--yes` | Accept a single automatically detected framework |
+
+Useful examples:
+
+```npm
+npx capstart init . --dry-run
+npx capstart init ../my-app --app-id com.example.myapp
+npx capstart init . --platforms ios
+npx capstart init . --framework nextjs --setup recommended --safe-area
+npx capstart init . --yes
+```
+
+For CI or another non-interactive environment, pass the choices explicitly:
+
+```npm
+npx capstart init . --framework nextjs --setup recommended --no-safe-area
+```
+
+## What Capstart Changes
+
+Capstart keeps the setup focused on the native shell and the framework build output:
+
+| Area | Changes |
+| --- | --- |
+| Framework config | Configures Next.js static export or TanStack Start SPA output |
+| Capacitor config | Creates or updates `capacitor.config.*`, including the detected `webDir` |
+| `package.json` | Installs packages and adds Capacitor scripts |
+| Native projects | Adds missing selected platforms and runs `cap sync` |
+| Global styles | Adds safe-area CSS only when selected |
+
+Capstart refuses to rewrite framework or Capacitor configuration that is too dynamic to update safely. Simplify the relevant config into an exported object, then run the command again.
+
+## Generated Scripts
+
+After setup, use the scripts added to `package.json`:
+
+```npm
+npm run cap:sync
+npm run cap:ios
+npm run cap:android
+```
+
+| Script | Action |
+| --- | --- |
+| `cap:sync` | Build the web app and synchronize native projects |
+| `cap:ios` | Build, sync, and open the iOS project in Xcode |
+| `cap:android` | Build, sync, and open the Android project in Android Studio |
+
+The exact command prefix follows the detected package manager: npm, pnpm, Yarn, or Bun.
+
+## After Setup
+
+Inspect the generated native projects, test the app on a real device, and read the [Deployment](/docs/deployment) guide before the first store release.
+
+For the plugins and native configuration you may want to add next, continue with [Installation](/docs/installation#3-add-recommended-capacitor-base-plugins).

@@ -2,6 +2,7 @@
   "pages": [
     "---Getting Started---",
     "index",
+    "cli",
     "installation",
     "deployment",
     "---Components---",
