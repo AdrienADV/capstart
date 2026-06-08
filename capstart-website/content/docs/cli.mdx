@@ -1,9 +1,9 @@
 ---
 title: CLI
-description: Add Capacitor to an existing Next.js or TanStack Start app with Capstart CLI.
+description: Add Capacitor to an existing Next.js, Nuxt, TanStack Start, or Vue app with Capstart CLI.
 ---
 
-Capstart CLI turns an existing **Next.js** or **TanStack Start** project into a Capacitor app. It detects the framework and package manager, configures a client-side production build, installs Capacitor, creates the native projects, and adds scripts for the day-to-day mobile workflow.
+Capstart CLI turns an existing **Next.js**, **Nuxt**, **TanStack Start**, or standalone **Vue** project into a Capacitor app. It detects the framework and package manager, configures a client-side production build when needed, installs Capacitor, creates the native projects, and adds scripts for the day-to-day mobile workflow.
 
 Use the CLI when you already have a web application and want to keep its existing structure. For a new React app with auth and native projects already configured, use the [Capstart boilerplate](/docs/installation#capstart-boilerplate) instead.
 
@@ -34,11 +34,14 @@ Review the changes before committing them. Framework and Capacitor configuration
 | Framework | What Capstart configures | Capacitor `webDir` |
 | --- | --- | --- |
 | Next.js | Static export, trailing slashes, and unoptimized images | `out` |
+| Nuxt | Client-only rendering and a `nuxt generate` build script | `.output/public` |
 | TanStack Start | SPA mode and an `/index.html` prerender output | `.output/public` with Nitro, otherwise `dist/client` |
+| Vue | Keeps the existing Vite or Vue CLI static build and detects literal custom output directories | `dist` by default, otherwise `build.outDir` or `outputDir` |
 
 Capacitor embeds generated web files. Request-time framework features do not run inside the installed app:
 
 - Next.js Server Actions, API routes, middleware, ISR, and request-time Server Components must stay on a deployed backend.
+- Nuxt server routes, server middleware, Nitro handlers, runtime SSR, and hybrid rendering must stay on a deployed backend.
 - TanStack Start server functions and server routes must stay on a deployed backend.
 - The mobile app must call an HTTPS API URL reachable from the device. Do not use `localhost`, because it points to the phone or emulator itself.
 
@@ -92,7 +95,7 @@ npx capstart init [directory] [options]
 
 | Option | Purpose |
 | --- | --- |
-| `--framework <nextjs\|tanstack-start>` | Select the framework without detection confirmation |
+| `--framework <nextjs\|nuxt\|tanstack-start\|vue>` | Select the framework without detection confirmation |
 | `--app-id <id>` | Set the reverse-domain native app identifier |
 | `--app-name <name>` | Set the native app name |
 | `--platforms <ios,android>` | Choose one or both native platforms |
@@ -112,6 +115,8 @@ npx capstart init . --dry-run
 npx capstart init ../my-app --app-id com.example.myapp
 npx capstart init . --platforms ios
 npx capstart init . --framework nextjs --setup recommended --safe-area
+npx capstart init . --framework nuxt --dry-run
+npx capstart init . --framework vue --safe-area
 npx capstart init . --yes
 ```
 
@@ -127,7 +132,7 @@ Capstart keeps the setup focused on the native shell and the framework build out
 
 | Area | Changes |
 | --- | --- |
-| Framework config | Configures Next.js static export or TanStack Start SPA output |
+| Framework config | Configures Next.js static export, Nuxt client-only generation, TanStack Start SPA output, or preserves an existing Vue static build |
 | Capacitor config | Creates or updates `capacitor.config.*`, including the detected `webDir` |
 | `package.json` | Installs packages and adds Capacitor scripts |
 | Native projects | Adds missing selected platforms and runs `cap sync` |
