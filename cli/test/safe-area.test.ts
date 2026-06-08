@@ -78,6 +78,81 @@ test("adds viewport fit to a Next.js pages document", async () => {
   assert.match(await readFile(documentPath, "utf8"), /viewport-fit=cover/);
 });
 
+test("adds viewport fit to Nuxt app head configuration", async () => {
+  const root = await createProject();
+  const cssPath = path.join(root, "app/assets/css/main.css");
+  const configPath = path.join(root, "nuxt.config.ts");
+  await mkdir(path.dirname(cssPath), { recursive: true });
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    configPath,
+    [
+      "export default defineNuxtConfig({",
+      "  app: {",
+      "    head: {",
+      "      meta: [{ name: 'description', content: 'Example' }],",
+      "    },",
+      "  },",
+      "});",
+      "",
+    ].join("\n"),
+  );
+  const project = await loadProject(root);
+
+  await configureSafeArea(project, "nuxt", false);
+  await configureSafeArea(project, "nuxt", false);
+
+  const css = await readFile(cssPath, "utf8");
+  const config = await readFile(configPath, "utf8");
+  assert.equal(css.match(/Capstart safe area insets/g)?.length, 1);
+  assert.equal(config.match(/viewport-fit=cover/g)?.length, 1);
+  assert.match(config, /name: 'description'/);
+});
+
+test("adds safe area CSS and viewport fit to a Vue Vite project", async () => {
+  const root = await createProject();
+  const cssPath = path.join(root, "src/assets/main.css");
+  const indexPath = path.join(root, "index.html");
+  await mkdir(path.dirname(cssPath), { recursive: true });
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    indexPath,
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+  );
+  const project = await loadProject(root);
+
+  await configureSafeArea(project, "vue", false);
+  await configureSafeArea(project, "vue", false);
+
+  assert.equal(
+    (await readFile(cssPath, "utf8")).match(/Capstart safe area insets/g)
+      ?.length,
+    1,
+  );
+  assert.equal(
+    (await readFile(indexPath, "utf8")).match(/viewport-fit=cover/g)?.length,
+    1,
+  );
+});
+
+test("adds viewport fit to a Vue CLI public index", async () => {
+  const root = await createProject();
+  const cssPath = path.join(root, "src/assets/main.css");
+  const indexPath = path.join(root, "public/index.html");
+  await mkdir(path.dirname(cssPath), { recursive: true });
+  await mkdir(path.dirname(indexPath), { recursive: true });
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    indexPath,
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+  );
+  const project = await loadProject(root);
+
+  await configureSafeArea(project, "vue", false);
+
+  assert.match(await readFile(indexPath, "utf8"), /viewport-fit=cover/);
+});
+
 test("adds SystemBars CSS inset handling to Capacitor config", async () => {
   const root = await createProject();
   const project = await loadProject(root);

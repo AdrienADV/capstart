@@ -4,7 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { nextjsAdapter } from "../src/adapters/nextjs.js";
+import { nuxtAdapter } from "../src/adapters/nuxt.js";
 import { tanstackStartAdapter } from "../src/adapters/tanstack-start.js";
+import { vueAdapter } from "../src/adapters/vue.js";
 import { configureCapacitor } from "../src/capacitor/configure.js";
 import { loadProject } from "../src/core/project.js";
 
@@ -40,6 +42,126 @@ test("configures a standard Next.js project", async () => {
   assert.match(config, /reactStrictMode: true/);
   assert.match(result.disclaimers[0].title, /do not run inside the Capacitor app/);
   assert.match(result.disclaimers[0].details.join(" "), /reachable from the device/);
+});
+
+test("configures a standard Nuxt project for a client-only static build", async () => {
+  const root = await createProject({
+    dependencies: { nuxt: "^4.0.0" },
+    scripts: { build: "nuxt build" },
+  });
+  const configPath = path.join(root, "nuxt.config.ts");
+  await writeFile(
+    configPath,
+    [
+      "export default defineNuxtConfig({",
+      '  modules: ["@nuxtjs/tailwindcss"],',
+      "});",
+      "",
+    ].join("\n"),
+  );
+
+  const project = await loadProject(root);
+  assert.equal(nuxtAdapter.detect(project), true);
+  assert.deepEqual(await nuxtAdapter.validate(project), []);
+
+  const result = await nuxtAdapter.configure(project, false);
+  const config = await readFile(configPath, "utf8");
+  const packageJson = JSON.parse(
+    await readFile(path.join(root, "package.json"), "utf8"),
+  ) as { scripts: Record<string, string> };
+
+  assert.equal(await nuxtAdapter.resolveWebDir(project), ".output/public");
+  assert.match(config, /ssr: false/);
+  assert.match(config, /@nuxtjs\/tailwindcss/);
+  assert.equal(packageJson.scripts.build, "nuxt generate");
+  assert.match(result.disclaimers[0].title, /do not run inside the Capacitor app/);
+  assert.match(result.disclaimers[0].details.join(" "), /Nitro handlers/);
+});
+
+test("creates a Nuxt config when the project does not have one", async () => {
+  const root = await createProject({
+    dependencies: { nuxt: "^4.0.0" },
+    scripts: { build: "nuxt build" },
+  });
+  const project = await loadProject(root);
+
+  await nuxtAdapter.configure(project, false);
+
+  assert.match(
+    await readFile(path.join(root, "nuxt.config.ts"), "utf8"),
+    /ssr: false/,
+  );
+});
+
+test("configures a standard Vue Vite project without changing it", async () => {
+  const root = await createProject({
+    dependencies: { vue: "^3.5.0" },
+    devDependencies: { vite: "^7.0.0" },
+    scripts: { build: "vite build" },
+  });
+  const packageJsonPath = path.join(root, "package.json");
+  const initialPackageJson = await readFile(packageJsonPath, "utf8");
+  const project = await loadProject(root);
+
+  assert.equal(vueAdapter.detect(project), true);
+  assert.deepEqual(await vueAdapter.validate(project), []);
+
+  const result = await vueAdapter.configure(project, false);
+
+  assert.equal(await vueAdapter.resolveWebDir(project), "dist");
+  assert.deepEqual(result.disclaimers, []);
+  assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
+});
+
+test("resolves custom Vue Vite and Vue CLI output directories", async () => {
+  const viteRoot = await createProject({
+    dependencies: { vue: "^3.5.0" },
+    devDependencies: { vite: "^7.0.0" },
+    scripts: { build: "vite build" },
+  });
+  await writeFile(
+    path.join(viteRoot, "vite.config.ts"),
+    [
+      'import { defineConfig } from "vite";',
+      "",
+      "export default defineConfig({",
+      '  build: { outDir: "build/mobile" },',
+      "});",
+      "",
+    ].join("\n"),
+  );
+
+  const vueCliRoot = await createProject({
+    dependencies: { vue: "^3.5.0" },
+    devDependencies: { "@vue/cli-service": "^5.0.0" },
+    scripts: { build: "vue-cli-service build" },
+  });
+  await writeFile(
+    path.join(vueCliRoot, "vue.config.js"),
+    'module.exports = { outputDir: "build/vue" };\n',
+  );
+
+  assert.equal(
+    await vueAdapter.resolveWebDir(await loadProject(viteRoot)),
+    "build/mobile",
+  );
+  assert.equal(
+    await vueAdapter.resolveWebDir(await loadProject(vueCliRoot)),
+    "build/vue",
+  );
+});
+
+test("does not detect Nuxt as a standalone Vue project", async () => {
+  const root = await createProject({
+    dependencies: {
+      nuxt: "^4.0.0",
+      vue: "^3.5.0",
+    },
+    devDependencies: { vite: "^7.0.0" },
+    scripts: { build: "nuxt build" },
+  });
+
+  assert.equal(vueAdapter.detect(await loadProject(root)), false);
 });
 
 test("configures TanStack Start SPA mode without removing prerender options", async () => {
@@ -123,6 +245,24 @@ test("dry-run does not write framework configuration", async () => {
   await nextjsAdapter.configure(project, true);
 
   assert.equal(await readFile(configPath, "utf8"), initial);
+});
+
+test("Nuxt dry-run does not write framework configuration or package scripts", async () => {
+  const root = await createProject({
+    dependencies: { nuxt: "^4.0.0" },
+    scripts: { build: "nuxt build" },
+  });
+  const configPath = path.join(root, "nuxt.config.ts");
+  const packageJsonPath = path.join(root, "package.json");
+  const initialConfig = "export default defineNuxtConfig({});\n";
+  const initialPackageJson = await readFile(packageJsonPath, "utf8");
+  await writeFile(configPath, initialConfig);
+
+  const project = await loadProject(root);
+  await nuxtAdapter.configure(project, true);
+
+  assert.equal(await readFile(configPath, "utf8"), initialConfig);
+  assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
 });
 
 test("creates Capacitor config and package scripts", async () => {

@@ -1,7 +1,13 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Node, SyntaxKind, VariableDeclarationKind } from "ts-morph";
-import { findConfigFile, loadSourceFile, setObjectProperty } from "./ast.js";
+import {
+  findConfigFile,
+  findExportedObject,
+  getOrCreateNestedObject,
+  loadSourceFile,
+  setObjectProperty,
+} from "./ast.js";
 import { pathExists } from "./project.js";
 import type {
   FrameworkId,
@@ -27,12 +33,30 @@ const globalCssCandidates: Record<FrameworkId, string[]> = {
     "src/index.css",
     "src/app.css",
   ],
+  nuxt: [
+    "app/assets/css/main.css",
+    "app/assets/css/app.css",
+    "app/assets/css/global.css",
+    "app/assets/css/tailwind.css",
+    "assets/css/main.css",
+    "assets/css/app.css",
+    "assets/css/global.css",
+    "assets/css/tailwind.css",
+  ],
   "tanstack-start": [
     "src/styles.css",
     "src/index.css",
     "src/app.css",
     "src/globals.css",
     "src/styles/globals.css",
+  ],
+  vue: [
+    "src/assets/main.css",
+    "src/assets/base.css",
+    "src/style.css",
+    "src/styles.css",
+    "src/index.css",
+    "src/app.css",
   ],
 };
 
@@ -86,12 +110,24 @@ async function findViewportTarget(
   root: string,
   framework: FrameworkId,
 ): Promise<{ configure(): Promise<void> } | undefined> {
+  if (framework === "nuxt") {
+    return nuxtViewportTarget(root);
+  }
+
   if (framework === "tanstack-start") {
     const rootRoutePath = await findConfigFile(root, [
       "src/routes/__root.tsx",
       "src/routes/__root.ts",
     ]);
     return rootRoutePath ? sourceViewportTarget(rootRoutePath) : undefined;
+  }
+
+  if (framework === "vue") {
+    const indexPath = await findConfigFile(root, [
+      "index.html",
+      "public/index.html",
+    ]);
+    return indexPath ? markupViewportTarget(indexPath) : undefined;
   }
 
   const layoutPath = await findConfigFile(root, [
@@ -120,6 +156,103 @@ async function findViewportTarget(
   }
 
   return undefined;
+}
+
+function nuxtViewportTarget(root: string): { configure(): Promise<void> } {
+  return {
+    async configure() {
+      const configPath = await findConfigFile(root, [
+        "nuxt.config.ts",
+        "nuxt.config.mts",
+        "nuxt.config.mjs",
+        "nuxt.config.js",
+        "nuxt.config.cjs",
+      ]);
+      if (!configPath) {
+        throw new Error("Could not find the Nuxt configuration file.");
+      }
+
+      const sourceFile = loadSourceFile(configPath);
+      const config = findExportedObject(sourceFile, ["defineNuxtConfig"]);
+      if (!config) {
+        throw new Error(
+          "Could not safely update the existing Nuxt configuration file.",
+        );
+      }
+
+      const app = getOrCreateNestedObject(config, "app");
+      const head = getOrCreateNestedObject(app, "head");
+      const metaProperty = head.getProperty("meta");
+      if (!metaProperty) {
+        head.addPropertyAssignment({
+          name: "meta",
+          initializer:
+            '[{ name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" }]',
+        });
+        await sourceFile.save();
+        return;
+      }
+
+      if (!Node.isPropertyAssignment(metaProperty)) {
+        throw new Error('Cannot safely update the Nuxt "app.head.meta" property.');
+      }
+      const meta = metaProperty.getInitializer();
+      if (!Node.isArrayLiteralExpression(meta)) {
+        throw new Error('Cannot safely update the Nuxt "app.head.meta" property.');
+      }
+
+      const viewport = meta.getElements().find((element) => {
+        if (!Node.isObjectLiteralExpression(element)) {
+          return false;
+        }
+        const name = element.getProperty("name");
+        if (!Node.isPropertyAssignment(name)) {
+          return false;
+        }
+        const initializer = name.getInitializer();
+        return (
+          Node.isStringLiteral(initializer) &&
+          initializer.getLiteralValue() === "viewport"
+        );
+      });
+
+      if (!viewport || !Node.isObjectLiteralExpression(viewport)) {
+        meta.addElement(
+          '{ name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" }',
+        );
+        await sourceFile.save();
+        return;
+      }
+
+      const content = viewport.getProperty("content");
+      if (!content) {
+        setObjectProperty(
+          viewport,
+          "content",
+          '"width=device-width, initial-scale=1, viewport-fit=cover"',
+        );
+        await sourceFile.save();
+        return;
+      }
+      if (!Node.isPropertyAssignment(content)) {
+        throw new Error(
+          'Cannot safely update the Nuxt viewport "content" property.',
+        );
+      }
+      const initializer = content.getInitializer();
+      if (!Node.isStringLiteral(initializer)) {
+        throw new Error(
+          'Cannot safely update the Nuxt viewport "content" property.',
+        );
+      }
+
+      const value = initializer.getLiteralValue();
+      if (!value.includes("viewport-fit=cover")) {
+        initializer.setLiteralValue(`${value}, viewport-fit=cover`);
+        await sourceFile.save();
+      }
+    },
+  };
 }
 
 function sourceViewportTarget(

@@ -22,7 +22,7 @@ program
   .argument("[directory]", "project directory", ".")
   .option(
     "-f, --framework <framework>",
-    "framework adapter: nextjs or tanstack-start",
+    "framework adapter: nextjs, nuxt, tanstack-start, or vue",
     parseFramework,
   )
   .option("--app-id <id>", "native application id, for example com.example.app")
@@ -68,11 +68,16 @@ program.parseAsync().catch((error: unknown) => {
 });
 
 function parseFramework(value: string): FrameworkId {
-  if (value === "nextjs" || value === "tanstack-start") {
+  if (
+    value === "nextjs" ||
+    value === "nuxt" ||
+    value === "tanstack-start" ||
+    value === "vue"
+  ) {
     return value;
   }
   throw new InvalidArgumentError(
-    'Framework must be "nextjs" or "tanstack-start".',
+    'Framework must be "nextjs", "nuxt", "tanstack-start", or "vue".',
   );
 }
 
