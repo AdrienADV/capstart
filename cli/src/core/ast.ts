@@ -31,10 +31,13 @@ export function loadSourceFile(filePath: string): SourceFile {
 
 export function findExportedObject(
   sourceFile: SourceFile,
+  wrapperNames: string[] = [],
 ): ObjectLiteralExpression | undefined {
+  const wrappers = new Set(wrapperNames);
+
   for (const exportAssignment of sourceFile.getExportAssignments()) {
     const expression = exportAssignment.getExpression();
-    const object = resolveObjectExpression(expression);
+    const object = resolveObjectExpression(expression, wrappers);
     if (object) {
       return object;
     }
@@ -44,7 +47,7 @@ export function findExportedObject(
     SyntaxKind.BinaryExpression,
   )) {
     if (binary.getLeft().getText() === "module.exports") {
-      const object = resolveObjectExpression(binary.getRight());
+      const object = resolveObjectExpression(binary.getRight(), wrappers);
       if (object) {
         return object;
       }
@@ -104,18 +107,29 @@ export function getOrCreateNestedObject(
 
 function resolveObjectExpression(
   expression: Node,
+  wrapperNames: Set<string>,
 ): ObjectLiteralExpression | undefined {
   if (Node.isObjectLiteralExpression(expression)) {
     return expression;
+  }
+
+  if (
+    Node.isCallExpression(expression) &&
+    wrapperNames.has(expression.getExpression().getText())
+  ) {
+    const argument = expression.getArguments()[0];
+    return argument
+      ? resolveObjectExpression(argument, wrapperNames)
+      : undefined;
   }
 
   if (Node.isIdentifier(expression)) {
     const declaration = expression.getDefinitions()[0]?.getDeclarationNode();
     if (Node.isVariableDeclaration(declaration)) {
       const initializer = declaration.getInitializer();
-      if (Node.isObjectLiteralExpression(initializer)) {
-        return initializer;
-      }
+      return initializer
+        ? resolveObjectExpression(initializer, wrapperNames)
+        : undefined;
     }
   }
 

@@ -4,9 +4,16 @@ import type {
   ProjectContext,
 } from "../core/types.js";
 import { nextjsAdapter } from "./nextjs.js";
+import { nuxtAdapter } from "./nuxt.js";
 import { tanstackStartAdapter } from "./tanstack-start.js";
+import { vueAdapter } from "./vue.js";
 
-const adapters: FrameworkAdapter[] = [nextjsAdapter, tanstackStartAdapter];
+const adapters: FrameworkAdapter[] = [
+  nextjsAdapter,
+  nuxtAdapter,
+  tanstackStartAdapter,
+  vueAdapter,
+];
 
 export function getAdapter(id: FrameworkId): FrameworkAdapter {
   const adapter = adapters.find((candidate) => candidate.id === id);

@@ -1,6 +1,6 @@
 # Capstart CLI
 
-Add Capacitor to an existing Next.js or TanStack Start application.
+Add Capacitor to an existing Next.js, Nuxt, TanStack Start, or Vue application.
 
 ```bash
 npx capstart init ..
@@ -45,14 +45,18 @@ changes the project:
 ? Use the detected framework Next.js? Yes
 ```
 
-If the detection is refused, Capstart lets you choose between Next.js and
-TanStack Start.
+If the detection is refused, Capstart lets you choose between Next.js, Nuxt,
+TanStack Start, and Vue.
 
 ## Supported frameworks
 
 - Next.js projects that can use static export
+- Nuxt projects that can use client-only rendering. Capstart switches the build
+  script to `nuxt generate` and uses `.output/public`.
 - TanStack Start projects that can use SPA mode. Capstart uses `.output/public`
   when the Vite config includes Nitro, and `dist/client` otherwise.
+- Standalone Vue projects built with Vite or Vue CLI. Capstart uses `dist` by
+  default and detects static custom `build.outDir` or `outputDir` values.
 
 Server-only features must remain hosted remotely and be called from the mobile
 application over HTTP.
@@ -70,14 +74,16 @@ npx capstart init .
 npx capstart init ../my-app --app-id com.example.myapp
 npx capstart init . --platforms ios
 npx capstart init . --setup recommended
+npx capstart init . --framework nuxt --dry-run
 npx capstart init . --framework tanstack-start --dry-run
+npx capstart init . --framework vue --dry-run
 npx capstart init . --yes
 ```
 
 Useful options:
 
 ```text
---framework <nextjs|tanstack-start>
+--framework <nextjs|nuxt|tanstack-start|vue>
 --app-id <id>
 --app-name <name>
 --platforms <ios,android>

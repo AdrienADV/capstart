@@ -56,7 +56,7 @@ export async function chooseAdapter(options: {
     }
 
     throw new Error(
-      "Framework selection requires an interactive terminal. Pass --framework nextjs or --framework tanstack-start.",
+      "Framework selection requires an interactive terminal. Pass --framework nextjs, --framework nuxt, --framework tanstack-start, or --framework vue.",
     );
   }
 

@@ -16,7 +16,9 @@
     "cli",
     "mobile",
     "nextjs",
-    "tanstack-start"
+    "nuxt",
+    "tanstack-start",
+    "vue"
   ],
   "repository": {
     "type": "git",
