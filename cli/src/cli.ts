@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command, InvalidArgumentError } from "commander";
+import packageJson from "../package.json";
 import { initCommand } from "./commands/init.js";
 import { logger } from "./core/logger.js";
 import type {
@@ -14,7 +15,7 @@ const program = new Command();
 program
   .name("capstart")
   .description("Add Capacitor to an existing web application.")
-  .version("0.1.0");
+  .version(packageJson.version);
 
 program
   .command("init")
