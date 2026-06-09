@@ -29,7 +29,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src/cli.ts --format esm --dts --clean",
+    "build": "tsup src/cli.ts --format esm --clean",
     "dev": "bun src/cli.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
