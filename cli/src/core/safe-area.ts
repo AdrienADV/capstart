@@ -43,6 +43,13 @@ const globalCssCandidates: Record<FrameworkId, string[]> = {
     "assets/css/global.css",
     "assets/css/tailwind.css",
   ],
+  "react-vite": [
+    "src/index.css",
+    "src/app.css",
+    "src/styles.css",
+    "src/globals.css",
+    "src/styles/globals.css",
+  ],
   "tanstack-start": [
     "src/styles.css",
     "src/index.css",
@@ -122,7 +129,7 @@ async function findViewportTarget(
     return rootRoutePath ? sourceViewportTarget(rootRoutePath) : undefined;
   }
 
-  if (framework === "vue") {
+  if (framework === "react-vite" || framework === "vue") {
     const indexPath = await findConfigFile(root, [
       "index.html",
       "public/index.html",

@@ -38,18 +38,18 @@ capstart/
 
 ### `cli`
 
-The `capstart` command-line tool configures existing Next.js and TanStack Start
-applications for Capacitor.
+The `capstart` command-line tool configures existing Next.js, Nuxt, React +
+Vite, TanStack Start, and Vue applications for Capacitor.
 
 ```bash
 npx capstart init ..
 ```
 
 The CLI displays the detected framework and asks for confirmation before
-configuring the project. If detection is refused, it offers Next.js and
-TanStack Start as explicit choices. It also offers a minimal setup or a
-recommended setup that includes common Capacitor plugins for keyboard, network,
-device, splash screen, and status bar behavior.
+configuring the project. If detection is refused, it offers every supported
+adapter as an explicit choice. It also offers a minimal setup or a recommended
+setup that includes common Capacitor plugins for keyboard, network, device,
+splash screen, and status bar behavior.
 
 Useful path:
 - `cli/README.md`

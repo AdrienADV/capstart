@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { nextjsAdapter } from "../src/adapters/nextjs.js";
 import { nuxtAdapter } from "../src/adapters/nuxt.js";
+import { reactViteAdapter } from "../src/adapters/react-vite.js";
 import { tanstackStartAdapter } from "../src/adapters/tanstack-start.js";
 import { vueAdapter } from "../src/adapters/vue.js";
 import { configureCapacitor } from "../src/capacitor/configure.js";
@@ -113,6 +114,56 @@ test("configures a standard Vue Vite project without changing it", async () => {
   assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
 });
 
+test("configures a standard React Vite project without changing it", async () => {
+  const root = await createProject({
+    dependencies: {
+      react: "^19.0.0",
+      "react-dom": "^19.0.0",
+    },
+    devDependencies: { vite: "^8.0.0" },
+    scripts: { build: "vite build" },
+  });
+  const packageJsonPath = path.join(root, "package.json");
+  const initialPackageJson = await readFile(packageJsonPath, "utf8");
+  const project = await loadProject(root);
+
+  assert.equal(reactViteAdapter.detect(project), true);
+  assert.deepEqual(await reactViteAdapter.validate(project), []);
+
+  const result = await reactViteAdapter.configure(project, false);
+
+  assert.equal(await reactViteAdapter.resolveWebDir(project), "dist");
+  assert.deepEqual(result.disclaimers, []);
+  assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
+});
+
+test("resolves a custom React Vite output directory", async () => {
+  const root = await createProject({
+    dependencies: {
+      react: "^19.0.0",
+      "react-dom": "^19.0.0",
+    },
+    devDependencies: { vite: "^8.0.0" },
+    scripts: { build: "vite build" },
+  });
+  await writeFile(
+    path.join(root, "vite.config.ts"),
+    [
+      'import { defineConfig } from "vite";',
+      "",
+      "export default defineConfig({",
+      '  build: { outDir: "build/mobile" },',
+      "});",
+      "",
+    ].join("\n"),
+  );
+
+  assert.equal(
+    await reactViteAdapter.resolveWebDir(await loadProject(root)),
+    "build/mobile",
+  );
+});
+
 test("resolves custom Vue Vite and Vue CLI output directories", async () => {
   const viteRoot = await createProject({
     dependencies: { vue: "^3.5.0" },
@@ -162,6 +213,43 @@ test("does not detect Nuxt as a standalone Vue project", async () => {
   });
 
   assert.equal(vueAdapter.detect(await loadProject(root)), false);
+});
+
+test("does not detect React frameworks as standalone React Vite projects", async () => {
+  const nextRoot = await createProject({
+    dependencies: {
+      next: "^16.0.0",
+      react: "^19.0.0",
+      "react-dom": "^19.0.0",
+    },
+    devDependencies: { vite: "^8.0.0" },
+    scripts: { build: "next build" },
+  });
+  const tanstackRoot = await createProject({
+    dependencies: {
+      "@tanstack/react-start": "^1.0.0",
+      react: "^19.0.0",
+      "react-dom": "^19.0.0",
+    },
+    devDependencies: { vite: "^8.0.0" },
+    scripts: { build: "vite build" },
+  });
+  const reactRouterRoot = await createProject({
+    dependencies: {
+      "@react-router/dev": "^7.0.0",
+      react: "^19.0.0",
+      "react-dom": "^19.0.0",
+    },
+    devDependencies: { vite: "^8.0.0" },
+    scripts: { build: "react-router build" },
+  });
+
+  assert.equal(reactViteAdapter.detect(await loadProject(nextRoot)), false);
+  assert.equal(reactViteAdapter.detect(await loadProject(tanstackRoot)), false);
+  assert.equal(
+    reactViteAdapter.detect(await loadProject(reactRouterRoot)),
+    false,
+  );
 });
 
 test("configures TanStack Start SPA mode without removing prerender options", async () => {

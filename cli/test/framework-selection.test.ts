@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { nextjsAdapter } from "../src/adapters/nextjs.js";
 import { nuxtAdapter } from "../src/adapters/nuxt.js";
+import { reactViteAdapter } from "../src/adapters/react-vite.js";
 import { tanstackStartAdapter } from "../src/adapters/tanstack-start.js";
 import { vueAdapter } from "../src/adapters/vue.js";
 import {
@@ -38,6 +39,7 @@ test("offers all frameworks when the detected framework is refused", async () =>
   assert.deepEqual(prompts.lastOptions, [
     "nextjs",
     "nuxt",
+    "react-vite",
     "tanstack-start",
     "vue",
   ]);
@@ -87,6 +89,16 @@ test("accepts a detected Vue project with --yes", async () => {
   assert.equal(adapter.id, "vue");
 });
 
+test("accepts a detected React Vite project with --yes", async () => {
+  const adapter = await chooseAdapter({
+    acceptDetected: true,
+    detected: [reactViteAdapter],
+    interactive: false,
+  });
+
+  assert.equal(adapter.id, "react-vite");
+});
+
 test("requires an explicit choice outside an interactive terminal", async () => {
   await assert.rejects(
     chooseAdapter({
@@ -100,7 +112,7 @@ test("requires an explicit choice outside an interactive terminal", async () => 
 
 function createPrompts(options: {
   confirm: boolean;
-  selected: "nextjs" | "nuxt" | "tanstack-start" | "vue";
+  selected: "nextjs" | "nuxt" | "react-vite" | "tanstack-start" | "vue";
 }): FrameworkPrompts & {
   confirmCalls: number;
   lastOptions: string[];

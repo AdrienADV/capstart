@@ -135,6 +135,31 @@ test("adds safe area CSS and viewport fit to a Vue Vite project", async () => {
   );
 });
 
+test("adds safe area CSS and viewport fit to a React Vite project", async () => {
+  const root = await createProject();
+  const cssPath = path.join(root, "src/index.css");
+  const indexPath = path.join(root, "index.html");
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    indexPath,
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+  );
+  const project = await loadProject(root);
+
+  await configureSafeArea(project, "react-vite", false);
+  await configureSafeArea(project, "react-vite", false);
+
+  assert.equal(
+    (await readFile(cssPath, "utf8")).match(/Capstart safe area insets/g)
+      ?.length,
+    1,
+  );
+  assert.equal(
+    (await readFile(indexPath, "utf8")).match(/viewport-fit=cover/g)?.length,
+    1,
+  );
+});
+
 test("adds viewport fit to a Vue CLI public index", async () => {
   const root = await createProject();
   const cssPath = path.join(root, "src/assets/main.css");
