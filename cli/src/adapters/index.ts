@@ -5,12 +5,14 @@ import type {
 } from "../core/types.js";
 import { nextjsAdapter } from "./nextjs.js";
 import { nuxtAdapter } from "./nuxt.js";
+import { reactViteAdapter } from "./react-vite.js";
 import { tanstackStartAdapter } from "./tanstack-start.js";
 import { vueAdapter } from "./vue.js";
 
 const adapters: FrameworkAdapter[] = [
   nextjsAdapter,
   nuxtAdapter,
+  reactViteAdapter,
   tanstackStartAdapter,
   vueAdapter,
 ];

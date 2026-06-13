@@ -1,4 +1,3 @@
-import { Node, type ObjectLiteralExpression } from "ts-morph";
 import {
   findConfigFile,
   findExportedObject,
@@ -6,14 +5,12 @@ import {
 } from "../core/ast.js";
 import { hasDependency } from "../core/project.js";
 import type { FrameworkAdapter } from "../core/types.js";
+import {
+  findViteOutDir,
+  getStringProperty,
+  validateViteProject,
+} from "./vite-config.js";
 
-const viteConfigNames = [
-  "vite.config.ts",
-  "vite.config.mts",
-  "vite.config.mjs",
-  "vite.config.js",
-  "vite.config.cjs",
-];
 const vueCliConfigNames = [
   "vue.config.ts",
   "vue.config.mts",
@@ -36,13 +33,8 @@ export const vueAdapter: FrameworkAdapter = {
   },
 
   async resolveWebDir(project) {
-    const viteConfigPath = await findConfigFile(project.root, viteConfigNames);
-    if (viteConfigPath) {
-      const config = findExportedObject(loadSourceFile(viteConfigPath), [
-        "defineConfig",
-      ]);
-      const build = config ? getObjectProperty(config, "build") : undefined;
-      const outDir = build ? getStringProperty(build, "outDir") : undefined;
+    if (hasDependency(project, "vite")) {
+      const outDir = await findViteOutDir(project);
       if (outDir) {
         return outDir;
       }
@@ -68,48 +60,10 @@ export const vueAdapter: FrameworkAdapter = {
   },
 
   async validate(project) {
-    if (!project.packageJson.scripts?.build) {
-      return [
-        {
-          level: "error" as const,
-          message: 'Missing a "build" script in package.json.',
-        },
-      ];
-    }
-    return [];
+    return validateViteProject(project);
   },
 
   async configure() {
     return { disclaimers: [] };
   },
 };
-
-function getObjectProperty(
-  object: ObjectLiteralExpression,
-  name: string,
-): ObjectLiteralExpression | undefined {
-  const property = object.getProperty(name);
-  if (!Node.isPropertyAssignment(property)) {
-    return undefined;
-  }
-  const initializer = property.getInitializer();
-  return Node.isObjectLiteralExpression(initializer) ? initializer : undefined;
-}
-
-function getStringProperty(
-  object: ObjectLiteralExpression,
-  name: string,
-): string | undefined {
-  const property = object.getProperty(name);
-  if (!Node.isPropertyAssignment(property)) {
-    return undefined;
-  }
-  const initializer = property.getInitializer();
-  if (
-    Node.isStringLiteral(initializer) ||
-    Node.isNoSubstitutionTemplateLiteral(initializer)
-  ) {
-    return initializer.getLiteralValue();
-  }
-  return undefined;
-}

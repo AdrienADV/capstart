@@ -1,4 +1,9 @@
-export type FrameworkId = "nextjs" | "nuxt" | "tanstack-start" | "vue";
+export type FrameworkId =
+  | "nextjs"
+  | "nuxt"
+  | "react-vite"
+  | "tanstack-start"
+  | "vue";
 export type Platform = "ios" | "android";
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
 export type SetupProfile = "minimal" | "recommended";

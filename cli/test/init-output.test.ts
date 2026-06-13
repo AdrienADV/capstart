@@ -235,6 +235,69 @@ test("configures a Vue project with safe area from end to end", async () => {
   );
 });
 
+test("configures a React Vite project with safe area from end to end", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "capstart-output-test-"));
+  const cssPath = path.join(root, "src/index.css");
+  const indexPath = path.join(root, "index.html");
+  await mkdir(path.dirname(cssPath), { recursive: true });
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    indexPath,
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+  );
+  await writeFile(
+    path.join(root, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "example-app",
+        dependencies: {
+          react: "^19.0.0",
+          "react-dom": "^19.0.0",
+        },
+        devDependencies: { vite: "^8.0.0" },
+        scripts: { build: "vite build" },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    await initCommand({
+      directory: root,
+      dryRun: false,
+      framework: "react-vite",
+      interactive: false,
+      platforms: ["ios"],
+      safeArea: true,
+      skipBuild: true,
+      skipInstall: true,
+      skipNative: true,
+      yes: false,
+    });
+  } finally {
+    console.log = originalLog;
+  }
+
+  const capacitorConfig = await readFile(
+    path.join(root, "capacitor.config.ts"),
+    "utf8",
+  );
+  const packageJson = JSON.parse(
+    await readFile(path.join(root, "package.json"), "utf8"),
+  ) as { scripts: Record<string, string> };
+
+  assert.match(await readFile(indexPath, "utf8"), /viewport-fit=cover/);
+  assert.match(capacitorConfig, /webDir: "dist"/);
+  assert.equal(packageJson.scripts.build, "vite build");
+  assert.equal(
+    packageJson.scripts["cap:sync"],
+    "npm run build && npm exec cap -- sync",
+  );
+});
+
 function stripAnsi(value: string): string {
   return value.replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "");
 }
