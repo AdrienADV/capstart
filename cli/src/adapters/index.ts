@@ -6,6 +6,8 @@ import type {
 import { nextjsAdapter } from "./nextjs.js";
 import { nuxtAdapter } from "./nuxt.js";
 import { reactViteAdapter } from "./react-vite.js";
+import { svelteAdapter } from "./svelte.js";
+import { svelteKitAdapter } from "./sveltekit.js";
 import { tanstackStartAdapter } from "./tanstack-start.js";
 import { vueAdapter } from "./vue.js";
 
@@ -13,6 +15,8 @@ const adapters: FrameworkAdapter[] = [
   nextjsAdapter,
   nuxtAdapter,
   reactViteAdapter,
+  svelteAdapter,
+  svelteKitAdapter,
   tanstackStartAdapter,
   vueAdapter,
 ];

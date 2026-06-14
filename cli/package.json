@@ -18,6 +18,8 @@
     "nextjs",
     "nuxt",
     "react",
+    "svelte",
+    "sveltekit",
     "tanstack-start",
     "vite",
     "vue"

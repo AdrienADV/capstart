@@ -23,7 +23,7 @@ program
   .argument("[directory]", "project directory", ".")
   .option(
     "-f, --framework <framework>",
-    "framework adapter: nextjs, nuxt, react-vite, tanstack-start, or vue",
+    "framework adapter: nextjs, nuxt, react-vite, svelte, sveltekit, tanstack-start, or vue",
     parseFramework,
   )
   .option("--app-id <id>", "native application id, for example com.example.app")
@@ -73,13 +73,15 @@ function parseFramework(value: string): FrameworkId {
     value === "nextjs" ||
     value === "nuxt" ||
     value === "react-vite" ||
+    value === "svelte" ||
+    value === "sveltekit" ||
     value === "tanstack-start" ||
     value === "vue"
   ) {
     return value;
   }
   throw new InvalidArgumentError(
-    'Framework must be "nextjs", "nuxt", "react-vite", "tanstack-start", or "vue".',
+    'Framework must be "nextjs", "nuxt", "react-vite", "svelte", "sveltekit", "tanstack-start", or "vue".',
   );
 }
 

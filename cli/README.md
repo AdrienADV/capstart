@@ -1,6 +1,7 @@
 # Capstart CLI
 
-Add Capacitor to an existing Next.js, Nuxt, React + Vite, TanStack Start, or Vue application.
+Add Capacitor to an existing Next.js, Nuxt, React + Vite, Svelte + Vite,
+SvelteKit, TanStack Start, or Vue application.
 
 ```bash
 npx capstart init ..
@@ -46,7 +47,7 @@ changes the project:
 ```
 
 If the detection is refused, Capstart lets you choose between Next.js, Nuxt,
-React + Vite, TanStack Start, and Vue.
+React + Vite, Svelte + Vite, SvelteKit, TanStack Start, and Vue.
 
 ## Supported frameworks
 
@@ -55,6 +56,12 @@ React + Vite, TanStack Start, and Vue.
   script to `nuxt generate` and uses `.output/public`.
 - Standalone React projects built with Vite. Capstart keeps the existing static
   build, uses `dist` by default, and detects a literal custom `build.outDir`.
+- Svelte + Vite projects. Capstart keeps the existing static build, uses
+  `dist` by default, and detects a literal custom `build.outDir`.
+- SvelteKit projects that can use SPA mode. Capstart switches the project to
+  `@sveltejs/adapter-static`, generates an `index.html` fallback, disables
+  runtime SSR, and uses `build` by default. Existing literal `pages` and
+  matching `assets` directories are preserved.
 - TanStack Start projects that can use SPA mode. Capstart uses `.output/public`
   when the Vite config includes Nitro, and `dist/client` otherwise.
 - Standalone Vue projects built with Vite or Vue CLI. Capstart uses `dist` by
@@ -82,6 +89,8 @@ npx capstart init . --platforms ios
 npx capstart init . --setup recommended
 npx capstart init . --framework nuxt --dry-run
 npx capstart init . --framework react-vite --dry-run
+npx capstart init . --framework svelte --dry-run
+npx capstart init . --framework sveltekit --dry-run
 npx capstart init . --framework tanstack-start --dry-run
 npx capstart init . --framework vue --dry-run
 npx capstart init . --yes
@@ -90,7 +99,7 @@ npx capstart init . --yes
 Useful options:
 
 ```text
---framework <nextjs|nuxt|react-vite|tanstack-start|vue>
+--framework <nextjs|nuxt|react-vite|svelte|sveltekit|tanstack-start|vue>
 --app-id <id>
 --app-name <name>
 --platforms <ios,android>

@@ -50,6 +50,21 @@ const globalCssCandidates: Record<FrameworkId, string[]> = {
     "src/globals.css",
     "src/styles/globals.css",
   ],
+  svelte: [
+    "src/app.css",
+    "src/style.css",
+    "src/styles.css",
+    "src/index.css",
+    "src/global.css",
+    "src/styles/globals.css",
+  ],
+  sveltekit: [
+    "src/app.css",
+    "src/routes/layout.css",
+    "src/styles.css",
+    "src/global.css",
+    "src/styles/globals.css",
+  ],
   "tanstack-start": [
     "src/styles.css",
     "src/index.css",
@@ -129,12 +144,21 @@ async function findViewportTarget(
     return rootRoutePath ? sourceViewportTarget(rootRoutePath) : undefined;
   }
 
-  if (framework === "react-vite" || framework === "vue") {
+  if (
+    framework === "react-vite" ||
+    framework === "svelte" ||
+    framework === "vue"
+  ) {
     const indexPath = await findConfigFile(root, [
       "index.html",
       "public/index.html",
     ]);
     return indexPath ? markupViewportTarget(indexPath) : undefined;
+  }
+
+  if (framework === "sveltekit") {
+    const appTemplatePath = await findConfigFile(root, ["src/app.html"]);
+    return appTemplatePath ? markupViewportTarget(appTemplatePath) : undefined;
   }
 
   const layoutPath = await findConfigFile(root, [

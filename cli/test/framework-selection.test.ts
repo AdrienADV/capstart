@@ -3,6 +3,8 @@ import test from "node:test";
 import { nextjsAdapter } from "../src/adapters/nextjs.js";
 import { nuxtAdapter } from "../src/adapters/nuxt.js";
 import { reactViteAdapter } from "../src/adapters/react-vite.js";
+import { svelteAdapter } from "../src/adapters/svelte.js";
+import { svelteKitAdapter } from "../src/adapters/sveltekit.js";
 import { tanstackStartAdapter } from "../src/adapters/tanstack-start.js";
 import { vueAdapter } from "../src/adapters/vue.js";
 import {
@@ -40,6 +42,8 @@ test("offers all frameworks when the detected framework is refused", async () =>
     "nextjs",
     "nuxt",
     "react-vite",
+    "svelte",
+    "sveltekit",
     "tanstack-start",
     "vue",
   ]);
@@ -99,6 +103,26 @@ test("accepts a detected React Vite project with --yes", async () => {
   assert.equal(adapter.id, "react-vite");
 });
 
+test("accepts a detected Svelte project with --yes", async () => {
+  const adapter = await chooseAdapter({
+    acceptDetected: true,
+    detected: [svelteAdapter],
+    interactive: false,
+  });
+
+  assert.equal(adapter.id, "svelte");
+});
+
+test("accepts a detected SvelteKit project with --yes", async () => {
+  const adapter = await chooseAdapter({
+    acceptDetected: true,
+    detected: [svelteKitAdapter],
+    interactive: false,
+  });
+
+  assert.equal(adapter.id, "sveltekit");
+});
+
 test("requires an explicit choice outside an interactive terminal", async () => {
   await assert.rejects(
     chooseAdapter({
@@ -112,7 +136,14 @@ test("requires an explicit choice outside an interactive terminal", async () => 
 
 function createPrompts(options: {
   confirm: boolean;
-  selected: "nextjs" | "nuxt" | "react-vite" | "tanstack-start" | "vue";
+  selected:
+    | "nextjs"
+    | "nuxt"
+    | "react-vite"
+    | "svelte"
+    | "sveltekit"
+    | "tanstack-start"
+    | "vue";
 }): FrameworkPrompts & {
   confirmCalls: number;
   lastOptions: string[];
