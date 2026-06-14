@@ -36,6 +36,99 @@ npm install @capgo/capacitor-live-activities
 npx cap sync
 ```
 
+## iOS Setup
+
+Installing and syncing the plugin does not create the native Live Activity UI. ActivityKit requires a Widget Extension that registers a Live Activity configuration before `startActivity()` can display anything.
+
+### Requirements
+
+- Use iOS 16.1 or later for both the app target and Widget Extension target.
+- Test on an iOS device or a compatible simulator. The Dynamic Island only appears on supported device models; other devices use the Lock Screen presentation.
+- Keep the combined static and dynamic ActivityKit data below Apple's 4 KB limit.
+
+### 1. Create a Widget Extension
+
+Open the native iOS project:
+
+```bash
+bunx cap open ios
+```
+
+Then:
+
+1. Select **File > New > Target**.
+2. Add a **Widget Extension**.
+3. Enable **Include Live Activity**.
+4. Disable **Include Configuration Intent** unless the app also needs a configurable widget.
+5. Ensure the generated extension is embedded in the main app target.
+
+The Widget Extension must contain an `ActivityConfiguration` and register it in its `WidgetBundle`. It must provide every required Live Activity presentation:
+
+- Lock Screen
+- Dynamic Island expanded
+- Dynamic Island compact leading and trailing
+- Dynamic Island minimal
+
+Adding the target alone is not sufficient. The native app or plugin must call ActivityKit's request, update, and end APIs. The extension must contain SwiftUI code that can decode and render the same `ActivityAttributes` and content state used by those calls. Include shared ActivityKit models in both the main app and Widget Extension targets.
+
+The Xcode-generated Live Activity template does not automatically render the JSON layouts passed to this plugin. The extension also needs a compatible native layout renderer.
+
+### 2. Enable Live Activities
+
+Add the following key to the main app target's `Info.plist`:
+
+```xml title="Info.plist"
+<key>NSSupportsLiveActivities</key>
+<true/>
+```
+
+If the project generates its `Info.plist`, add **Supports Live Activities** with a Boolean value of **YES** under the main app target's custom iOS target properties instead.
+
+### 3. Configure the App Group for Shared Images
+
+An App Group is only required when using `saveImage()`, `removeImage()`, `listImages()`, or `cleanupImages()`. The plugin derives the App Group identifier from the main app bundle identifier using this exact format:
+
+```text
+group.<MAIN_APP_BUNDLE_ID>.liveactivities
+```
+
+For example, an app with the bundle identifier `com.example.delivery` must use:
+
+```text
+group.com.example.delivery.liveactivities
+```
+
+In Xcode, add the **App Groups** capability to both the main app target and the Widget Extension target, then enable the same identifier on both targets.
+
+Live Activity extensions cannot access the network. Download remote images in the main app and save them to the shared App Group before referencing them from a Live Activity. For bundled images, also enable the Widget Extension in the asset's target membership.
+
+### 4. Configure Deep Links
+
+When using `behavior.widgetUrl` or a timer sequence `tapUrl`, register the matching URL scheme or Universal Link in the main app. For a custom scheme such as `myapp://order/12345`, add the scheme under the main app target's **Info > URL Types** settings.
+
+### 5. Optional: Enable Server-Driven Updates
+
+Push Notifications are not required for local updates initiated by the app. To start, update, or end Live Activities from a server:
+
+1. Add the **Push Notifications** capability to the main app target.
+2. Obtain ActivityKit push tokens and send them to the server.
+3. Send ActivityKit notifications through APNs using the `liveactivity` push type.
+4. Add `NSSupportsLiveActivitiesFrequentUpdates` to the main app `Info.plist` only when the use case requires frequent push updates.
+
+ActivityKit push tokens are separate from standard user-notification device tokens. Enabling the Push Notifications capability alone is not sufficient; server-driven updates require native token handling and an APNs backend.
+
+### Native Setup Checklist
+
+Before calling `startActivity()`, verify that:
+
+- `NSSupportsLiveActivities` is enabled on the main app target.
+- The Widget Extension is embedded and registers an `ActivityConfiguration`.
+- The native ActivityKit implementation and Widget Extension use the same `ActivityAttributes` type.
+- The app and Widget Extension deployment targets are iOS 16.1 or later.
+- Live Activities are enabled for the app in iOS Settings.
+- The matching App Group is enabled on both targets when using shared images.
+- Any custom URL scheme used by `widgetUrl` or `tapUrl` is registered.
+
 ## Minimal Usage
 
 Start a Live Activity with a simple layout and dynamic data:
