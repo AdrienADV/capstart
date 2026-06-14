@@ -1,15 +1,17 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { nextjsAdapter } from "../src/adapters/nextjs.js";
 import { nuxtAdapter } from "../src/adapters/nuxt.js";
 import { reactViteAdapter } from "../src/adapters/react-vite.js";
+import { svelteAdapter } from "../src/adapters/svelte.js";
+import { svelteKitAdapter } from "../src/adapters/sveltekit.js";
 import { tanstackStartAdapter } from "../src/adapters/tanstack-start.js";
 import { vueAdapter } from "../src/adapters/vue.js";
 import { configureCapacitor } from "../src/capacitor/configure.js";
-import { loadProject } from "../src/core/project.js";
+import { loadProject, pathExists } from "../src/core/project.js";
 
 test("configures a standard Next.js project", async () => {
   const root = await createProject({
@@ -137,6 +139,229 @@ test("configures a standard React Vite project without changing it", async () =>
   assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
 });
 
+test("configures a standard Svelte Vite project without changing it", async () => {
+  const root = await createProject({
+    devDependencies: {
+      "@sveltejs/vite-plugin-svelte": "^7.0.0",
+      svelte: "^5.0.0",
+      vite: "^8.0.0",
+    },
+    scripts: { build: "vite build" },
+  });
+  const packageJsonPath = path.join(root, "package.json");
+  const initialPackageJson = await readFile(packageJsonPath, "utf8");
+  const project = await loadProject(root);
+
+  assert.equal(svelteAdapter.detect(project), true);
+  assert.deepEqual(await svelteAdapter.validate(project), []);
+
+  const result = await svelteAdapter.configure(project, false);
+
+  assert.equal(await svelteAdapter.resolveWebDir(project), "dist");
+  assert.deepEqual(result.disclaimers, []);
+  assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
+});
+
+test("configures the current SvelteKit Vite config for a Capacitor SPA", async () => {
+  const root = await createProject({
+    devDependencies: {
+      "@sveltejs/adapter-auto": "^7.0.0",
+      "@sveltejs/kit": "^2.63.0",
+      svelte: "^5.56.0",
+      vite: "^8.0.0",
+    },
+    scripts: { build: "vite build" },
+  });
+  const configPath = path.join(root, "vite.config.ts");
+  await writeFile(
+    configPath,
+    [
+      'import adapter from "@sveltejs/adapter-auto";',
+      'import { sveltekit } from "@sveltejs/kit/vite";',
+      'import { defineConfig } from "vite";',
+      "",
+      "export default defineConfig({",
+      "  plugins: [",
+      "    sveltekit({",
+      "      compilerOptions: { runes: true },",
+      "      // adapter-auto only supports some environments.",
+      "      // If your environment is not supported, switch out the adapter.",
+      "      // See https://svelte.dev/docs/kit/adapters for more information.",
+      "      adapter: adapter(),",
+      "    }),",
+      "  ],",
+      "});",
+      "",
+    ].join("\n"),
+  );
+
+  const project = await loadProject(root);
+  assert.equal(svelteKitAdapter.detect(project), true);
+  assert.equal(svelteAdapter.detect(project), false);
+  assert.deepEqual(await svelteKitAdapter.validate(project), []);
+  assert.equal(await svelteKitAdapter.resolveWebDir(project), "build");
+
+  const result = await svelteKitAdapter.configure(project, false);
+  const config = await readFile(configPath, "utf8");
+  const rootLayout = await readFile(
+    path.join(root, "src/routes/+layout.js"),
+    "utf8",
+  );
+  const packageJson = JSON.parse(
+    await readFile(path.join(root, "package.json"), "utf8"),
+  ) as {
+    devDependencies: Record<string, string>;
+  };
+
+  assert.match(config, /@sveltejs\/adapter-static/);
+  assert.doesNotMatch(config, /@sveltejs\/adapter-auto/);
+  assert.doesNotMatch(config, /adapter-auto only supports/);
+  assert.doesNotMatch(config, /If your environment is not supported/);
+  assert.match(config, /fallback: "index\.html"/);
+  assert.match(config, /compilerOptions: \{ runes: true \}/);
+  assert.equal(rootLayout, "export const ssr = false;\n");
+  assert.equal(packageJson.devDependencies["@sveltejs/adapter-auto"], undefined);
+  assert.equal(
+    packageJson.devDependencies["@sveltejs/adapter-static"],
+    "^3.0.0",
+  );
+  assert.match(result.disclaimers[0].details.join(" "), /remote functions/);
+});
+
+test("configures a legacy SvelteKit config and preserves static options", async () => {
+  const root = await createProject({
+    devDependencies: {
+      "@sveltejs/adapter-static": "^3.0.10",
+      "@sveltejs/kit": "^2.0.0",
+      svelte: "^5.0.0",
+      vite: "^7.0.0",
+    },
+    scripts: { build: "vite build" },
+  });
+  await writeFile(
+    path.join(root, "vite.config.js"),
+    [
+      'import { sveltekit } from "@sveltejs/kit/vite";',
+      'import { defineConfig } from "vite";',
+      "",
+      "export default defineConfig({ plugins: [sveltekit()] });",
+      "",
+    ].join("\n"),
+  );
+  const configPath = path.join(root, "svelte.config.js");
+  await writeFile(
+    configPath,
+    [
+      'import adapter from "@sveltejs/adapter-static";',
+      "",
+      "const config = {",
+      "  kit: {",
+      "    adapter: adapter({",
+      '      pages: "build/mobile",',
+      '      assets: "build/mobile",',
+      "      precompress: true,",
+      "    }),",
+      "  },",
+      "};",
+      "",
+      "export default config;",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    path.join(root, "src/routes/+layout.ts"),
+    "export const prerender = true;\nexport const ssr = true;\n",
+  );
+
+  const project = await loadProject(root);
+  assert.deepEqual(await svelteKitAdapter.validate(project), []);
+  assert.equal(
+    await svelteKitAdapter.resolveWebDir(project),
+    "build/mobile",
+  );
+
+  await svelteKitAdapter.configure(project, false);
+  const config = await readFile(configPath, "utf8");
+  const rootLayout = await readFile(
+    path.join(root, "src/routes/+layout.ts"),
+    "utf8",
+  );
+
+  assert.match(config, /pages: "build\/mobile"/);
+  assert.match(config, /assets: "build\/mobile"/);
+  assert.match(config, /precompress: true/);
+  assert.match(config, /fallback: "index\.html"/);
+  assert.match(rootLayout, /prerender = true/);
+  assert.match(rootLayout, /ssr = false/);
+});
+
+test("rejects split SvelteKit adapter-static output directories", async () => {
+  const root = await createProject({
+    devDependencies: {
+      "@sveltejs/adapter-static": "^3.0.0",
+      "@sveltejs/kit": "^2.0.0",
+      svelte: "^5.0.0",
+      vite: "^8.0.0",
+    },
+    scripts: { build: "vite build" },
+  });
+  await writeFile(
+    path.join(root, "vite.config.ts"),
+    [
+      'import adapter from "@sveltejs/adapter-static";',
+      'import { sveltekit } from "@sveltejs/kit/vite";',
+      'import { defineConfig } from "vite";',
+      "",
+      "export default defineConfig({",
+      "  plugins: [sveltekit({",
+      '    adapter: adapter({ pages: "pages", assets: "assets" }),',
+      "  })],",
+      "});",
+      "",
+    ].join("\n"),
+  );
+
+  await assert.rejects(
+    async () => svelteKitAdapter.resolveWebDir(await loadProject(root)),
+    /pages and assets to use the same output directory/,
+  );
+});
+
+test("warns when SvelteKit server route files are present", async () => {
+  const root = await createProject({
+    devDependencies: {
+      "@sveltejs/adapter-auto": "^7.0.0",
+      "@sveltejs/kit": "^2.0.0",
+      svelte: "^5.0.0",
+      vite: "^8.0.0",
+    },
+    scripts: { build: "vite build" },
+  });
+  await writeFile(
+    path.join(root, "vite.config.ts"),
+    [
+      'import adapter from "@sveltejs/adapter-auto";',
+      'import { sveltekit } from "@sveltejs/kit/vite";',
+      'import { defineConfig } from "vite";',
+      "",
+      "export default defineConfig({",
+      "  plugins: [sveltekit({ adapter: adapter() })],",
+      "});",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    path.join(root, "src/routes/+page.server.ts"),
+    "export const load = () => ({});\n",
+  );
+
+  const diagnostics = await svelteKitAdapter.validate(await loadProject(root));
+
+  assert.equal(diagnostics.length, 1);
+  assert.equal(diagnostics[0].level, "warning");
+  assert.match(diagnostics[0].message, /src\/routes\/\+page\.server\.ts/);
+});
+
 test("resolves a custom React Vite output directory", async () => {
   const root = await createProject({
     dependencies: {
@@ -213,6 +438,20 @@ test("does not detect Nuxt as a standalone Vue project", async () => {
   });
 
   assert.equal(vueAdapter.detect(await loadProject(root)), false);
+});
+
+test("does not detect SvelteKit as standalone Svelte", async () => {
+  const root = await createProject({
+    devDependencies: {
+      "@sveltejs/kit": "^2.0.0",
+      svelte: "^5.0.0",
+      vite: "^8.0.0",
+    },
+    scripts: { build: "vite build" },
+  });
+
+  assert.equal(svelteAdapter.detect(await loadProject(root)), false);
+  assert.equal(svelteKitAdapter.detect(await loadProject(root)), true);
 });
 
 test("does not detect React frameworks as standalone React Vite projects", async () => {
@@ -351,6 +590,41 @@ test("Nuxt dry-run does not write framework configuration or package scripts", a
 
   assert.equal(await readFile(configPath, "utf8"), initialConfig);
   assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
+});
+
+test("SvelteKit dry-run does not write framework configuration or package dependencies", async () => {
+  const root = await createProject({
+    devDependencies: {
+      "@sveltejs/adapter-auto": "^7.0.0",
+      "@sveltejs/kit": "^2.0.0",
+      svelte: "^5.0.0",
+      vite: "^8.0.0",
+    },
+    scripts: { build: "vite build" },
+  });
+  const configPath = path.join(root, "vite.config.ts");
+  const packageJsonPath = path.join(root, "package.json");
+  const initialConfig = [
+    'import adapter from "@sveltejs/adapter-auto";',
+    'import { sveltekit } from "@sveltejs/kit/vite";',
+    'import { defineConfig } from "vite";',
+    "",
+    "export default defineConfig({",
+    "  plugins: [sveltekit({ adapter: adapter() })],",
+    "});",
+    "",
+  ].join("\n");
+  await writeFile(configPath, initialConfig);
+  const initialPackageJson = await readFile(packageJsonPath, "utf8");
+
+  await svelteKitAdapter.configure(await loadProject(root), true);
+
+  assert.equal(await readFile(configPath, "utf8"), initialConfig);
+  assert.equal(await readFile(packageJsonPath, "utf8"), initialPackageJson);
+  assert.equal(
+    await pathExists(path.join(root, "src/routes/+layout.js")),
+    false,
+  );
 });
 
 test("creates Capacitor config and package scripts", async () => {
@@ -529,6 +803,7 @@ test("merges serialized recommended defaults into a JSON Capacitor config", asyn
 
 async function createProject(packageJson: Record<string, unknown>) {
   const root = await mkdtemp(path.join(os.tmpdir(), "capstart-test-"));
+  await mkdir(path.join(root, "src/routes"), { recursive: true });
   await writeFile(
     path.join(root, "package.json"),
     `${JSON.stringify({ name: "example-app", ...packageJson }, null, 2)}\n`,

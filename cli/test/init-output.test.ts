@@ -298,6 +298,97 @@ test("configures a React Vite project with safe area from end to end", async () 
   );
 });
 
+test("configures a SvelteKit project with safe area from end to end", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "capstart-output-test-"));
+  const cssPath = path.join(root, "src/app.css");
+  const appTemplatePath = path.join(root, "src/app.html");
+  const viteConfigPath = path.join(root, "vite.config.ts");
+  await mkdir(path.join(root, "src/routes"), { recursive: true });
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    appTemplatePath,
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+  );
+  await writeFile(
+    viteConfigPath,
+    [
+      'import adapter from "@sveltejs/adapter-auto";',
+      'import { sveltekit } from "@sveltejs/kit/vite";',
+      'import { defineConfig } from "vite";',
+      "",
+      "export default defineConfig({",
+      "  plugins: [sveltekit({ adapter: adapter() })],",
+      "});",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    path.join(root, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "example-app",
+        devDependencies: {
+          "@sveltejs/adapter-auto": "^7.0.0",
+          "@sveltejs/kit": "^2.0.0",
+          svelte: "^5.0.0",
+          vite: "^8.0.0",
+        },
+        scripts: { build: "vite build" },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    await initCommand({
+      directory: root,
+      dryRun: false,
+      framework: "sveltekit",
+      interactive: false,
+      platforms: ["ios"],
+      safeArea: true,
+      skipBuild: true,
+      skipInstall: true,
+      skipNative: true,
+      yes: false,
+    });
+  } finally {
+    console.log = originalLog;
+  }
+
+  const capacitorConfig = await readFile(
+    path.join(root, "capacitor.config.ts"),
+    "utf8",
+  );
+  const packageJson = JSON.parse(
+    await readFile(path.join(root, "package.json"), "utf8"),
+  ) as {
+    devDependencies: Record<string, string>;
+    scripts: Record<string, string>;
+  };
+
+  assert.match(await readFile(appTemplatePath, "utf8"), /viewport-fit=cover/);
+  assert.match(await readFile(viteConfigPath, "utf8"), /adapter-static/);
+  assert.match(await readFile(viteConfigPath, "utf8"), /fallback: "index\.html"/);
+  assert.equal(
+    await readFile(path.join(root, "src/routes/+layout.js"), "utf8"),
+    "export const ssr = false;\n",
+  );
+  assert.match(capacitorConfig, /webDir: "build"/);
+  assert.equal(packageJson.devDependencies["@sveltejs/adapter-auto"], undefined);
+  assert.equal(
+    packageJson.devDependencies["@sveltejs/adapter-static"],
+    "^3.0.0",
+  );
+  assert.equal(
+    packageJson.scripts["cap:sync"],
+    "npm run build && npm exec cap -- sync",
+  );
+});
+
 function stripAnsi(value: string): string {
   return value.replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "");
 }

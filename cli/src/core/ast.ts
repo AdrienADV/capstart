@@ -124,7 +124,9 @@ function resolveObjectExpression(
   }
 
   if (Node.isIdentifier(expression)) {
-    const declaration = expression.getDefinitions()[0]?.getDeclarationNode();
+    const declaration =
+      expression.getSourceFile().getVariableDeclaration(expression.getText()) ??
+      expression.getDefinitions()[0]?.getDeclarationNode();
     if (Node.isVariableDeclaration(declaration)) {
       const initializer = declaration.getInitializer();
       return initializer

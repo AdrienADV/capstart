@@ -39,7 +39,8 @@ capstart/
 ### `cli`
 
 The `capstart` command-line tool configures existing Next.js, Nuxt, React +
-Vite, TanStack Start, and Vue applications for Capacitor.
+Vite, Svelte + Vite, SvelteKit, TanStack Start, and Vue applications for
+Capacitor.
 
 ```bash
 npx capstart init ..

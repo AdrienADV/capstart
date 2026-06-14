@@ -160,6 +160,57 @@ test("adds safe area CSS and viewport fit to a React Vite project", async () => 
   );
 });
 
+test("adds safe area CSS and viewport fit to a Svelte Vite project", async () => {
+  const root = await createProject();
+  const cssPath = path.join(root, "src/app.css");
+  const indexPath = path.join(root, "index.html");
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    indexPath,
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+  );
+  const project = await loadProject(root);
+
+  await configureSafeArea(project, "svelte", false);
+  await configureSafeArea(project, "svelte", false);
+
+  assert.equal(
+    (await readFile(cssPath, "utf8")).match(/Capstart safe area insets/g)
+      ?.length,
+    1,
+  );
+  assert.equal(
+    (await readFile(indexPath, "utf8")).match(/viewport-fit=cover/g)?.length,
+    1,
+  );
+});
+
+test("adds safe area CSS and viewport fit to a SvelteKit project", async () => {
+  const root = await createProject();
+  const cssPath = path.join(root, "src/app.css");
+  const appTemplatePath = path.join(root, "src/app.html");
+  await writeFile(cssPath, "body { margin: 0; }\n");
+  await writeFile(
+    appTemplatePath,
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+  );
+  const project = await loadProject(root);
+
+  await configureSafeArea(project, "sveltekit", false);
+  await configureSafeArea(project, "sveltekit", false);
+
+  assert.equal(
+    (await readFile(cssPath, "utf8")).match(/Capstart safe area insets/g)
+      ?.length,
+    1,
+  );
+  assert.equal(
+    (await readFile(appTemplatePath, "utf8")).match(/viewport-fit=cover/g)
+      ?.length,
+    1,
+  );
+});
+
 test("adds viewport fit to a Vue CLI public index", async () => {
   const root = await createProject();
   const cssPath = path.join(root, "src/assets/main.css");

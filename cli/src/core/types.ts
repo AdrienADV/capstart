@@ -2,6 +2,8 @@ export type FrameworkId =
   | "nextjs"
   | "nuxt"
   | "react-vite"
+  | "svelte"
+  | "sveltekit"
   | "tanstack-start"
   | "vue";
 export type Platform = "ios" | "android";
