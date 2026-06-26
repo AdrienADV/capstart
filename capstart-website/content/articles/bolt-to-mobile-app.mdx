@@ -3,6 +3,37 @@ title: Turn a Bolt App into a Mobile App
 description: A practical workflow for taking a web app built with Bolt, adding Capacitor with Capstart, then testing and building it for iOS or Android.
 ---
 
+<div className="not-prose mb-8 flex flex-col gap-3 rounded-lg border border-fd-border bg-fd-card p-4 sm:flex-row sm:items-center sm:justify-between">
+  <div className="flex flex-wrap items-center gap-3">
+    <a
+      href="https://bolt.dev"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open Bolt"
+      className="flex h-12 w-[8.25rem] items-center justify-center rounded-md border border-fd-border bg-white px-4 sm:w-36"
+    >
+      <img src="/logo-bolt.svg" alt="Bolt" className="h-6 w-auto" />
+    </a>
+    <span className="text-sm font-medium text-fd-muted-foreground">to</span>
+    <a
+      href="https://capgo.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open Capgo"
+      className="flex h-12 w-[8.25rem] items-center justify-center rounded-md border border-fd-border bg-black px-4 sm:w-36"
+    >
+      <img
+        src="/logo-capgo.webp"
+        alt="Capgo"
+        className="h-7 w-auto object-contain"
+      />
+    </a>
+  </div>
+  <p className="m-0 text-sm leading-relaxed text-fd-muted-foreground">
+    A practical path from a Bolt web app to native iOS and Android builds.
+  </p>
+</div>
+
 Bolt is great for getting a web app off the ground quickly: you describe the interface, the AI generates the project, you iterate in the browser, then you can inspect the code, sync it with GitHub, or download it to keep working locally. It is a strong way to turn an idea into a real product surface fast.
 
 But even a polished web app does not automatically become an installable mobile app for the App Store or Google Play. You still need a native layer around the web build, you need to check what actually runs inside the WebView, and you need to separate what can be bundled into the app from what must stay on a server.
