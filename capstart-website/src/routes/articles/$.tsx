@@ -14,6 +14,11 @@ import { Suspense } from "react";
 import { getMDXComponents } from "@/components/mdx";
 import { articleSource } from "@/lib/articles";
 import { baseOptions } from "@/lib/layout.shared";
+import { createSeo } from "@/lib/seo";
+
+const articlesTitle = "Articles";
+const articlesDescription =
+  "Practical guides for turning web apps into iOS and Android apps with Capacitor.";
 
 export const Route = createFileRoute("/articles/$")({
   component: Page,
@@ -28,12 +33,31 @@ export const Route = createFileRoute("/articles/$")({
     await clientLoader.preload(data.path);
     return data;
   },
+  head: ({ loaderData }) => {
+    if (!loaderData || loaderData.type === "index") {
+      return createSeo({
+        title: articlesTitle,
+        description: articlesDescription,
+        path: "/articles",
+      });
+    }
+
+    return createSeo({
+      title: loaderData.title,
+      description: loaderData.description,
+      path: loaderData.url,
+      type: "article",
+    });
+  },
 });
 
 const indexLoader = createServerFn({
   method: "GET",
 }).handler(async () => ({
   type: "index" as const,
+  title: articlesTitle,
+  description: articlesDescription,
+  url: "/articles",
   articles: articleSource.getPages().map((page) => ({
     title: page.data.title,
     description: page.data.description,
@@ -52,6 +76,9 @@ const articleLoader = createServerFn({
     return {
       type: "article" as const,
       path: page.path,
+      title: page.data.title,
+      description: page.data.description ?? page.data.title,
+      url: page.url,
       pageTree: await articleSource.serializePageTree(
         articleSource.getPageTree(),
       ),

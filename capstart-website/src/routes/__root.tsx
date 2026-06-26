@@ -5,13 +5,16 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
+import {
+  createSeo,
+  defaultSocialImage,
+  siteName,
+} from "@/lib/seo";
 import appCss from "@/styles/app.css?url";
 
-const siteUrl = "https://capstart.dev";
 const siteTitle = "Capstart - A simple guide to build CapacitorJS Apps";
 const siteDescription =
   "Build beautiful native iOS, Android, and web apps with Capstart, a curated CapacitorJS component library.";
-const socialImage = `${siteUrl}/og-image.png`;
 
 const analyticsScript = {
   src: "https://analytics.itswhereishipeverything.space/script.js",
@@ -29,67 +32,13 @@ export const Route = createRootRoute({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
-      { title: siteTitle },
-      {
-        name: "description",
-        content: siteDescription,
-      },
-      {
-        name: "robots",
-        content: "index, follow",
-      },
-      {
-        property: "og:type",
-        content: "website",
-      },
-      {
-        property: "og:site_name",
-        content: "Capstart",
-      },
-      {
-        property: "og:title",
-        content: siteTitle,
-      },
-      {
-        property: "og:description",
-        content: siteDescription,
-      },
-      {
-        property: "og:url",
-        content: siteUrl,
-      },
-      {
-        property: "og:image",
-        content: socialImage,
-      },
-      {
-        property: "og:image:width",
-        content: "2490",
-      },
-      {
-        property: "og:image:height",
-        content: "1354",
-      },
-      {
-        property: "og:image:alt",
-        content: "Capstart preview card for CapacitorJS native app components",
-      },
-      {
-        name: "twitter:card",
-        content: "summary_large_image",
-      },
-      {
-        name: "twitter:title",
-        content: siteTitle,
-      },
-      {
-        name: "twitter:description",
-        content: siteDescription,
-      },
-      {
-        name: "twitter:image",
-        content: socialImage,
-      },
+      ...createSeo({
+        title: siteTitle,
+        description: siteDescription,
+        path: "/",
+        image: defaultSocialImage,
+        imageAlt: `${siteName} preview card for CapacitorJS native app components`,
+      }).meta,
     ],
     links: [
       { rel: "stylesheet", href: appCss },

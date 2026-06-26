@@ -13,6 +13,7 @@ import {
 } from 'fumadocs-ui/layouts/docs/page';
 import { baseOptions } from '@/lib/layout.shared';
 import { gitConfig } from '@/lib/shared';
+import { createSeo } from '@/lib/seo';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense, useEffect } from 'react';
 import { getCalApi } from '@calcom/embed-react';
@@ -26,6 +27,16 @@ export const Route = createFileRoute('/docs/$')({
     await clientLoader.preload(data.path);
     return data;
   },
+  head: ({ loaderData }) => {
+    if (!loaderData) return {};
+
+    return createSeo({
+      title: loaderData.title,
+      description: loaderData.description,
+      path: loaderData.url,
+      type: "article",
+    });
+  },
 });
 
 const serverLoader = createServerFn({
@@ -38,6 +49,9 @@ const serverLoader = createServerFn({
 
     return {
       path: page.path,
+      title: page.data.title,
+      description: page.data.description ?? page.data.title,
+      url: page.url,
       markdownUrl: slugsToMarkdownPath(page.slugs).url,
       pageTree: await source.serializePageTree(source.getPageTree()),
     };
