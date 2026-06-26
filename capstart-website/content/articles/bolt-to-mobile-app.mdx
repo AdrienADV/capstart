@@ -1,0 +1,158 @@
+---
+title: Turn a Bolt App into a Mobile App
+description: A practical workflow for taking a web app built with Bolt, adding Capacitor with Capstart, then testing and building it for iOS or Android.
+---
+
+Bolt is great for getting a web app off the ground quickly: you describe the interface, the AI generates the project, you iterate in the browser, then you can inspect the code, sync it with GitHub, or download it to keep working locally. It is a strong way to turn an idea into a real product surface fast.
+
+But even a polished web app does not automatically become an installable mobile app for the App Store or Google Play. You still need a native layer around the web build, you need to check what actually runs inside the WebView, and you need to separate what can be bundled into the app from what must stay on a server.
+
+This guide covers the common path: you already built a web app with Bolt, and now you want to turn it into a mobile app without rewriting it.
+
+## The right mental model
+
+A Capacitor mobile app packages your web build inside native iOS and Android projects. Your screens, routing, design system, API calls, and much of your product logic stay in the web code. The native projects exist to launch the app, access mobile APIs, and produce store-ready builds.
+
+This model works well when:
+
+- your Bolt project already works as a web app;
+- the interface is mostly HTML, CSS, React, Vue, Svelte, Next.js, Nuxt, or another web framework;
+- you want to keep the iteration speed of web development;
+- native needs are limited or incremental: keyboard behavior, safe areas, network state, notifications, purchases, social login, camera access, and similar mobile features.
+
+It is less appropriate if you want a fully native mobile app with highly specific SwiftUI or Kotlin screens. In that case, choose a mobile-native stack from the start. Bolt also documents Expo app creation for projects that are mobile-first.
+
+## 1. Get the source code from Bolt
+
+Before adding the mobile layer, get the project out of Bolt and make it run locally.
+
+Depending on your workflow, you can:
+
+- use Bolt's code view to inspect the project structure;
+- connect the project to GitHub if you want clean version history;
+- download or clone the code, then work from your terminal.
+
+Once the project is local, install dependencies and run the web build:
+
+```npm
+npm install
+npm run build
+```
+
+Do not skip this step. If the web build fails, the mobile app will fail too. Fix the web project first: missing imports, missing environment variables, uninstalled dependencies, server routes used in the wrong place, or API calls that still point to `localhost`.
+
+## 2. Add Capacitor with Capstart
+
+Go to the root of the project exported from Bolt, then run:
+
+```npm
+npx capstart init .
+```
+
+Capstart detects the framework, configures a static build when needed, adds Capacitor, creates the iOS and Android projects, and adds useful scripts to `package.json`.
+
+For a Bolt-generated app, the detected framework depends on the generated template: React + Vite, Next.js, Vue, Nuxt, Svelte, SvelteKit, or TanStack Start. The important part is not the framework name, but the web build output directory. Capacitor needs to know which folder to package into the native app: `dist`, `out`, `.output/public`, `build`, or another directory depending on the framework.
+
+If you want to make the setup choices explicit, you can pass options:
+
+```npm
+npx capstart init . --setup recommended --safe-area
+```
+
+The recommended setup adds the baseline Capacitor plugins many apps eventually need: Keyboard, Network, Device, Splash Screen, and Status Bar. Safe-area handling adds the spacing needed around the notch, status bar, and home indicator.
+
+## 3. Review the generated changes
+
+After initialization, review what changed:
+
+- `capacitor.config.*`: app name, native app id, and `webDir`;
+- `package.json`: added Capacitor scripts;
+- `ios/` and/or `android/` native projects;
+- framework config, if Capstart needed to enable static output;
+- global CSS, if you enabled safe areas.
+
+Take a minute to replace the example identifier with a real one:
+
+```ts title="capacitor.config.ts"
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.company.product',
+  appName: 'Product',
+  webDir: 'dist',
+};
+
+export default config;
+```
+
+Keep the app id stable from the beginning. Changing it later can complicate builds, certificates, deep links, notifications, and in-app purchases.
+
+## 4. Test the app on a simulator or device
+
+Once the configuration looks right, sync the web build into the native projects:
+
+```npm
+npm run cap:sync
+```
+
+Then open the platform you want to test:
+
+```npm
+npm run cap:ios
+npm run cap:android
+```
+
+On iOS, this opens the project in Xcode. On Android, it opens Android Studio. Check the mobile-specific details that are easy to miss in a desktop browser:
+
+- the keyboard does not cover important fields;
+- buttons near the bottom respect safe areas;
+- deep pages still load inside the native app;
+- API calls use an HTTPS URL reachable from a phone;
+- authentication still works after redirects;
+- heavy assets do not make startup feel slow.
+
+## 5. Fix what was implicitly web-only
+
+Most of the Bolt code can usually stay as-is, but an installed app has different constraints.
+
+`localhost` URLs need to go away. In a simulator or on a phone, `localhost` points to the device, not your development machine. Use a deployed API, or a development URL that is explicitly reachable from your local network.
+
+Runtime server features are not bundled into the app. If your Next.js, Nuxt, SvelteKit, or TanStack Start project uses API routes, server actions, server functions, or runtime middleware, keep that logic on a deployed backend and call it from the mobile app.
+
+Local storage should be treated as device storage. It is useful for preferences, not as the source of truth. For sessions, use the approach recommended by your auth provider and test redirects on both iOS and Android.
+
+Mobile interactions deserve their own pass. A UI generated for desktop can look acceptable in Bolt but feel too dense on a phone. Review forms, menus, modals, tap targets, and offline states.
+
+## 6. Use CapGo if you do not have Xcode
+
+To open, sign, and build an iOS app locally, you need a Mac with Xcode. If you do not have Xcode, or if you do not want to maintain the native build chain on your machine, CapGo can handle that part in the cloud.
+
+CapGo provides cloud iOS and Android builds for Capacitor apps. The workflow becomes:
+
+1. keep the code in GitHub;
+2. configure the required identifiers, certificates, and secrets;
+3. run the iOS or Android build from CapGo's infrastructure;
+4. download a testable or publishable build, depending on your setup.
+
+This is not mandatory for every project. If you already have a Mac, Xcode, and Android Studio, local builds are fine. But for a web team, a solo creator, or a project that started in Bolt, avoiding the Xcode setup can remove a lot of friction.
+
+CapGo can also be useful later if you want automated native builds and web updates when the native shell has not changed. The rule is simple: build locally while it feels comfortable; move to cloud builds when the native toolchain slows down iteration.
+
+## Checklist before the first mobile build
+
+- The Bolt project builds locally with `npm run build`.
+- API calls use an HTTPS URL reachable from the device.
+- Required environment variables are defined outside Bolt.
+- `npx capstart init .` created or updated `capacitor.config.*`.
+- `appId`, `appName`, and `webDir` are correct.
+- Safe areas and keyboard behavior have been tested on mobile.
+- Server routes stay on a deployed backend.
+- You know whether you will build locally with Xcode/Android Studio or in the cloud with CapGo.
+
+## Useful sources
+
+- [Bolt](https://bolt.dev/)
+- [Bolt code view](https://support.bolt.new/building/using-bolt/code-view)
+- [Bolt GitHub integration](https://support.bolt.new/integrations/git)
+- [Capacitor documentation](https://capacitorjs.com/docs)
+- [CapGo native builds without a Mac](https://capgo.app/solutions/build-without-mac/)

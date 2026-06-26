@@ -3,9 +3,20 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { CodeBlock, CodeBlockTab, CodeBlockTabs, CodeBlockTabsList, CodeBlockTabsTrigger, Pre } from 'fumadocs-ui/components/codeblock';
 import { baseOptions } from '@/lib/layout.shared';
+import { createSeo } from '@/lib/seo';
+
+const homeTitle = 'Capstart - A simple guide to build CapacitorJS Apps';
+const homeDescription =
+  'Build beautiful native iOS, Android, and web apps with Capstart, a curated CapacitorJS component library.';
 
 export const Route = createFileRoute('/')({
   component: Home,
+  head: () =>
+    createSeo({
+      title: homeTitle,
+      description: homeDescription,
+      path: '/',
+    }),
 });
 
 function StartBuildingSection() {
