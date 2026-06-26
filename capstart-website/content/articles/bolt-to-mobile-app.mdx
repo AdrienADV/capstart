@@ -123,20 +123,34 @@ Local storage should be treated as device storage. It is useful for preferences,
 
 Mobile interactions deserve their own pass. A UI generated for desktop can look acceptable in Bolt but feel too dense on a phone. Review forms, menus, modals, tap targets, and offline states.
 
-## 6. Use CapGo if you do not have Xcode
+## 6. Use Capgo if you do not have Xcode
 
-To open, sign, and build an iOS app locally, you need a Mac with Xcode. If you do not have Xcode, or if you do not want to maintain the native build chain on your machine, CapGo can handle that part in the cloud.
+To open, sign, and build an iOS app locally, you need a Mac with Xcode. If you do not have Xcode, or if you do not want to maintain the native build chain on your machine, Capgo can handle that part in the cloud.
 
-CapGo provides cloud iOS and Android builds for Capacitor apps. The workflow becomes:
+Capgo provides cloud iOS and Android builds for Capacitor apps. The workflow becomes:
 
 1. keep the code in GitHub;
 2. configure the required identifiers, certificates, and secrets;
-3. run the iOS or Android build from CapGo's infrastructure;
+3. run the iOS or Android build from Capgo's infrastructure;
 4. download a testable or publishable build, depending on your setup.
+
+<div className="not-prose my-6 flex flex-col gap-3 rounded-lg border border-fd-border bg-fd-card p-4 sm:flex-row sm:items-center sm:justify-between">
+  <p className="text-sm leading-relaxed text-fd-muted-foreground">
+    Capgo can run the native build in the cloud when you do not want to set up Xcode locally.
+  </p>
+  <a
+    href="https://capgo.app"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex shrink-0 items-center justify-center rounded-md border border-fd-border px-3 py-2 text-sm font-medium text-fd-foreground transition-colors hover:bg-fd-muted"
+  >
+    Open Capgo
+  </a>
+</div>
 
 This is not mandatory for every project. If you already have a Mac, Xcode, and Android Studio, local builds are fine. But for a web team, a solo creator, or a project that started in Bolt, avoiding the Xcode setup can remove a lot of friction.
 
-CapGo can also be useful later if you want automated native builds and web updates when the native shell has not changed. The rule is simple: build locally while it feels comfortable; move to cloud builds when the native toolchain slows down iteration.
+Capgo can also be useful later if you want automated native builds and web updates when the native shell has not changed. The rule is simple: build locally while it feels comfortable; move to cloud builds when the native toolchain slows down iteration.
 
 ## Checklist before the first mobile build
 
@@ -147,7 +161,7 @@ CapGo can also be useful later if you want automated native builds and web updat
 - `appId`, `appName`, and `webDir` are correct.
 - Safe areas and keyboard behavior have been tested on mobile.
 - Server routes stay on a deployed backend.
-- You know whether you will build locally with Xcode/Android Studio or in the cloud with CapGo.
+- You know whether you will build locally with Xcode/Android Studio or in the cloud with Capgo.
 
 ## Useful sources
 
@@ -155,4 +169,4 @@ CapGo can also be useful later if you want automated native builds and web updat
 - [Bolt code view](https://support.bolt.new/building/using-bolt/code-view)
 - [Bolt GitHub integration](https://support.bolt.new/integrations/git)
 - [Capacitor documentation](https://capacitorjs.com/docs)
-- [CapGo native builds without a Mac](https://capgo.app/solutions/build-without-mac/)
+- [Capgo native builds without a Mac](https://capgo.app/solutions/build-without-mac/)
