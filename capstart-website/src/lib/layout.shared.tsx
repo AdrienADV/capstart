@@ -1,5 +1,5 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { appName, gitConfig } from './shared';
+import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import { appName, articlesRoute, docsRoute, gitConfig } from "./shared";
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -7,6 +7,18 @@ export function baseOptions(): BaseLayoutProps {
       // JSX supported
       title: appName,
     },
+    links: [
+      {
+        type: "main",
+        text: "Docs",
+        url: docsRoute,
+      },
+      {
+        type: "main",
+        text: "Articles",
+        url: articlesRoute,
+      },
+    ],
     githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
   };
 }
