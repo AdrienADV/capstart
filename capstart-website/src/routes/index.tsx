@@ -12,52 +12,114 @@ function StartBuildingSection() {
   const [appName, setAppName] = useState('');
   const name = appName.trim() || 'Facebook';
 
-  const copyActions = ({ className, children }: { className?: string; children?: React.ReactNode }) => (
-    <div className={className} onClick={() => window.umami?.track('start-building-copy')}>
+  const trackCopyAction = (eventName: string) => {
+    window.umami?.track(eventName);
+  };
+
+  const copyActions = (eventName: string) => ({ className, children }: { className?: string; children?: React.ReactNode }) => (
+    <div
+      aria-label="Code block actions"
+      className={className}
+      role="toolbar"
+      onClick={() => trackCopyAction(eventName)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          trackCopyAction(eventName);
+        }
+      }}
+    >
       {children}
     </div>
   );
 
   return (
     <section className="px-6 py-12">
-      <div className="mx-auto max-w-xl flex flex-col items-center gap-4 text-center">
+      <div className="mx-auto max-w-5xl flex flex-col items-center gap-4 text-center">
         <p className="text-xl font-bold text-fd-primary">Start building</p>
-        <div className="flex items-center gap-3 text-sm">
-          <label htmlFor="app-name" className="text-fd-muted-foreground shrink-0">
-            What are you building?
-          </label>
-          <input
-            id="app-name"
-            type="text"
-            value={appName}
-            onChange={(e) => setAppName(e.target.value)}
-            placeholder="Facebook"
-            className="w-40 px-3 py-1.5 rounded-lg border border-fd-border bg-fd-background text-fd-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-fd-ring/50"
-          />
-        </div>
-        <div className="w-full text-left">
-          <CodeBlockTabs defaultValue="npx">
-            <CodeBlockTabsList>
-              <CodeBlockTabsTrigger value="npx">npx</CodeBlockTabsTrigger>
-              <CodeBlockTabsTrigger value="bunx">bunx</CodeBlockTabsTrigger>
-              <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
-            </CodeBlockTabsList>
-            <CodeBlockTab value="npx">
-              <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions}>
-                <Pre>{`npx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
-              </CodeBlock>
-            </CodeBlockTab>
-            <CodeBlockTab value="bunx">
-              <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions}>
-                <Pre>{`bunx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
-              </CodeBlock>
-            </CodeBlockTab>
-            <CodeBlockTab value="pnpm">
-              <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions}>
-                <Pre>{`pnpm dlx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
-              </CodeBlock>
-            </CodeBlockTab>
-          </CodeBlockTabs>
+        <div className="grid w-full grid-cols-1 gap-5 text-left lg:grid-cols-2 lg:items-start">
+          <div className="flex flex-col gap-3">
+            <div className="flex min-h-24 flex-col justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-fd-foreground">
+                  Create a new project
+                </p>
+                <p className="mt-1 text-sm text-fd-muted-foreground">
+                  Start from the Capstart Vite boilerplate with{' '}
+                  <strong className="text-fd-foreground">React</strong>,{' '}
+                  <strong className="text-fd-foreground">shadcn/ui</strong>, and{' '}
+                  <strong className="text-fd-foreground">Supabase</strong>.
+                </p>
+              </div>
+              <label htmlFor="app-name" className="flex flex-col gap-2 text-sm text-fd-muted-foreground sm:flex-row sm:items-center">
+                App name
+                <input
+                  id="app-name"
+                  type="text"
+                  value={appName}
+                  onChange={(e) => setAppName(e.target.value)}
+                  placeholder="Facebook"
+                  className="w-full px-3 py-1.5 rounded-lg border border-fd-border bg-fd-background text-fd-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-fd-ring/50 sm:w-40"
+                />
+              </label>
+            </div>
+            <CodeBlockTabs defaultValue="npx">
+              <CodeBlockTabsList>
+                <CodeBlockTabsTrigger value="npx">npx</CodeBlockTabsTrigger>
+                <CodeBlockTabsTrigger value="bunx">bunx</CodeBlockTabsTrigger>
+                <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+              </CodeBlockTabsList>
+              <CodeBlockTab value="npx">
+                <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-boilerplate')}>
+                  <Pre>{`npx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+                </CodeBlock>
+              </CodeBlockTab>
+              <CodeBlockTab value="bunx">
+                <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-boilerplate')}>
+                  <Pre>{`bunx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+                </CodeBlock>
+              </CodeBlockTab>
+              <CodeBlockTab value="pnpm">
+                <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-boilerplate')}>
+                  <Pre>{`pnpm dlx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+                </CodeBlock>
+              </CodeBlockTab>
+            </CodeBlockTabs>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex min-h-24 flex-col justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-fd-foreground">
+                  If you already have a web app
+                </p>
+                <p className="mt-1 text-sm text-fd-muted-foreground">
+                  Run Capstart from the root of your existing web project.
+                </p>
+              </div>
+              <span aria-hidden="true" className="h-8" />
+            </div>
+            <CodeBlockTabs defaultValue="npx">
+              <CodeBlockTabsList>
+                <CodeBlockTabsTrigger value="npx">npx</CodeBlockTabsTrigger>
+                <CodeBlockTabsTrigger value="bunx">bunx</CodeBlockTabsTrigger>
+                <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+              </CodeBlockTabsList>
+              <CodeBlockTab value="npx">
+                <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-cli')}>
+                  <Pre>npx capstart init .</Pre>
+                </CodeBlock>
+              </CodeBlockTab>
+              <CodeBlockTab value="bunx">
+                <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-cli')}>
+                  <Pre>bunx capstart init .</Pre>
+                </CodeBlock>
+              </CodeBlockTab>
+              <CodeBlockTab value="pnpm">
+                <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-cli')}>
+                  <Pre>pnpm dlx capstart init .</Pre>
+                </CodeBlock>
+              </CodeBlockTab>
+            </CodeBlockTabs>
+          </div>
         </div>
       </div>
     </section>
