@@ -1,0 +1,238 @@
+---
+title: Turn a Base44 App into a Mobile App
+description: A practical workflow for taking a web app built with Base44, choosing the right mobile packaging path, then testing and building it for iOS or Android.
+---
+
+<div className="not-prose mb-8 flex flex-col gap-3 rounded-lg border border-fd-border bg-fd-card p-4 sm:flex-row sm:items-center sm:justify-between">
+  <div className="flex flex-wrap items-center gap-3">
+    <a
+      href="https://base44.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open Base44"
+      className="flex h-12 w-[8.25rem] items-center justify-center rounded-md border border-fd-border bg-white px-4 sm:w-36"
+    >
+      <img src="/logo-base44.svg" alt="Base44" className="h-6 w-auto" />
+    </a>
+    <span className="text-sm font-medium text-fd-muted-foreground">to</span>
+    <a
+      href="https://capgo.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open Capgo"
+      className="flex h-12 w-[8.25rem] items-center justify-center rounded-md border border-fd-border bg-black px-4 sm:w-36"
+    >
+      <img
+        src="/logo-capgo.webp"
+        alt="Capgo"
+        className="h-7 w-auto object-contain"
+      />
+    </a>
+  </div>
+  <p className="m-0 text-sm leading-relaxed text-fd-muted-foreground">
+    A practical path from a Base44 web app to native iOS and Android builds.
+  </p>
+</div>
+
+Base44 is a fast way to build a full-stack web app with AI. The generated app is still a web app: Base44 uses React, React Router, Vite, Tailwind CSS, shadcn/ui, a managed backend, authentication, functions, and the Base44 SDK. That makes it a good candidate for a mobile wrapper, because most of the product can stay in the web layer.
+
+Base44 also has a built-in mobile flow. From the app editor, you can publish the app, let users add it to their home screen, scan it against app store guidelines, and generate IPA or AAB files for store submission on supported plans.
+
+So the question is not simply "How do I wrap Base44 with Capacitor?" The better question is: which mobile path should you use?
+
+## The right mental model
+
+A Base44 app can become mobile in three different ways.
+
+The fastest path is the mobile web path. You publish the Base44 app, share the link, and users can add it to their home screen. Base44 manages the PWA manifest from your app settings, and published changes appear automatically.
+
+The built-in store path is Base44's native wrapper. Base44 packages your published app URL inside a secure WebView, then generates store files from the Mobile app tab. This is useful when you want app store distribution without owning a native project.
+
+The code-owned path is a Capacitor app created from your exported or synced Base44 code. This is the path to choose when you want version control, native plugins, custom app identifiers, native signing ownership, CI, or cloud native builds through tools such as Capgo.
+
+The tradeoff is control. Base44's built-in package is convenient, but its current mobile wrapper focuses on running the live web app. It does not currently cover native-only features such as push notifications, full offline mode, or HealthKit. If your mobile roadmap needs those features, plan for the code-owned path.
+
+## 1. Decide before you create a store listing
+
+Pick one native shell before the first public store submission.
+
+Use Base44's built-in Mobile app tab when:
+
+- the app works well as a responsive web app;
+- you want the simplest path to IPA and AAB files;
+- you do not need custom native plugins;
+- you are comfortable with the generated package name, bundle identifiers, and signing flow;
+- most updates should come from publishing changes in Base44.
+
+Use Capstart and Capacitor when:
+
+- you want the native iOS and Android projects in your repository;
+- you need plugins for notifications, purchases, social login, camera, files, widgets, or native navigation;
+- you want a stable app id that you own from the beginning;
+- you want to build locally with Xcode and Android Studio, or in the cloud with Capgo;
+- you want code review, branches, pull requests, and repeatable release builds.
+
+Do not casually switch between these paths for the same App Store or Google Play listing. Store updates are tied to identifiers and signing keys. Base44 documents that generated native files use Base44-configured identifiers and signing values that you cannot edit inside the generated IPA or AAB. If you later upload a different Capacitor shell with different identifiers or signing, the stores can reject the update.
+
+## 2. Make the Base44 app mobile-ready first
+
+Before exporting code or generating native files, finish the mobile pass in Base44.
+
+Open the app on a phone-sized viewport and test the actual product flows:
+
+- first load, sign up, login, logout, and password recovery;
+- every form users need to complete;
+- menus, dialogs, sheets, and dropdowns;
+- checkout or subscription flows, if the app sells anything;
+- empty states, error states, and loading states;
+- privacy policy and terms links before signup.
+
+Base44's app store flow includes a scan against Apple and Google guidelines, plus AI-assisted fixes. Run that scan even if you plan to export the app later. It catches the same product problems that make mobile WebViews feel unfinished: missing legal links, weak onboarding, unclear permissions, unusable layouts, or incomplete store metadata.
+
+If your app sells physical goods or real-world services, Stripe can usually remain part of the app flow. If it sells digital goods, subscriptions, paid features, credits, or content consumed in the app, do not assume your web checkout is acceptable inside a mobile app. Apple and Google usually require their own billing systems for digital content.
+
+## 3. If the built-in Base44 mobile path is enough
+
+For many Base44 projects, you may not need Capstart at all.
+
+The built-in flow is:
+
+1. publish the Base44 app with a stable URL;
+2. prepare your Apple Developer and Google Play Console accounts;
+3. open `Publish` in Base44, then the `Mobile app` tab;
+4. run the app scan for App Store and/or Google Play guidelines;
+5. apply fixes, publish again, and rerun the scan;
+6. generate App Store files for iOS or Google Play files for Android;
+7. upload the downloaded IPA or AAB through the store dashboards.
+
+This path creates a lightweight native wrapper around your published Base44 app. When you publish most content and design changes in Base44, users usually see them in the installed app without a new store submission. You still need a new native submission when the shell changes: app name, icon, identifiers, permissions, or anything the store needs to review as a binary update.
+
+This route is especially good for internal tools, MVPs, directory apps, portals, dashboards, and simple transactional apps where store presence matters more than deep native integration.
+
+## 4. Get the source code from Base44
+
+Choose this path when you want a code-owned mobile app.
+
+Base44 provides several developer workflows:
+
+- use the Code tab to inspect and edit the React/Vite project;
+- connect GitHub for version control and local development;
+- export the app code as a ZIP on supported plans;
+- use `base44 eject` when you want a one-time local copy with a new Base44 backend.
+
+Be careful with the choice. GitHub two-way sync is meant for ongoing local development, but Base44 documents it as permanent for the connected app. Eject is different: it clones the app into a separate local project, creates a new Base44 backend with its own app id, and starts with an empty database.
+
+For a normal mobile conversion, GitHub sync is usually the cleanest path. Clone the repository, install dependencies, and create the local environment file expected by Base44:
+
+```bash
+npm install
+```
+
+```bash title=".env.local"
+VITE_BASE44_APP_ID=your_app_id
+VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
+```
+
+Then verify the web app locally:
+
+```npm
+npm run dev
+npm run build
+```
+
+Do not add Capacitor until the web build passes. If the exported project cannot build as a web app, it will not build as a mobile app.
+
+## 5. Add Capacitor with Capstart
+
+Base44 app code is a React + Vite project, so run Capstart from the exported or synced project root:
+
+```npm
+npx capstart init . --framework react-vite --setup recommended --safe-area
+```
+
+Capstart adds Capacitor, creates the native iOS and Android projects, configures the Vite build output as the Capacitor `webDir`, and adds mobile scripts to `package.json`.
+
+For a standard Base44 React/Vite app, the expected web output is usually `dist`:
+
+```ts title="capacitor.config.ts"
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.company.product',
+  appName: 'Product',
+  webDir: 'dist',
+};
+
+export default config;
+```
+
+Replace the example app id immediately. This is the native identifier that should remain stable across your App Store and Google Play releases. If you already created a Base44-generated native listing, check the identifier and signing situation before trying to upload a new Capacitor build to that same listing.
+
+## 6. Test the native app, not just the browser
+
+Sync the web build into the native projects:
+
+```npm
+npm run cap:sync
+```
+
+Then open the platform you want to test:
+
+```npm
+npm run cap:ios
+npm run cap:android
+```
+
+Test on a simulator and, before launch, on real devices. A Base44 app can look good in desktop preview while still needing mobile fixes:
+
+- the keyboard should not cover important fields;
+- safe areas should protect content near the notch and home indicator;
+- auth redirects and sessions should survive the native WebView;
+- the Base44 backend URL should be reachable over HTTPS;
+- Google login, if used, may need the correct app signing fingerprint;
+- legal pages should be reachable before account creation;
+- store-sensitive flows such as payments should match Apple and Google rules.
+
+Remember that Capacitor bundles the built frontend. It does not bundle Base44's managed hosting, authentication, database, or backend infrastructure into the app. If the app depends on Base44 services, the native shell still needs to reach the deployed Base44 backend.
+
+## 7. Use Capgo if you do not want the native toolchain locally
+
+To open, sign, and build an iOS app locally, you need a Mac with Xcode. Android builds need Android Studio and the Android SDK. If you do not want every developer to maintain that setup, Capgo can build Capacitor apps in the cloud.
+
+The workflow becomes:
+
+1. keep the exported Base44 project in GitHub;
+2. add Capacitor with Capstart and commit the native projects;
+3. configure native identifiers, certificates, and secrets;
+4. run iOS and Android builds from Capgo;
+5. download testable or publishable builds from the cloud.
+
+This is most useful once you have chosen the code-owned path. If Base44's own Mobile app tab already gives you the store files you need, use that first. Move to Capstart and Capgo when the native shell becomes part of the product.
+
+## Checklist before the first mobile build
+
+- You chose either Base44's generated native wrapper or your own Capacitor shell.
+- The Base44 app is published and works on a real mobile viewport.
+- Store scans have no unresolved critical issues.
+- Privacy policy and terms links are reachable before signup.
+- Digital goods do not rely on a web checkout inside the mobile app.
+- If exporting code, GitHub sync, ZIP export, or eject is the right workflow for the project.
+- The local project builds with `npm run build`.
+- `VITE_BASE44_APP_ID` and `VITE_BASE44_APP_BASE_URL` are defined for local builds.
+- `npx capstart init .` created or updated `capacitor.config.*`.
+- `appId`, `appName`, and `webDir` are correct.
+- Auth, payments, keyboard behavior, safe areas, and backend calls have been tested inside the native app.
+- You know whether builds will run locally or in the cloud with Capgo.
+
+## Useful sources
+
+- [Base44](https://base44.com/)
+- [Base44 mobile experience](https://docs.base44.com/Building-your-app/Mobile-experience)
+- [Base44 app store submission](https://docs.base44.com/documentation/building-your-app/uploading-to-app-stores)
+- [Base44 Code tab](https://docs.base44.com/developers/app-code/editor/code-tab)
+- [Base44 GitHub integration](https://docs.base44.com/developers/app-code/local-development/github)
+- [Base44 project structure](https://docs.base44.com/developers/app-code/overview/project-structure)
+- [Base44 eject workflow](https://docs.base44.com/developers/backend/overview/start-from-existing-app)
+- [Capstart CLI](/docs/cli)
+- [Capacitor documentation](https://capacitorjs.com/docs)
+- [Capgo native builds without a Mac](https://capgo.app/solutions/build-without-mac/)
