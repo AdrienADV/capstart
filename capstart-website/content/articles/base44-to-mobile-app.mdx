@@ -1,26 +1,28 @@
 ---
-title: Base44 to Native Mobile Apps
-description: Export a Base44 React app, add Capacitor with Capstart, then build signed iOS and Android apps with Capgo.
+title: Base44 to App Store with Capgo
+description: A simple, non-technical guide to turning a Base44 app into an App Store build with Capstart and Capgo.
 ---
 
-<div className="not-prose mb-8 flex flex-col gap-3 rounded-lg border border-fd-border bg-fd-card p-4 sm:flex-row sm:items-center sm:justify-between">
-  <div className="flex flex-wrap items-center gap-3">
+<div className="not-prose mb-8 flex flex-col gap-4 rounded-lg border border-fd-border bg-fd-card p-4 lg:flex-row lg:items-center lg:justify-between">
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
     <a
       href="https://base44.com"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Open Base44"
-      className="flex h-12 w-[8.25rem] items-center justify-center rounded-md border border-fd-border bg-white px-4 sm:w-36"
+      className="flex h-12 w-36 shrink-0 items-center justify-center rounded-md border border-fd-border bg-white px-4"
     >
       <img src="/logo-base44.svg" alt="Base44" className="h-6 w-auto" />
     </a>
-    <span className="text-sm font-medium text-fd-muted-foreground">to</span>
+    <span className="text-center text-sm font-medium text-fd-muted-foreground">
+      to
+    </span>
     <a
       href="https://capgo.app"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Open Capgo"
-      className="flex h-12 w-[8.25rem] items-center justify-center rounded-md border border-fd-border bg-black px-4 sm:w-36"
+      className="flex h-12 w-36 shrink-0 items-center justify-center rounded-md border border-fd-border bg-black px-4"
     >
       <img
         src="/logo-capgo.webp"
@@ -29,350 +31,192 @@ description: Export a Base44 React app, add Capacitor with Capstart, then build 
       />
     </a>
   </div>
-  <p className="m-0 text-sm leading-relaxed text-fd-muted-foreground">
-    A practical path from a Base44 web app to native iOS and Android builds.
+  <p className="m-0 max-w-md text-sm leading-relaxed text-fd-muted-foreground lg:text-right">
+    The simple path from a Base44 app to an App Store build with Capgo.
   </p>
 </div>
 
-Base44 is useful because it gets you to a real React application quickly. You describe the product, iterate in the browser, connect data, and end up with something people can use without starting from a blank repository.
+If you built your product in Base44, you already have the most important part: the app people use.
 
-Shipping that same product to the App Store or Google Play is a different step. The web app needs to be exported, built as static assets, wrapped in a native Capacitor project, tested inside a WebView, then signed for each store.
+What you do not have yet is the file Apple accepts in App Store Connect. The simple version is:
 
-This guide shows the Capstart path: export the Base44 project, add Capacitor with one setup command, then use Capgo Builder when you want signed iOS or Android builds without maintaining the full native toolchain locally.
+1. Base44 is where you build and publish the app.
+2. Capstart turns the Base44 project into a mobile app project.
+3. Capgo builds the iPhone app in the cloud.
+4. App Store Connect is where you send the app to Apple for review.
 
-## Prerequisites and time estimate
+Think of it like packaging. Base44 is the product. Capstart makes the mobile box around it. Capgo prepares the signed file Apple can open. Apple still decides whether the app can go live.
 
-Plan 2 to 4 hours for a first setup if your Base44 app already works well on mobile web.
+## First: do you even need Capgo?
 
-You will need:
+Base44 already has its own mobile flow. It can scan your app against app store guidelines and generate App Store or Google Play files on supported plans. If your app is simple and you do not need special phone features, try that first.
 
-- a Base44 plan that lets you export code through GitHub or ZIP;
-- Node.js 18 or newer;
-- a code editor, such as Cursor or VS Code;
-- 8 GB RAM and roughly 10 GB of free disk space;
-- an Apple Developer account for iOS distribution;
-- a Google Play Developer account for Android distribution;
-- a Mac with Xcode only if you want local iOS builds.
+Use Base44's own mobile flow when:
 
-If you use Capgo Builder for iOS, the build can run in the cloud from macOS, Windows, or Linux. You still need your Apple Developer account because Apple controls signing, TestFlight, and App Store review.
+- you mostly want your Base44 app listed in the stores;
+- the app works well on a phone already;
+- you do not need push notifications, advanced offline mode, or custom device features;
+- you are happy for Base44 to handle the mobile package.
 
-## Why turn a Base44 app into a mobile app?
+Use Capstart and Capgo when:
 
-A Base44 app can already run in a mobile browser. Native packaging is useful when the product needs more than a browser tab:
+- you want to own the mobile app project yourself;
+- you want your own stable app identifier from the beginning;
+- you need native features later, such as notifications, camera access, Apple sign-in, in-app purchases, or native navigation;
+- you want Capgo to build the app without setting up Xcode on your own machine;
+- you want a repeatable release process for future versions.
 
-- users expect an installed app icon and store distribution;
-- you need camera, push notifications, share sheets, biometrics, files, or offline storage;
-- you want one codebase for web, iOS, and Android;
-- you want a stable native project you control outside the Base44 editor;
-- you want cloud builds and live-update workflows through Capgo.
+Choose the path before the first public App Store submission. Apple identifies an app with technical values such as the bundle ID and signing setup. Treat them like the app's passport number. Changing the mobile package later can make updates harder.
 
-If your app is a simple mobile web experience and Base44's own mobile publishing flow covers your needs, start there. Choose Capstart and Capgo when you want to own the Capacitor project, add native features over time, or make the release process repeatable.
+## Before you package the app
 
-## Step 1: Export the Base44 project
+Do one careful mobile pass inside Base44 first.
 
-Capstart works on the project files, so the first job is to get the Base44 code onto your machine or into GitHub.
+Open the app on a real phone and check:
 
-### Option A: Sync to GitHub
+- the first screen loads quickly enough;
+- signup, login, logout, and password recovery work;
+- every form can be completed with the phone keyboard;
+- menus, popups, and buttons are easy to tap;
+- privacy policy and terms links are visible before signup;
+- the app name, logo, and screenshots look ready for a store listing.
 
-Use this route if you want a clean release workflow.
+Also check payments early. If you sell physical goods or real-world services, a normal web checkout such as Stripe is usually fine. If you sell digital content, paid features, subscriptions, credits, or anything used inside the app, Apple and Google usually expect their own in-app purchase systems.
 
-1. Open the app in Base44.
-2. Connect the project to GitHub from the Base44 code or export controls.
-3. Create a new repository or link an existing one.
-4. Clone the repository locally.
+## The simplest Capstart + Capgo path
 
-This is usually the best option for Capgo Builder because the native iOS and Android projects can live in the same repository as the web app.
+This is the normal route when you want to go from Base44 to the App Store through Capgo.
 
-### Option B: Download a ZIP
+### 1. Finish and publish the Base44 app
 
-Use ZIP export when you just want to try the conversion locally.
+Get the Base44 version stable first. It does not need to be perfect, but the main flow should work on mobile.
 
-1. Open the project code view in Base44.
-2. Export the project archive.
-3. Extract it on your computer.
-4. Open the extracted folder in your editor.
+You should have:
 
-Do not add Capacitor inside a random parent folder. Open the folder that contains the Base44 app's `package.json`.
+- a published Base44 app URL;
+- a clear app name;
+- a logo or app icon;
+- a privacy policy;
+- terms of use;
+- an Apple Developer account.
 
-## Step 2: Run the Base44 app locally
+Base44's mobile scan is useful even if you plan to build with Capgo later. Run it to catch obvious store issues before you spend time on the native build.
 
-Before adding a native layer, prove that the exported web project still works.
+### 2. Get the code out of Base44
 
-With Cursor, you can ask:
+To use Capstart and Capgo, you need the app's code outside Base44.
 
-```txt
-Install the project dependencies, check that Node.js is available, and start the local dev server for this Base44 app.
-```
+The usual options are:
 
-Or run the commands manually:
+- connect Base44 to GitHub;
+- export the code as a ZIP file on a supported Base44 plan.
 
-```npm
-npm install
-npm run dev
-```
+This is the first step where a non-technical founder may want help from a developer. You are not rebuilding the app. You are taking the files behind the Base44 app so they can be packaged for mobile.
 
-Open the local URL shown in the terminal. Base44 React projects commonly run through Vite, often at `http://localhost:5173`, but use the port printed by your dev server.
+### 3. Add the mobile app wrapper with Capstart
 
-Fix web issues now: missing environment variables, broken imports, API calls pointing at `localhost`, auth redirects that only work in the Base44 preview, or routes that fail after a refresh.
-
-## Step 3: Prepare the production build
-
-Capacitor does not package your dev server. It packages the production web output, usually a `dist/` folder for a React + Vite project.
-
-Capstart can configure the common pieces for you, but it helps to know what it is aiming for. A typical Vite setup for a Capacitor app looks like this:
-
-```ts title="vite.config.ts"
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  plugins: [react()],
-  base: './',
-  build: {
-    outDir: 'dist',
-  },
-});
-```
-
-Then build the app:
-
-```npm
-npm run build
-```
-
-Check that `dist/index.html` exists and that the build finishes without errors. If the production build fails, the native build will fail too.
-
-## Step 4: Add Capacitor with Capstart
-
-From the root of the exported Base44 project, run:
+Capstart adds the mobile layer around the Base44 project. In practice, a developer runs one command from the project folder:
 
 ```npm
 npx capstart init . --framework react-vite --setup recommended --safe-area
 ```
 
-If your exported project is not React + Vite, let Capstart detect the framework:
+After that, the project has the pieces needed for an iPhone or Android app.
 
-```npm
-npx capstart init . --setup recommended --safe-area
-```
-
-Capstart adds the Capacitor setup around the existing app. Depending on the project, it can:
-
-- install the Capacitor packages;
-- create or update `capacitor.config.*`;
-- add iOS and Android native projects;
-- add build and sync scripts to `package.json`;
-- configure the web output directory;
-- add safe-area handling for notches, status bars, and home indicators;
-- include common plugins such as Keyboard, Network, Device, Status Bar, and Splash Screen.
-
-The important value to choose carefully is the native app id:
+The important setting is the app identifier. It usually looks like this:
 
 ```txt
 com.company.product
 ```
 
-Treat it as permanent. Changing it later can affect store listings, certificates, push notifications, deep links, and in-app purchases.
+Pick it carefully and keep it stable. It should belong to your company or product, not to a temporary test name.
 
-## Step 5: Review the Capacitor config
+### 4. Test the mobile version before sending it to Apple
 
-After Capstart finishes, review `capacitor.config.ts` or `capacitor.config.json`.
+Do not submit the first build blindly.
 
-For a Base44 React + Vite app, the config should be close to this:
+Test the app as an installed app, not only in a browser. Check:
 
-```ts title="capacitor.config.ts"
-import type { CapacitorConfig } from '@capacitor/cli';
+- the keyboard does not hide important fields;
+- the top and bottom of the screen are not cut off;
+- login still works inside the mobile app;
+- links open in the right place;
+- the app can reach the Base44 backend over HTTPS;
+- payments follow Apple and Google rules.
 
-const config: CapacitorConfig = {
-  appId: 'com.company.product',
-  appName: 'Product',
-  webDir: 'dist',
-  server: {
-    androidScheme: 'https',
-  },
-};
+This step matters because an app can look fine in the Base44 editor but feel broken once installed on a phone.
 
-export default config;
-```
+### 5. Build the App Store file with Capgo
 
-Replace the placeholder app id and name before your first serious build. Also confirm that `webDir` matches the folder created by `npm run build`.
+Capgo can build Capacitor apps in the cloud. For iOS, that means you do not have to maintain Xcode and Apple signing on one local Mac just to create a release build.
 
-## Step 6: Build and sync
+The first Capgo setup connects the mobile project to your Apple Developer account and signing files. This part sounds technical because Apple requires it. The practical result is simple: Capgo can produce a signed iPhone app build.
 
-Every time the web app changes, rebuild the web assets and sync them into the native projects:
+At this stage, follow Capgo's current build setup for iOS. A developer usually connects the repository, configures the Apple signing information, starts the cloud build, then downloads or uploads the signed build.
 
-```npm
-npm run build
-npm run cap:sync
-```
+Capgo helps create the build. It does not replace your Apple Developer account, and it does not skip Apple's review.
 
-If your project does not have Capstart's scripts yet, use Capacitor directly:
+### 6. Submit in App Store Connect
 
-```npm
-npx cap sync
-```
+Once you have the iOS build, the final step happens in App Store Connect.
 
-Commit the generated `ios/` and `android/` folders. Capgo Builder and CI systems need the native projects, not only the React source files.
+You prepare:
 
-## Step 7: Build signed apps with Capgo Builder
+- app name;
+- description;
+- screenshots;
+- app category;
+- privacy answers;
+- support URL;
+- age rating;
+- pricing and availability.
 
-Local simulator testing is useful, but release builds need signing. On iOS, that usually means Xcode, certificates, provisioning profiles, and App Store Connect setup. Capgo Builder can run that build process in the cloud for Capacitor projects.
+Then you upload or select the build, send it to review, and wait for Apple.
 
-This is especially useful for Base44 projects because the workflow stays close to the AI-assisted development loop:
+If Apple rejects the app, read the rejection reason carefully. Most early rejections are about missing privacy information, broken login, incomplete content, unclear payments, or links that do not work for reviewers.
 
-- Base44 generates the product;
-- GitHub stores the exported code;
-- Capstart adds the mobile shell;
-- Capgo Builder produces signed iOS and Android builds;
-- App Store Connect and Google Play handle review and distribution.
+## What happens after launch?
 
-Set up Capgo once:
+The first version still goes through Apple review.
 
-```npm
-npx @capgo/cli@latest login
-npx @capgo/cli@latest init
-npx @capgo/cli@latest build init --platform ios
-npx @capgo/cli@latest build init --platform android
-```
+After that, some changes may be faster:
 
-Then request release builds:
+- text changes;
+- small design fixes;
+- bug fixes in the web layer;
+- images and assets that do not change native permissions.
 
-```npm
-npm run build
-npm run cap:sync
-npx @capgo/cli@latest build com.company.product --platform ios --build-mode release
-npx @capgo/cli@latest build com.company.product --platform android --build-mode release
-```
+Those can often be handled through the web app or Capgo live updates, depending on your setup.
 
-Capgo creates the native build. It does not replace your Apple or Google developer accounts, and it does not bypass store review.
+Some changes still need a new App Store build:
 
-If your app uses Capgo live updates, you can also upload the web bundle after a web-only change:
+- app icon;
+- app name;
+- bundle ID;
+- push notifications;
+- camera or photo permissions;
+- native plugins;
+- in-app purchases;
+- anything Apple needs to review as part of the installed app.
 
-```npm
-npx @capgo/cli@latest bundle upload --channel production
-```
+The simple rule: if the phone app shell changes, expect a new store submission. If only the web experience changes, there may be a faster path.
 
-Use live updates for web-layer fixes. Use a new native build when permissions, plugins, icons, signing, or store-reviewed behavior changes.
+## Plain-English checklist
 
-## Step 8: Optional local testing
+- The Base44 app works on a real phone.
+- The Base44 app is published with a stable URL.
+- You have an Apple Developer account.
+- You have a privacy policy and terms of use.
+- You know whether payments are physical goods, services, or digital purchases.
+- You chose Base44's own mobile flow or the Capstart + Capgo path.
+- If using Capstart, the app identifier is final.
+- The mobile build has been tested before submission.
+- Capgo can create the signed iOS build.
+- App Store Connect has the listing, screenshots, privacy answers, and support links ready.
 
-If you have the native IDEs installed, open the generated projects:
+Keep this sentence in mind:
 
-```npm
-npm run cap:ios
-npm run cap:android
-```
-
-Or use Capacitor directly:
-
-```npm
-npx cap open ios
-npx cap open android
-```
-
-Test the app as an installed app, not only in the browser. Check the keyboard, safe areas, login, redirects, deep links, loading states, and slow network behavior. A Base44 screen that looks fine in the editor can still need spacing and interaction fixes once it runs inside a WebView.
-
-## Step 9: Add native features
-
-Once the base app works, add device features incrementally.
-
-For example:
-
-```npm
-npm install @capacitor/share @capacitor/camera @capacitor/push-notifications
-npm run cap:sync
-```
-
-Then wire the plugins into your React components. For each new plugin, check the native setup it requires: permissions, entitlements, Android manifest entries, iOS usage descriptions, or App Store privacy answers.
-
-Plugin changes normally require a fresh native build. Web copy and UI fixes may be eligible for Capgo live updates if the native shell stays the same.
-
-## Step 10: Polish for production
-
-### App icons and splash screens
-
-Create the store-ready assets before release:
-
-```npm
-npm install -D @capacitor/assets
-```
-
-Add:
-
-- `assets/icon.png` at 1024 x 1024;
-- `assets/splash.png` at 2732 x 2732.
-
-Then generate platform assets:
-
-```npm
-npx capacitor-assets generate
-npm run cap:sync
-```
-
-### Base44 backend and auth
-
-Exported Base44 apps may still call Base44-hosted services. That can work in Capacitor, but test it on a real device.
-
-Check that:
-
-- all API calls use HTTPS;
-- no production request points to `localhost`;
-- login and logout work inside the WebView;
-- OAuth or magic-link redirects return to the installed app when needed;
-- deep links are configured for any external auth flow;
-- privacy policy and terms links are reachable before account creation.
-
-If you later move away from Base44's backend, plan a separate migration. The React UI can often stay, but calls such as `base44.entities.*` and Base44 SDK helpers need to be replaced with your own API.
-
-### Payments
-
-Review payments before submitting to Apple or Google.
-
-Web checkout is usually acceptable for physical goods or real-world services. Digital features, subscriptions, credits, premium content, or in-app capabilities often require Apple and Google in-app purchase systems. Fixing this after rejection is slower than deciding the payment model early.
-
-## Troubleshooting
-
-### White screen on launch
-
-- Confirm Vite uses `base: './'`.
-- Run `npm run build` before `npm run cap:sync`.
-- Make sure `webDir` points to the actual build output.
-- Inspect device logs in Xcode, Android Studio, or the browser inspector.
-
-### Capgo Builder fails
-
-- Commit `ios/` and `android/` to git.
-- Run `npm run cap:sync` locally before starting the cloud build.
-- Check that signing credentials are configured for the right app id.
-- Rebuild natively after adding or removing Capacitor plugins.
-
-### Auth works on web but not in the app
-
-- Avoid browser-only redirect URLs.
-- Configure deep links or universal links for OAuth and magic links.
-- Test on a physical device, not only a desktop browser.
-- Confirm cookies, storage, and session refresh work inside the WebView.
-
-### Export is not available
-
-GitHub sync and ZIP export depend on the Base44 plan and current project settings. If export is not available, upgrade the project plan or copy the code through the available Base44 code view before trying to initialize Capacitor.
-
-## Launch checklist
-
-- The Base44 app builds locally with `npm run build`.
-- The production web output exists in `dist/` or the configured `webDir`.
-- Capstart created the Capacitor config and native projects.
-- The app id and app name are final.
-- Login, signup, logout, and password recovery work on a real device.
-- API calls use reachable HTTPS URLs.
-- Payments match Apple and Google rules.
-- App icons, splash screens, privacy policy, and terms are ready.
-- Capgo Builder can produce signed iOS and Android builds.
-- App Store Connect and Google Play listing details are prepared.
-
-The short version:
-
-Base44 builds the product. Capstart turns it into a Capacitor app. Capgo Builder signs and builds it. Apple and Google review it for store distribution.
+Base44 builds the app. Capstart makes it mobile. Capgo builds it for Apple. App Store Connect sends it to review.
 
 ## Useful sources
 
