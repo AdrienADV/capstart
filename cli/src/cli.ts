@@ -2,6 +2,7 @@
 
 import { Command, InvalidArgumentError } from "commander";
 import packageJson from "../package.json";
+*import { createCommand } from "./commands/create.js";
 import { initCommand } from "./commands/init.js";
 import { logger } from "./core/logger.js";
 import type {
@@ -14,8 +15,27 @@ const program = new Command();
 
 program
   .name("capstart")
-  .description("Add Capacitor to an existing web application.")
+  .description("Create Capstart apps or add Capacitor to existing web applications.")
   .version(packageJson.version);
+
+program
+  .command("create")
+  .description("Create a new app from the Capstart boilerplate.")
+  .argument("[directory]", "app directory", "my-app")
+  .option("--app-id <id>", "native application id, for example com.example.app")
+  .option("--app-name <name>", "native application name")
+  .option(
+    "--template <path>",
+    "local boilerplate template directory",
+  )
+  .action(async (directory, commandOptions) => {
+    await createCommand({
+      appId: commandOptions.appId,
+      appName: commandOptions.appName,
+      directory,
+      template: commandOptions.template,
+    });
+  });
 
 program
   .command("init")

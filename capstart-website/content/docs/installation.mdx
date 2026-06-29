@@ -51,21 +51,24 @@ You can start from the **Capstart boilerplate**, add Capacitor to an existing Ne
 
 ## Capstart boilerplate
 
-Use Capstart when you want a product app baseline immediately: Supabase session handling, protected routes, shadcn/ui components, and native iOS/Android projects are already in place.
+Use Capstart when you want a product app baseline immediately: Supabase session handling, protected routes, shadcn/ui components, and native iOS/Android projects already wired together. The CLI can create this boilerplate directly, so you do not need to run `degit` yourself.
 
 <div className="flex justify-center">
   <video autoPlay loop muted playsInline src="/capstart-demo.mp4" className="w-full max-w-64 rounded-lg" />
 </div>
 
-```npm
-npx degit AdrienADV/capstart/capstart-boilerplate my-app
+```bash
+npx capstart create my-app \
+  --app-id com.example.myapp \
+  --app-name "My App"
 cd my-app
-npm install
+bun install
 cp .env.example .env
-npm run dev
+bun run dev
 ```
 
-After cloning, fill the Supabase values in `.env`, then update `appId` and `appName` in `capacitor.config.ts` before shipping.
+After creating the app, fill the Supabase values in `.env`, then replace icons,
+splash screens, signing, and store metadata before shipping.
 
 [Open Capstart on GitHub](https://github.com/AdrienADV/capstart)
 
