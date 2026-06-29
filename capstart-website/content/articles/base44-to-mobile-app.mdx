@@ -1,0 +1,229 @@
+---
+title: Base44 to App Store with Capgo
+description: A simple, non-technical guide to turning a Base44 app into an App Store build with Capstart and Capgo.
+---
+
+<div className="not-prose mb-8 flex flex-col gap-4 rounded-lg border border-fd-border bg-fd-card p-4 lg:flex-row lg:items-center lg:justify-between">
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <a
+      href="https://base44.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open Base44"
+      className="flex h-12 w-36 shrink-0 items-center justify-center rounded-md border border-fd-border bg-white px-4"
+    >
+      <img src="/logo-base44.svg" alt="Base44" className="h-6 w-auto" />
+    </a>
+    <span className="text-center text-sm font-medium text-fd-muted-foreground">
+      to
+    </span>
+    <a
+      href="https://capgo.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open Capgo"
+      className="flex h-12 w-36 shrink-0 items-center justify-center rounded-md border border-fd-border bg-black px-4"
+    >
+      <img
+        src="/logo-capgo.webp"
+        alt="Capgo"
+        className="h-7 w-auto object-contain"
+      />
+    </a>
+  </div>
+  <p className="m-0 max-w-md text-sm leading-relaxed text-fd-muted-foreground lg:text-right">
+    The simple path from a Base44 app to an App Store build with Capgo.
+  </p>
+</div>
+
+If you built your product in Base44, you already have the most important part: the app people use.
+
+What you do not have yet is the file Apple accepts in App Store Connect. The simple version is:
+
+1. Base44 is where you build and publish the app.
+2. Capstart turns the Base44 project into a mobile app project.
+3. Capgo builds the iPhone app in the cloud.
+4. App Store Connect is where you send the app to Apple for review.
+
+Think of it like packaging. Base44 is the product. Capstart makes the mobile box around it. Capgo prepares the signed file Apple can open. Apple still decides whether the app can go live.
+
+## First: do you even need Capgo?
+
+Base44 already has its own mobile flow. It can scan your app against app store guidelines and generate App Store or Google Play files on supported plans. If your app is simple and you do not need special phone features, try that first.
+
+Use Base44's own mobile flow when:
+
+- you mostly want your Base44 app listed in the stores;
+- the app works well on a phone already;
+- you do not need push notifications, advanced offline mode, or custom device features;
+- you are happy for Base44 to handle the mobile package.
+
+Use Capstart and Capgo when:
+
+- you want to own the mobile app project yourself;
+- you want your own stable app identifier from the beginning;
+- you need native features later, such as notifications, camera access, Apple sign-in, in-app purchases, or native navigation;
+- you want Capgo to build the app without setting up Xcode on your own machine;
+- you want a repeatable release process for future versions.
+
+Choose the path before the first public App Store submission. Apple identifies an app with technical values such as the bundle ID and signing setup. Treat them like the app's passport number. Changing the mobile package later can make updates harder.
+
+## Before you package the app
+
+Do one careful mobile pass inside Base44 first.
+
+Open the app on a real phone and check:
+
+- the first screen loads quickly enough;
+- signup, login, logout, and password recovery work;
+- every form can be completed with the phone keyboard;
+- menus, popups, and buttons are easy to tap;
+- privacy policy and terms links are visible before signup;
+- the app name, logo, and screenshots look ready for a store listing.
+
+Also check payments early. If you sell physical goods or real-world services, a normal web checkout such as Stripe is usually fine. If you sell digital content, paid features, subscriptions, credits, or anything used inside the app, Apple and Google usually expect their own in-app purchase systems.
+
+## The simplest Capstart + Capgo path
+
+This is the normal route when you want to go from Base44 to the App Store through Capgo.
+
+### 1. Finish and publish the Base44 app
+
+Get the Base44 version stable first. It does not need to be perfect, but the main flow should work on mobile.
+
+You should have:
+
+- a published Base44 app URL;
+- a clear app name;
+- a logo or app icon;
+- a privacy policy;
+- terms of use;
+- an Apple Developer account.
+
+Base44's mobile scan is useful even if you plan to build with Capgo later. Run it to catch obvious store issues before you spend time on the native build.
+
+### 2. Get the code out of Base44
+
+To use Capstart and Capgo, you need the app's code outside Base44.
+
+The usual options are:
+
+- connect Base44 to GitHub;
+- export the code as a ZIP file on a supported Base44 plan.
+
+This is the first step where a non-technical founder may want help from a developer. You are not rebuilding the app. You are taking the files behind the Base44 app so they can be packaged for mobile.
+
+### 3. Add the mobile app wrapper with Capstart
+
+Capstart adds the mobile layer around the Base44 project. In practice, a developer runs one command from the project folder:
+
+```npm
+npx capstart init . --framework react-vite --setup recommended --safe-area
+```
+
+After that, the project has the pieces needed for an iPhone or Android app.
+
+The important setting is the app identifier. It usually looks like this:
+
+```txt
+com.company.product
+```
+
+Pick it carefully and keep it stable. It should belong to your company or product, not to a temporary test name.
+
+### 4. Test the mobile version before sending it to Apple
+
+Do not submit the first build blindly.
+
+Test the app as an installed app, not only in a browser. Check:
+
+- the keyboard does not hide important fields;
+- the top and bottom of the screen are not cut off;
+- login still works inside the mobile app;
+- links open in the right place;
+- the app can reach the Base44 backend over HTTPS;
+- payments follow Apple and Google rules.
+
+This step matters because an app can look fine in the Base44 editor but feel broken once installed on a phone.
+
+### 5. Build the App Store file with Capgo
+
+Capgo can build Capacitor apps in the cloud. For iOS, that means you do not have to maintain Xcode and Apple signing on one local Mac just to create a release build.
+
+The first Capgo setup connects the mobile project to your Apple Developer account and signing files. This part sounds technical because Apple requires it. The practical result is simple: Capgo can produce a signed iPhone app build.
+
+At this stage, follow Capgo's current build setup for iOS. A developer usually connects the repository, configures the Apple signing information, starts the cloud build, then downloads or uploads the signed build.
+
+Capgo helps create the build. It does not replace your Apple Developer account, and it does not skip Apple's review.
+
+### 6. Submit in App Store Connect
+
+Once you have the iOS build, the final step happens in App Store Connect.
+
+You prepare:
+
+- app name;
+- description;
+- screenshots;
+- app category;
+- privacy answers;
+- support URL;
+- age rating;
+- pricing and availability.
+
+Then you upload or select the build, send it to review, and wait for Apple.
+
+If Apple rejects the app, read the rejection reason carefully. Most early rejections are about missing privacy information, broken login, incomplete content, unclear payments, or links that do not work for reviewers.
+
+## What happens after launch?
+
+The first version still goes through Apple review.
+
+After that, some changes may be faster:
+
+- text changes;
+- small design fixes;
+- bug fixes in the web layer;
+- images and assets that do not change native permissions.
+
+Those can often be handled through the web app or Capgo live updates, depending on your setup.
+
+Some changes still need a new App Store build:
+
+- app icon;
+- app name;
+- bundle ID;
+- push notifications;
+- camera or photo permissions;
+- native plugins;
+- in-app purchases;
+- anything Apple needs to review as part of the installed app.
+
+The simple rule: if the phone app shell changes, expect a new store submission. If only the web experience changes, there may be a faster path.
+
+## Plain-English checklist
+
+- The Base44 app works on a real phone.
+- The Base44 app is published with a stable URL.
+- You have an Apple Developer account.
+- You have a privacy policy and terms of use.
+- You know whether payments are physical goods, services, or digital purchases.
+- You chose Base44's own mobile flow or the Capstart + Capgo path.
+- If using Capstart, the app identifier is final.
+- The mobile build has been tested before submission.
+- Capgo can create the signed iOS build.
+- App Store Connect has the listing, screenshots, privacy answers, and support links ready.
+
+Keep this sentence in mind:
+
+Base44 builds the app. Capstart makes it mobile. Capgo builds it for Apple. App Store Connect sends it to review.
+
+## Useful sources
+
+- [Base44](https://base44.com/)
+- [Base44 mobile experience](https://docs.base44.com/Building-your-app/Mobile-experience)
+- [Base44 app store submission](https://docs.base44.com/documentation/building-your-app/uploading-to-app-stores)
+- [Base44 GitHub integration](https://docs.base44.com/developers/app-code/local-development/github)
+- [Capstart CLI](/docs/cli)
+- [Capacitor documentation](https://capacitorjs.com/docs)
+- [Capgo native builds without a Mac](https://capgo.app/solutions/build-without-mac/)
