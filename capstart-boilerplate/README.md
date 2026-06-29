@@ -3,11 +3,13 @@
 CapStart is a starter boilerplate to ship mobile apps fast with **React + Capacitor + Supabase + shadcn/ui**.
 
 It includes:
+
 - React + Vite + TypeScript
-- Capacitor setup for iOS and Android
+- Capacitor-ready web setup
 - Supabase auth wiring (login, session, protected routes)
 - Tailwind CSS v4 + shadcn/ui components
 - Mobile-first layout with safe-area handling
+- Capgo transitions and native plugin examples
 
 ## Tech Stack
 
@@ -47,7 +49,22 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-or-publishable-key
 ```
 
-4. Start the web app:
+4. Generate the Capacitor native projects with your final app identity:
+
+```bash
+bunx capstart@latest init . \
+  --framework react-vite \
+  --setup recommended \
+  --safe-area \
+  --app-id com.example.myapp \
+  --app-name "My App"
+```
+
+Use a real reverse-domain app id before this step. Capstart writes it to
+`capacitor.config.ts`, generates `ios/` and `android/`, syncs the native plugins,
+and adds the `cap:*` scripts to `package.json`.
+
+5. Start the web app:
 
 ```bash
 bun run dev
@@ -55,13 +72,14 @@ bun run dev
 
 ## Mobile Development
 
-This project already contains `ios/` and `android/` native projects.
+This starter does not commit generated native projects. Run the Capstart CLI once
+per app to create `ios/` and `android/` with the correct bundle id and app name.
 
 ### Open native projects
 
 ```bash
-bunx cap open ios
-bunx cap open android
+bun run cap:ios
+bun run cap:android
 ```
 
 ### Build and sync web assets to native
@@ -69,7 +87,7 @@ bunx cap open android
 Use this before native release/testing with bundled assets:
 
 ```bash
-bun run sync
+bun run cap:sync
 ```
 
 ## Available Scripts
@@ -77,9 +95,11 @@ bun run sync
 - `bun run dev` - start Vite dev server
 - `bun run build` - build web assets into `dist/`
 - `bun run typecheck` - run the TypeScript compiler without emitting files
-- `bun run sync` - build web assets and sync them to native projects
 - `bun run preview` - preview production build
 - `bun run lint` - run ESLint
+- `bun run cap:sync` - build web assets and sync native projects, added by Capstart
+- `bun run cap:ios` - build, sync, and open Xcode, added by Capstart
+- `bun run cap:android` - build, sync, and open Android Studio, added by Capstart
 
 ## Project Structure
 
@@ -94,11 +114,12 @@ capstart/
 │   ├── app.tsx            # Root app component
 │   ├── main.tsx           # Providers + router bootstrap
 │   └── router.tsx         # Route definitions
-├── android/               # Native Android project
-├── ios/                   # Native iOS project
-├── capacitor.config.ts    # Capacitor app configuration
+├── capacitor.config.ts    # Capacitor app configuration updated by Capstart
 └── .env.example           # Required environment variables
 ```
+
+After `bunx capstart@latest init ...`, the generated `ios/` and `android/`
+folders become part of your app and should be committed.
 
 ## Authentication Flow
 
@@ -110,13 +131,15 @@ capstart/
 
 Before shipping your app, update:
 
-- `capacitor.config.ts`
-  - `appId` (currently `com.example.app`)
-  - `appName`
+- Pass the final `--app-id` and `--app-name` to `capstart init` before generating
+  native projects
 - Supabase project URL and key in `.env`
-- App icons/splash screens in native projects (`ios/` and `android/`)
+- App icons/splash screens in the generated native projects
+- Native signing, version numbers, and store metadata
 
 ## Notes
 
 - This boilerplate is mobile-first but can be developed in the browser.
 - Safe-area CSS variables are already configured for notch/status-bar devices.
+- Changing the app id after native projects are generated requires native project
+  changes. Pick the final id before running Capstart whenever possible.

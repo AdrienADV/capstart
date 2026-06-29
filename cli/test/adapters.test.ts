@@ -635,8 +635,8 @@ test("creates Capacitor config and package scripts", async () => {
   const project = await loadProject(root);
 
   await configureCapacitor(project, {
-    appId: "com.example.app",
-    appName: "Example",
+    appId: "com.example.mobile",
+    appName: "Example Mobile",
     dryRun: false,
     platforms: ["ios", "android"],
     safeArea: false,
@@ -649,7 +649,8 @@ test("creates Capacitor config and package scripts", async () => {
     await readFile(path.join(root, "package.json"), "utf8"),
   ) as { scripts: Record<string, string> };
 
-  assert.match(config, /appId: "com\.example\.app"/);
+  assert.match(config, /appId: "com\.example\.mobile"/);
+  assert.match(config, /appName: "Example Mobile"/);
   assert.match(config, /webDir: "out"/);
   assert.doesNotMatch(config, /KeyboardResize/);
   assert.doesNotMatch(config, /plugins:/);
@@ -671,8 +672,8 @@ test("creates recommended Capacitor plugin configuration", async () => {
   const project = await loadProject(root);
 
   await configureCapacitor(project, {
-    appId: "com.example.app",
-    appName: "Example",
+    appId: "com.example.mobile",
+    appName: "Example Mobile",
     dryRun: false,
     platforms: ["ios"],
     safeArea: false,
@@ -721,8 +722,8 @@ test("merges recommended plugin defaults into an existing Capacitor config", asy
   const project = await loadProject(root);
 
   await configureCapacitor(project, {
-    appId: "com.example.app",
-    appName: "Example",
+    appId: "com.example.mobile",
+    appName: "Example Mobile",
     dryRun: false,
     platforms: ["ios", "android"],
     safeArea: false,
@@ -730,8 +731,8 @@ test("merges recommended plugin defaults into an existing Capacitor config", asy
     webDir: "out",
   });
   await configureCapacitor(project, {
-    appId: "com.example.app",
-    appName: "Example",
+    appId: "com.example.mobile",
+    appName: "Example Mobile",
     dryRun: false,
     platforms: ["ios", "android"],
     safeArea: false,
@@ -741,6 +742,8 @@ test("merges recommended plugin defaults into an existing Capacitor config", asy
 
   const config = await readFile(configPath, "utf8");
 
+  assert.match(config, /appId: "com\.example\.mobile"/);
+  assert.match(config, /appName: "Example Mobile"/);
   assert.match(config, /CustomPlugin: \{ enabled: true \}/);
   assert.match(config, /customSetting: true/);
   assert.match(config, /resizeOnFullScreen: true/);
@@ -777,8 +780,8 @@ test("merges serialized recommended defaults into a JSON Capacitor config", asyn
   const project = await loadProject(root);
 
   await configureCapacitor(project, {
-    appId: "com.example.app",
-    appName: "Example",
+    appId: "com.example.mobile",
+    appName: "Example Mobile",
     dryRun: false,
     platforms: ["android"],
     safeArea: false,
@@ -787,10 +790,14 @@ test("merges serialized recommended defaults into a JSON Capacitor config", asyn
   });
 
   const config = JSON.parse(await readFile(configPath, "utf8")) as {
+    appId: string;
+    appName: string;
     plugins: Record<string, Record<string, unknown>>;
     webDir: string;
   };
 
+  assert.equal(config.appId, "com.example.mobile");
+  assert.equal(config.appName, "Example Mobile");
   assert.equal(config.webDir, "out");
   assert.equal(config.plugins.CustomPlugin.enabled, true);
   assert.equal(config.plugins.Keyboard.customSetting, true);

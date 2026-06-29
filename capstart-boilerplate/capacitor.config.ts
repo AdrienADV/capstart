@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.example.app',
-  appName: 'capstart',
+  appId: 'com.capstart.app',
+  appName: 'Capstart',
   webDir: 'dist',
   plugins: {
     SystemBars: {

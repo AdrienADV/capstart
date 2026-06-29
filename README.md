@@ -13,7 +13,7 @@ This monorepo contains **three independent products**. Pick the one that fits yo
 | Product | What it does | When to use it |
 |---|---|---|
 | [`cli/`](./cli/) | Adds Capacitor to an **existing** web project | You already have a Next.js / Nuxt / React / Svelte / Vue app |
-| [`capstart-boilerplate/`](./capstart-boilerplate/) | Starter app to build from scratch | You're starting a new mobile app and want an opinionated setup |
+| [`capstart-boilerplate/`](./capstart-boilerplate/) | Starter app to build from scratch | You're starting a new mobile app and want auth/UI already wired |
 | [`capstart-website/`](./capstart-website/) | Documentation website | You're contributing to the docs or running them locally |
 
 ---
@@ -26,7 +26,7 @@ Adds Capacitor to an existing web project. Supports Next.js, Nuxt, React + Vite,
 npx capstart init ..
 ```
 
-The CLI detects your framework, installs Capacitor, adds native iOS/Android projects, builds your web app, and runs `cap sync`. In interactive mode it also offers a **minimal** or **recommended** plugin setup.
+The CLI detects your framework, configures the native app id/name, installs Capacitor, adds native iOS/Android projects, builds your web app, and runs `cap sync`. In interactive mode it also offers a **minimal** or **recommended** plugin setup.
 
 → [CLI README](./cli/README.md)
 
@@ -37,7 +37,7 @@ The CLI detects your framework, installs Capacitor, adds native iOS/Android proj
 A ready-to-ship starter with:
 
 - React 19 + Vite + TypeScript
-- Capacitor 8 (iOS + Android folders included)
+- Capacitor 8 configured through Capstart CLI
 - Supabase auth wiring (login, session, protected routes)
 - Tailwind CSS v4 + shadcn/ui
 - Mobile-first layout with safe-area handling
@@ -45,10 +45,11 @@ A ready-to-ship starter with:
 ```bash
 cd capstart-boilerplate
 bun install
+bunx capstart@latest init . --framework react-vite --setup recommended --safe-area --app-id com.example.myapp --app-name "My App"
 bun run dev
 ```
 
-→ [Boilerplate README](./capstart-boilerplate/README.md) for native sync/build steps.
+→ [Boilerplate README](./capstart-boilerplate/README.md) for the complete setup and native sync/build steps.
 
 ---
 
@@ -107,9 +108,9 @@ bun run types:check
 
 ```bash
 cd capstart-boilerplate
-npm run dev
-npm run build
-npm run lint
+bun run dev
+bun run build
+bun run lint
 ```
 
 ---
