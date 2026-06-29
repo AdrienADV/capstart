@@ -2,115 +2,84 @@
 
 ![Capstart — build native apps with CapacitorJS using web UI](./capstart-hero.png)
 
-Capstart is a web-first ecosystem for building polished mobile apps with **CapacitorJS**.
+Capstart is a web-first toolkit for building polished mobile apps with **CapacitorJS**.
 
-It combines:
-- a **production-oriented boilerplate** you can start from,
-- and a **documentation website** that explains patterns, components, and integration choices.
+---
 
-## Project Intent
+## What's in this repo
 
-Capstart follows one core principle:
+This monorepo contains **three independent products**. Pick the one that fits your situation:
 
-- Keep product UI and routing in the web layer.
-- Add native surfaces only when they materially improve mobile UX.
+| Product | What it does | When to use it |
+|---|---|---|
+| [`cli/`](./cli/) | Adds Capacitor to an **existing** web project | You already have a Next.js / Nuxt / React / Svelte / Vue app |
+| [`capstart-boilerplate/`](./capstart-boilerplate/) | Starter app to build from scratch | You're starting a new mobile app and want an opinionated setup |
+| [`capstart-website/`](./capstart-website/) | Documentation website | You're contributing to the docs or running them locally |
 
-In practice, Capstart focuses on production-ready patterns for:
+---
 
-- navigation bars and tab bars,
-- transitions,
-- social login and authentication bridges,
-- in-app purchases and subscriptions,
-- advanced iOS surfaces (Live Activities, widgets).
+## CLI — `npx capstart init`
 
-## Repository Structure
-
-This repository currently contains three main packages:
-
-```txt
-capstart/
-├── cli/                    # CLI that adds Capacitor to existing applications
-├── capstart-boilerplate/   # Starter app (Capacitor + React) for real projects
-└── capstart-website/       # Documentation website and component guides
-```
-
-## Package Overview
-
-### `cli`
-
-The `capstart` command-line tool configures existing Next.js, Nuxt, React +
-Vite, Svelte + Vite, SvelteKit, TanStack Start, and Vue applications for
-Capacitor.
+Adds Capacitor to an existing web project. Supports Next.js, Nuxt, React + Vite, Svelte + Vite, SvelteKit, TanStack Start, and Vue.
 
 ```bash
 npx capstart init ..
 ```
 
-The CLI displays the detected framework and asks for confirmation before
-configuring the project. If detection is refused, it offers every supported
-adapter as an explicit choice. It also offers a minimal setup or a recommended
-setup that includes common Capacitor plugins for keyboard, network, device,
-splash screen, and status bar behavior.
+The CLI detects your framework, installs Capacitor, adds native iOS/Android projects, builds your web app, and runs `cap sync`. In interactive mode it also offers a **minimal** or **recommended** plugin setup.
 
-Useful path:
-- `cli/README.md`
+→ [CLI README](./cli/README.md)
 
-### `capstart-boilerplate`
+---
 
-A starter project intended to bootstrap a Capacitor app quickly with an opinionated web stack and native-ready setup.
+## Boilerplate — start a new mobile app
 
-What it includes (high level):
-- Capacitor project scaffolding with `android/` and `ios/` native folders,
-- React + TypeScript app structure,
-- routing, UI components, and app pages,
-- baseline configuration to start building and shipping mobile features.
+A ready-to-ship starter with:
 
-Useful paths:
-- `capstart-boilerplate/src/`
-- `capstart-boilerplate/android/`
-- `capstart-boilerplate/ios/`
-- `capstart-boilerplate/capacitor.config.ts`
-- `capstart-boilerplate/README.md`
+- React 19 + Vite + TypeScript
+- Capacitor 8 (iOS + Android folders included)
+- Supabase auth wiring (login, session, protected routes)
+- Tailwind CSS v4 + shadcn/ui
+- Mobile-first layout with safe-area handling
 
-### `capstart-website`
+```bash
+cd capstart-boilerplate
+bun install
+bun run dev
+```
 
-The official docs site for Capstart components and patterns.
+→ [Boilerplate README](./capstart-boilerplate/README.md) for native sync/build steps.
 
-Stack:
-- React 19 + TypeScript 6
-- TanStack Router + TanStack Start
-- Fumadocs (MDX docs)
-- Tailwind CSS 4
-- Vite 8
-- Cloudflare Workers (Wrangler)
+---
 
-Useful paths:
-- `capstart-website/content/docs/`
-- `capstart-website/src/routes/`
-- `capstart-website/public/`
-- `capstart-website/package.json`
+## Website — documentation
 
-## Quick Start
-
-### 1) Run the documentation site
+The official docs site for Capstart patterns and components. Built with React 19, TanStack Router, Fumadocs, Tailwind CSS 4, and deployed on Cloudflare Workers.
 
 ```bash
 cd capstart-website
 bun install
 bun run dev
+# → http://localhost:3000
 ```
 
-Dev server default: `http://localhost:3000`
+→ [capstart-website/content/docs/](./capstart-website/content/docs/) for MDX content.
 
-### 2) Explore the boilerplate
+---
 
-```bash
-cd capstart-boilerplate
-npm install
-npm run dev
-```
+## What Capstart covers
 
-Then follow `capstart-boilerplate/README.md` for native sync/build steps.
+Capstart follows one principle: keep product UI and routing in the web layer, add native surfaces only when they materially improve mobile UX.
+
+Covered patterns:
+
+- Navigation bars and tab bars
+- Page transitions
+- Social login and authentication bridges
+- In-app purchases and subscriptions
+- Advanced iOS surfaces (Live Activities, widgets)
+
+---
 
 ## Common Commands
 
@@ -129,10 +98,9 @@ bun run build
 cd capstart-website
 bun run dev
 bun run build
-bun run start
+bun run deploy   # Cloudflare Workers
 bun run lint
 bun run types:check
-bun run deploy
 ```
 
 ### Boilerplate
@@ -144,29 +112,22 @@ npm run build
 npm run lint
 ```
 
+---
+
 ## Contribution Guidelines
 
-1. If you change guides/content, edit files in `capstart-website/content/docs/*.mdx`.
-2. If you add new docs pages, update `capstart-website/content/docs/meta.json`.
-3. If you improve starter experience, update files in `capstart-boilerplate/` and keep its README in sync.
-4. Run relevant checks before opening a PR.
-5. Keep each PR focused and explain intent + impact clearly.
+1. Guide/content changes → edit files in `capstart-website/content/docs/*.mdx`.
+2. New docs pages → update `capstart-website/content/docs/meta.json`.
+3. Starter improvements → update `capstart-boilerplate/` and keep its README in sync.
+4. Run the relevant checks before opening a PR, and explain intent + impact in the PR description.
 
-## Deployment
-
-The documentation site deployment target is **Cloudflare Workers**:
-
-```bash
-cd capstart-website
-bun run deploy
-```
-
-## License
-
-This project is licensed under the [MIT License](./LICENSE).
+---
 
 ## Links
 
-- Public docs repository: https://github.com/AdrienADV/capstart-docs
 - CapacitorJS: https://capacitorjs.com
 - Fumadocs: https://fumadocs.vercel.app
+
+## License
+
+[MIT](./LICENSE)
