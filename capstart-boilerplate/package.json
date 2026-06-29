@@ -8,6 +8,7 @@
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b",
+    "sync": "bun run build && bunx cap sync",
     "preview": "vite preview",
     "build": "vite build"
   },

@@ -54,8 +54,6 @@ export async function configureCapacitor(
       string,
       unknown
     >;
-    config.appId = options.appId;
-    config.appName = options.appName;
     config.webDir = options.webDir;
     if (options.setup === "recommended") {
       applyRecommendedJsonConfig(config);
@@ -74,8 +72,6 @@ export async function configureCapacitor(
         `Cannot safely update the existing ${path.basename(configPath)}.`,
       );
     }
-    setObjectProperty(config, "appId", JSON.stringify(options.appId));
-    setObjectProperty(config, "appName", JSON.stringify(options.appName));
     setObjectProperty(config, "webDir", JSON.stringify(options.webDir));
     if (options.setup === "recommended") {
       applyRecommendedSourceConfig(sourceFile, config);

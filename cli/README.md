@@ -7,12 +7,11 @@ SvelteKit, TanStack Start, or Vue application.
 npx capstart init ..
 ```
 
-Capstart detects the framework and package manager, configures the native app
-id/name, configures a static or SPA build, installs Capacitor, adds native
-projects, builds the web application, and runs `cap sync`.
+Capstart detects the framework and package manager, configures a static or SPA
+build, installs Capacitor, adds native projects, builds the web application, and
+runs `cap sync`.
 
-In an interactive terminal, Capstart asks for the native app name, native app id,
-and which setup to install:
+In an interactive terminal, Capstart also asks which setup to install:
 
 - `minimal`: Capacitor core, CLI, and the selected native platforms;
 - `recommended`: the minimal setup plus Keyboard, Network, Device, Splash
@@ -20,8 +19,6 @@ and which setup to install:
 
 The recommended setup is pre-selected in the interactive prompt. Non-interactive
 usage keeps the existing minimal setup unless `--setup recommended` is passed.
-Pass `--app-id` and `--app-name` to make the native identity explicit in scripts
-or docs.
 
 Installation, build, and Capacitor command output is hidden by default. Capstart
 shows a single setup progress line and only prints a short command summary when
@@ -87,7 +84,7 @@ Examples:
 
 ```bash
 npx capstart init .
-npx capstart init ../my-app --app-id com.example.myapp --app-name "My App"
+npx capstart init ../my-app --app-id com.example.myapp
 npx capstart init . --platforms ios
 npx capstart init . --setup recommended
 npx capstart init . --framework nuxt --dry-run
@@ -119,10 +116,6 @@ Useful options:
 Use `--yes` to accept a single automatically detected framework in CI or other
 non-interactive environments. Use `--framework` to bypass detection
 confirmation and select an adapter explicitly.
-
-Capstart creates or updates `capacitor.config.*` with `appId`, `appName`, and
-the resolved `webDir` before native projects are generated. Choose the final
-app id before running native generation whenever possible.
 
 Use `--setup recommended` to install these baseline runtime plugins:
 

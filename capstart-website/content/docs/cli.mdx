@@ -3,9 +3,9 @@ title: CLI
 description: Add Capacitor to an existing Next.js, Nuxt, React + Vite, Svelte + Vite, SvelteKit, TanStack Start, or Vue app with Capstart CLI.
 ---
 
-Capstart CLI turns an existing **Next.js**, **Nuxt**, standalone **React + Vite**, **Svelte + Vite**, **SvelteKit**, **TanStack Start**, or standalone **Vue** project into a Capacitor app. It detects the framework and package manager, configures the native app id/name, configures a client-side production build when needed, installs Capacitor, creates the native projects, and adds scripts for the day-to-day mobile workflow.
+Capstart CLI turns an existing **Next.js**, **Nuxt**, standalone **React + Vite**, **Svelte + Vite**, **SvelteKit**, **TanStack Start**, or standalone **Vue** project into a Capacitor app. It detects the framework and package manager, configures a client-side production build when needed, installs Capacitor, creates the native projects, and adds scripts for the day-to-day mobile workflow.
 
-Use the CLI when you already have a web application and want to keep its existing structure. For a new React app with auth, protected routes, and mobile UI conventions already wired, start from the [Capstart boilerplate](/docs/installation#capstart-boilerplate), then run this CLI to generate the native projects with your app id.
+Use the CLI when you already have a web application and want to keep its existing structure. For a new React app with auth and native projects already configured, use the [Capstart boilerplate](/docs/installation#capstart-boilerplate) instead.
 
 ## Quick Start
 
@@ -15,7 +15,7 @@ Run Capstart from the root of the web project:
 npx capstart init .
 ```
 
-Before changing files, Capstart confirms the detected framework and asks for the native app name, native app id, setup profile, and safe-area behavior. It then runs the complete setup:
+Before changing files, Capstart confirms the detected framework and asks which setup and safe-area behavior to use. It then runs the complete setup:
 
 ```text
 Configure the framework
@@ -118,7 +118,7 @@ Useful examples:
 
 ```npm
 npx capstart init . --dry-run
-npx capstart init ../my-app --app-id com.example.myapp --app-name "My App"
+npx capstart init ../my-app --app-id com.example.myapp
 npx capstart init . --platforms ios
 npx capstart init . --framework nextjs --setup recommended --safe-area
 npx capstart init . --framework nuxt --dry-run
@@ -141,7 +141,7 @@ Capstart keeps the setup focused on the native shell and the framework build out
 | Area | Changes |
 | --- | --- |
 | Framework config | Configures Next.js static export, Nuxt client-only generation, SvelteKit and TanStack Start SPA output, or preserves an existing React + Vite, Svelte + Vite, or Vue static build |
-| Capacitor config | Creates or updates `capacitor.config.*`, including `appId`, `appName`, and the detected `webDir` |
+| Capacitor config | Creates or updates `capacitor.config.*`, including the detected `webDir` |
 | `package.json` | Installs packages and adds Capacitor scripts |
 | Native projects | Adds missing selected platforms and runs `cap sync` |
 | Global styles | Adds safe-area CSS only when selected |

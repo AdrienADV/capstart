@@ -7,10 +7,6 @@ import {
   installCapacitor,
   syncNativeProjects,
 } from "../capacitor/install.js";
-import {
-  chooseAppId,
-  chooseAppName,
-} from "../core/app-config-selection.js";
 import { chooseAdapter } from "../core/framework-selection.js";
 import { offerGithubStar } from "../core/github-star.js";
 import { logger } from "../core/logger.js";
@@ -73,16 +69,8 @@ export async function initCommand(options: InitOptions): Promise<void> {
     ? await configureSafeArea(project, adapter.id, true)
     : undefined;
 
-  const appName = await chooseAppName({
-    defaultValue: getProjectName(project),
-    interactive,
-    requested: options.appName,
-  });
-  const appId = await chooseAppId({
-    defaultValue: createDefaultAppId(project),
-    interactive,
-    requested: options.appId,
-  });
+  const appId = options.appId ?? createDefaultAppId(project);
+  const appName = options.appName ?? getProjectName(project);
   validateAppId(appId);
 
   if (options.dryRun) {

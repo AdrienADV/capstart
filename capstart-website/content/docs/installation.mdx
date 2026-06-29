@@ -16,7 +16,7 @@ You can start from the **Capstart boilerplate**, add Capacitor to an existing Ne
     <div className="flex flex-col gap-2">
       <h3 className="text-lg font-semibold text-fd-foreground">Capstart boilerplate</h3>
       <p className="text-sm leading-relaxed text-fd-muted-foreground">
-        Start from a product-ready React app with Supabase auth, Tailwind v4, shadcn/ui, protected routes, mobile layout, and Capstart CLI native generation.
+        Start from a product-ready app with React, Capacitor, Supabase auth, Tailwind v4, shadcn/ui, protected routes, and native iOS/Android projects already wired together.
       </p>
     </div>
     <a className="mt-auto inline-flex text-sm font-medium text-fd-primary" href="#capstart-boilerplate">
@@ -51,27 +51,21 @@ You can start from the **Capstart boilerplate**, add Capacitor to an existing Ne
 
 ## Capstart boilerplate
 
-Use Capstart when you want a product app baseline immediately: Supabase session handling, protected routes, shadcn/ui components, mobile layout, and Capacitor-ready native integrations. The boilerplate does not commit generated native projects; run the CLI once so `ios/` and `android/` are created with your real bundle id and app name.
+Use Capstart when you want a product app baseline immediately: Supabase session handling, protected routes, shadcn/ui components, and native iOS/Android projects are already in place.
 
 <div className="flex justify-center">
   <video autoPlay loop muted playsInline src="/capstart-demo.mp4" className="w-full max-w-64 rounded-lg" />
 </div>
 
-```bash
+```npm
 npx degit AdrienADV/capstart/capstart-boilerplate my-app
 cd my-app
-bun install
+npm install
 cp .env.example .env
-bunx capstart@latest init . \
-  --framework react-vite \
-  --setup recommended \
-  --safe-area \
-  --app-id com.example.myapp \
-  --app-name "My App"
-bun run dev
+npm run dev
 ```
 
-After cloning, fill the Supabase values in `.env`, then choose your final `--app-id` and `--app-name` before running Capstart. The generated `ios/` and `android/` folders belong to your app and should be committed.
+After cloning, fill the Supabase values in `.env`, then update `appId` and `appName` in `capacitor.config.ts` before shipping.
 
 [Open Capstart on GitHub](https://github.com/AdrienADV/capstart)
 
