@@ -3,19 +3,28 @@ title: CLI
 description: Add Capacitor to an existing Next.js, Nuxt, React + Vite, Svelte + Vite, SvelteKit, TanStack Start, or Vue app with Capstart CLI.
 ---
 
-Capstart CLI turns an existing **Next.js**, **Nuxt**, standalone **React + Vite**, **Svelte + Vite**, **SvelteKit**, **TanStack Start**, or standalone **Vue** project into a Capacitor app. It detects the framework and package manager, configures a client-side production build when needed, installs Capacitor, creates the native projects, and adds scripts for the day-to-day mobile workflow.
+Capstart CLI has two entry points:
 
-Use the CLI when you already have a web application and want to keep its existing structure. For a new React app with auth and native projects already configured, use the [Capstart boilerplate](/docs/installation#capstart-boilerplate) instead.
+- `capstart create` creates a new app from the Capstart boilerplate.
+- `capstart init` turns an existing **Next.js**, **Nuxt**, standalone **React + Vite**, **Svelte + Vite**, **SvelteKit**, **TanStack Start**, or standalone **Vue** project into a Capacitor app.
 
 ## Quick Start
 
-Run Capstart from the root of the web project:
+Create a new app from the boilerplate:
+
+```npm
+npx capstart create my-app --app-id com.example.myapp --app-name "My App"
+```
+
+Or run Capstart from the root of an existing web project:
 
 ```npm
 npx capstart init .
 ```
 
-Before changing files, Capstart confirms the detected framework and asks which setup and safe-area behavior to use. It then runs the complete setup:
+For `init`, Capstart detects the framework and package manager, configures a client-side production build when needed, installs Capacitor, creates native projects, and adds scripts for the day-to-day mobile workflow.
+
+Before changing files, `init` confirms the detected framework and asks which setup and safe-area behavior to use. It then runs the complete setup:
 
 ```text
 Configure the framework
@@ -94,6 +103,20 @@ npx capstart init . --no-safe-area
 Capstart must be able to find a global CSS file and a safe place to configure the viewport. If your project uses a custom structure, run with `--no-safe-area` and add the insets manually.
 
 ## Command Reference
+
+Create a new boilerplate app:
+
+```npm
+npx capstart create [directory] [options]
+```
+
+| Option | Purpose |
+| --- | --- |
+| `--app-id <id>` | Set the reverse-domain native app identifier |
+| `--app-name <name>` | Set the native app name |
+| `--template <path>` | Use a local boilerplate template, mainly for CLI development |
+
+Add Capacitor to an existing app:
 
 ```npm
 npx capstart init [directory] [options]

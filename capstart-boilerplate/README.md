@@ -2,6 +2,12 @@
 
 CapStart is a starter boilerplate to ship mobile apps fast with **React + Capacitor + Supabase + shadcn/ui**.
 
+Create a new app with the CLI:
+
+```bash
+npx capstart create my-app --app-id com.example.myapp --app-name "My App"
+```
+
 It includes:
 - React + Vite + TypeScript
 - Capacitor setup for iOS and Android

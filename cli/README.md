@@ -1,15 +1,23 @@
 # Capstart CLI
 
-Add Capacitor to an existing Next.js, Nuxt, React + Vite, Svelte + Vite,
-SvelteKit, TanStack Start, or Vue application.
+Create a new Capstart boilerplate app, or add Capacitor to an existing Next.js,
+Nuxt, React + Vite, Svelte + Vite, SvelteKit, TanStack Start, or Vue
+application.
+
+```bash
+npx capstart create my-app --app-id com.example.myapp --app-name "My App"
+```
 
 ```bash
 npx capstart init ..
 ```
 
-Capstart detects the framework and package manager, configures a static or SPA
-build, installs Capacitor, adds native projects, builds the web application, and
-runs `cap sync`.
+`capstart create` scaffolds the Capstart boilerplate from GitHub and applies the
+native app id/name to the copied Capacitor, Android, and iOS project files.
+
+`capstart init` detects the framework and package manager, configures a static
+or SPA build, installs Capacitor, adds native projects, builds the web
+application, and runs `cap sync`.
 
 In an interactive terminal, Capstart also asks which setup to install:
 
@@ -75,6 +83,32 @@ Server-only features must remain hosted remotely and be called from the mobile
 application over HTTP.
 
 ## Usage
+
+Create a new app from the boilerplate:
+
+```bash
+npx capstart create [directory] [options]
+```
+
+Examples:
+
+```bash
+npx capstart create my-app
+npx capstart create my-app --app-id com.example.myapp --app-name "My App"
+```
+
+Useful options:
+
+```text
+--app-id <id>
+--app-name <name>
+--template <path>
+```
+
+Use `--template` only when developing or testing the CLI against a local
+boilerplate directory.
+
+Add Capacitor to an existing app:
 
 ```bash
 npx capstart init [directory] [options]

@@ -12,7 +12,7 @@ This monorepo contains **three independent products**. Pick the one that fits yo
 
 | Product | What it does | When to use it |
 |---|---|---|
-| [`cli/`](./cli/) | Adds Capacitor to an **existing** web project | You already have a Next.js / Nuxt / React / Svelte / Vue app |
+| [`cli/`](./cli/) | Creates Capstart apps or adds Capacitor to an **existing** web project | You want the boilerplate or you already have a web app |
 | [`capstart-boilerplate/`](./capstart-boilerplate/) | Starter app to build from scratch | You're starting a new mobile app and want an opinionated setup |
 | [`capstart-website/`](./capstart-website/) | Documentation website | You're contributing to the docs or running them locally |
 
@@ -32,6 +32,16 @@ The CLI detects your framework, installs Capacitor, adds native iOS/Android proj
 
 ---
 
+## CLI — `npx capstart create`
+
+Creates a new app from the Capstart boilerplate without running `degit` directly.
+
+```bash
+npx capstart create my-app --app-id com.example.myapp --app-name "My App"
+```
+
+---
+
 ## Boilerplate — start a new mobile app
 
 A ready-to-ship starter with:
@@ -43,7 +53,8 @@ A ready-to-ship starter with:
 - Mobile-first layout with safe-area handling
 
 ```bash
-cd capstart-boilerplate
+npx capstart create my-app --app-id com.example.myapp --app-name "My App"
+cd my-app
 bun install
 bun run dev
 ```
