@@ -34,7 +34,7 @@ The CLI detects your framework, installs Capacitor, adds native iOS/Android proj
 
 ## CLI — `npx capstart create`
 
-Creates a new app from the Capstart boilerplate without running `degit` directly.
+Creates a new app from the Capstart boilerplate.
 
 ```bash
 npx capstart create my-app --app-id com.example.myapp --app-name "My App"

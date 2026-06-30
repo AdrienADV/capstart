@@ -21,7 +21,18 @@ export const Route = createFileRoute('/')({
 
 function StartBuildingSection() {
   const [appName, setAppName] = useState('');
-  const name = appName.trim() || 'Facebook';
+  const appLabel = appName.trim() || 'Facebook';
+  const appDirectory =
+    appLabel
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'my-app';
+  const quotedAppName = `"${appLabel
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\$/g, '\\$')
+    .replace(/`/g, '\\`')}"`;
+  const createCommand = `capstart create ${appDirectory} --app-name ${quotedAppName}`;
 
   const trackCopyAction = (eventName: string) => {
     window.umami?.track(eventName);
@@ -81,17 +92,17 @@ function StartBuildingSection() {
               </CodeBlockTabsList>
               <CodeBlockTab value="npx">
                 <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-boilerplate')}>
-                  <Pre>{`npx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+                  <Pre>{`npx ${createCommand}`}</Pre>
                 </CodeBlock>
               </CodeBlockTab>
               <CodeBlockTab value="bunx">
                 <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-boilerplate')}>
-                  <Pre>{`bunx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+                  <Pre>{`bunx ${createCommand}`}</Pre>
                 </CodeBlock>
               </CodeBlockTab>
               <CodeBlockTab value="pnpm">
                 <CodeBlock viewportProps={{ className: 'px-4' }} Actions={copyActions('start-building-copy-boilerplate')}>
-                  <Pre>{`pnpm dlx degit AdrienADV/capstart/capstart-boilerplate ${name}`}</Pre>
+                  <Pre>{`pnpm dlx ${createCommand}`}</Pre>
                 </CodeBlock>
               </CodeBlockTab>
             </CodeBlockTabs>
