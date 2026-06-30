@@ -2,7 +2,7 @@
 
 import { Command, InvalidArgumentError } from "commander";
 import packageJson from "../package.json";
-*import { createCommand } from "./commands/create.js";
+import { createCommand } from "./commands/create.js";
 import { initCommand } from "./commands/init.js";
 import { logger } from "./core/logger.js";
 import type {
