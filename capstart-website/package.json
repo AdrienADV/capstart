@@ -21,7 +21,7 @@
     "@tanstack/react-router-devtools": "1.167.0",
     "@tanstack/react-start": "1.168.34",
     "fumadocs-core": "16.14.0",
-    "fumadocs-mdx": "15.2.1",
+    "fumadocs-mdx": "15.2.2",
     "fumadocs-ui": "16.14.0",
     "lucide-react": "^1.14.0",
     "react": "^19.2.6",
