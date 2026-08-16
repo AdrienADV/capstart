@@ -72,6 +72,31 @@ test("creates an app from a local boilerplate template", async () => {
   assert.match(iosInfoPlist, /<string>Example Mobile<\/string>/);
 });
 
+test("creates a named project directory when no directory is provided", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "capstart-create-test-"));
+  const previousDirectory = process.cwd();
+
+  const originalLog = console.log;
+  console.log = () => {};
+  try {
+    process.chdir(root);
+    await createCommand({
+      appId: "com.example.mobile",
+      appName: "Example Mobile",
+      interactive: false,
+      template: boilerplatePath,
+    });
+  } finally {
+    process.chdir(previousDirectory);
+    console.log = originalLog;
+  }
+
+  const packageJson = JSON.parse(
+    await readFile(path.join(root, "example-mobile", "package.json"), "utf8"),
+  ) as { name: string };
+  assert.equal(packageJson.name, "example-mobile");
+});
+
 test("refuses to create an app in a non-empty directory", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "capstart-create-test-"));
   await writeFile(path.join(root, "existing.txt"), "existing\n");
