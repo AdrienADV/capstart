@@ -21,7 +21,10 @@ program
 program
   .command("create")
   .description("Create a new app from the Capstart boilerplate.")
-  .argument("[directory]", "app directory", "my-app")
+  .argument(
+    "[directory]",
+    "app directory (defaults to a folder named after the app)",
+  )
   .option("--app-id <id>", "native application id, for example com.example.app")
   .option("--app-name <name>", "native application name")
   .option(

@@ -90,6 +90,9 @@ Create a new app from the boilerplate:
 npx capstart create [directory] [options]
 ```
 
+When `directory` is omitted, Capstart asks for the app name and creates a new
+folder for it in the current directory.
+
 Examples:
 
 ```bash

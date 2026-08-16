@@ -32,23 +32,27 @@ const defaultIgnoredTemplateParts = new Set([
 export interface CreateOptions {
   appId?: string;
   appName?: string;
-  directory: string;
+  directory?: string;
   interactive?: boolean;
   template?: string;
 }
 
 export async function createCommand(options: CreateOptions): Promise<void> {
-  const targetRoot = path.resolve(options.directory);
   const interactive =
     options.interactive ?? Boolean(process.stdin.isTTY && process.stdout.isTTY);
-  const defaultName = createDefaultAppName(targetRoot);
+  const defaultName = options.directory
+    ? createDefaultAppName(path.resolve(options.directory))
+    : "my-app";
   const appName = await chooseAppName({
     defaultValue: defaultName,
     interactive,
     requested: options.appName,
   });
+  const targetRoot = path.resolve(
+    options.directory ?? createPackageName(appName),
+  );
   const appId = await chooseAppId({
-    defaultValue: createDefaultAppId(defaultName),
+    defaultValue: createDefaultAppId(appName),
     interactive,
     requested: options.appId,
   });
