@@ -3,7 +3,7 @@
   "version": "0.3.3",
   "description": "Create Capstart apps or add Capacitor to existing web framework projects.",
   "type": "module",
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.1",
   "bin": {
     "capstart": "./dist/cli.js"
   },
