@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
-    "@tanstack/react-router": "1.170.35",
-    "@tanstack/react-router-devtools": "1.167.1",
-    "@tanstack/react-start": "1.168.52",
+    "@tanstack/react-router": "1.170.36",
+    "@tanstack/react-router-devtools": "1.167.2",
+    "@tanstack/react-start": "1.168.53",
     "fumadocs-core": "16.15.8",
     "fumadocs-mdx": "15.4.0",
     "fumadocs-ui": "16.15.10",
