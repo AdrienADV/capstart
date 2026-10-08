@@ -17,7 +17,7 @@ const siteDescription =
   "Build beautiful native iOS, Android, and web apps with Capstart, a curated CapacitorJS component library.";
 
 const analyticsScript = {
-  src: "https://analytics.itswhereishipeverything.space/script.js",
+  src: "https://analytics.adrienvillermois.com/script.js",
   defer: true,
   "data-website-id": "81097c07-632a-4b4d-bda5-92020255f0cc",
 };
