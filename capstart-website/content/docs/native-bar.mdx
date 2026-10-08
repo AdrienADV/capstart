@@ -1,11 +1,13 @@
 ---
 title: Native Bar
-description: Add a native navbar, tabbar, and transition shell to a Capacitor app.
+description: Add native navbars, tabbars, Liquid Glass, and transition shells to a Capacitor app.
 ---
 
 `@capgo/capacitor-native-navigation` renders a native top navigation bar, a native bottom tab bar, and native transition shells with iOS and Android UI components.
 
-Your web app keeps control of routes, pages, and content. The plugin only owns the native frame around the WebView: bars, buttons, tabs, safe areas, and transition animations.
+Your web app keeps control of routes, pages, and content. The plugin owns the native frame around the WebView: bars, buttons, tabs, safe areas, and optional snapshot transitions.
+
+**Current version:** this guide covers `8.4.5`, the latest Capacitor 8 release.
 
 ## Demo
 
@@ -15,31 +17,45 @@ Your web app keeps control of routes, pages, and content. The plugin only owns t
 
 ## What It Does
 
-- Renders a native navbar at the top of the screen.
-- Renders a native tabbar at the bottom of the screen.
+- Renders a native navbar and tabbar from serializable JavaScript state.
+- Uses system-owned iOS navigation and tab surfaces, including Liquid Glass on supported iOS versions.
+- Provides floating and curved tabbar layouts, including center and detached trailing actions.
+- Supports selected icons, badges, label modes, Android indicators, ripples, and Material You colors.
+- Provides an optional live Liquid Glass-style blur on Android 12 and newer.
 - Emits JavaScript events when the user taps back, a navbar action, or a tab.
 - Exposes CSS variables so web content does not hide behind native bars.
-- Captures the WebView to create transitions that feel closer to a native app.
-- Works with React, Vue, Angular, Svelte, Solid, vanilla JavaScript, and any router that can call imperative methods.
+- Captures the WebView for push, back, root, tab, and zoom transitions.
+- Works with React, Vue, Angular, Svelte, Solid, vanilla JavaScript, and any router with an imperative API.
 
 ## What It Does Not Replace
 
 - It does not replace your router.
 - It does not create one native WebView per route.
-- It does not turn React, Vue, or Svelte components into native icons. Icons must be serializable descriptors: SVG strings, iOS SF Symbols, or Android resources.
+- It does not turn framework components into native icons. Icons must be serializable descriptors: SVG strings, iOS SF Symbols, or Android resources.
+
+## Compatibility
+
+| Requirement | Version |
+| --- | --- |
+| Native Navigation | `8.4.5` |
+| Capacitor | 8; use Capacitor 8.5 or newer with Native Navigation 8.4.x |
+| `@capacitor/core` peer dependency | `>= 8.0.0` |
+| Node.js | 22 or newer |
+
+Version 8.4 also adds tabbar height controls and support for the iOS 27 multi-window and iPhone Duo layouts. On a foldable or resizable iOS window, the system tabbar can move to a trailing rail while a curved center-action bar remains at the bottom.
 
 ## Installation
 
 ```npm
-npm install @capgo/capacitor-native-navigation
+npm install @capgo/capacitor-native-navigation@^8.4.5
 npx cap sync
 ```
 
-The current package targets Capacitor 8 with `@capacitor/core >= 8.0.0`.
+If you upgrade from an earlier 8.x release, run `npx cap sync` again so the native projects receive the new iOS and Android implementations.
 
 ## Minimal Configuration
 
-Initialize the plugin when the app starts. `contentInsetMode: 'css'` tells the plugin to write native insets into CSS variables.
+Initialize the plugin once when the app starts. `contentInsetMode: 'css'` writes native insets to CSS variables on `document.documentElement`.
 
 ```ts title="native-navigation.ts"
 import { NativeNavigation } from '@capgo/capacitor-native-navigation';
@@ -52,7 +68,7 @@ await NativeNavigation.configure({
 
 ## Native Navbar
 
-The navbar is updated from JavaScript. It can display a title, subtitle, back button, and actions.
+The navbar can display a title, subtitle, back button, and left or right actions. Set `large` for an iOS large title, `transparent` for the scroll-edge appearance, or `blurEffect` to choose an iOS material fallback when Liquid Glass is unavailable.
 
 ```ts
 await NativeNavigation.setNavbar({
@@ -65,7 +81,8 @@ await NativeNavigation.setNavbar({
       id: 'compose',
       title: 'Compose',
       icon: {
-        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+        ios: { sfSymbol: 'square.and.pencil' },
+        android: { resource: 'ic_compose' },
       },
     },
   ],
@@ -74,38 +91,106 @@ await NativeNavigation.setNavbar({
 
 ## Native Tabbar
 
-The tabbar receives a serializable list of tabs. The plugin renders the active tab, labels, badges, icons, and native colors.
+The tabbar receives a serializable list of tabs. It renders the active tab, labels, badges, platform icons, and native colors.
 
 ```ts
 await NativeNavigation.setTabbar({
   selectedId: 'home',
-  labelVisibilityMode: 'labeled',
-  icons: true,
+  labelVisibilityMode: 'selected',
+  indicatorColor: '#0A84FF',
+  rippleColor: '#330A84FF',
+  badgeBackgroundColor: '#FF3B30',
+  badgeTextColor: '#FFFFFF',
   colors: {
     dynamic: true,
+    tint: '#0A84FF',
+    inactiveTint: '#8E8E93',
   },
   tabs: [
     {
       id: 'home',
       title: 'Home',
       icon: {
-        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>',
+        ios: { sfSymbol: 'house' },
+        android: { resource: 'ic_home' },
+      },
+      selectedIcon: {
+        ios: { sfSymbol: 'house.fill' },
+        android: { resource: 'ic_home_filled' },
       },
     },
     {
-      id: 'settings',
-      title: 'Settings',
+      id: 'inbox',
+      title: 'Inbox',
+      badge: 3,
       icon: {
-        svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
+        ios: { sfSymbol: 'tray' },
+        android: { resource: 'ic_inbox' },
       },
     },
   ],
 });
 ```
 
+`labelVisibilityMode` accepts `auto`, `selected`, `labeled`, or `unlabeled`. Set `disableIndicator: true` to remove the Android active-tab indicator. The `colors` object also accepts `background`, `foreground`, `badgeBackground`, `badgeText`, `indicator`, and `ripple`.
+
+### Floating and curved layouts
+
+Use `style.shape: 'floating'` for a capsule or `style.shape: 'curve'` for a full-width bar with an integrated center action.
+
+```ts
+await NativeNavigation.setTabbar({
+  selectedId: 'home',
+  style: {
+    shape: 'floating',
+    height: 64,
+    horizontalMargin: 24,
+    maxWidth: 430,
+    bottomGap: 10,
+  },
+  tabs: [
+    { id: 'home', title: 'Home', icon: { ios: { sfSymbol: 'house.fill' } } },
+    { id: 'library', title: 'Library', icon: { ios: { sfSymbol: 'photo.on.rectangle' } } },
+    {
+      id: 'search',
+      title: 'Search',
+      role: 'search',
+      icon: { ios: { sfSymbol: 'magnifyingglass' } },
+    },
+  ],
+});
+```
+
+On a floating tabbar, the last tab whose `role` is `search` or `prominent` becomes a detached trailing circular action when the platform supports it. A curved tabbar ignores `role`; configure its center action with `centerItemId`, `centerButtonDiameter`, `centerButtonLift`, `centerButtonColor`, and `centerButtonIconColor`.
+
+## Android Liquid Glass
+
+Set `glass.effect` to `liquidGlass` to draw a live blurred WebView backdrop behind Android native bars. Android 12 and newer use `RenderEffect`; older versions retain the translucent surface without live blur. iOS continues to use the system-owned Liquid Glass appearance.
+
+```ts
+await NativeNavigation.configure({
+  contentInsetMode: 'css',
+  glass: {
+    effect: 'liquidGlass',
+    blurRadius: 18,
+    surfaceAlpha: 0.62,
+  },
+});
+
+await NativeNavigation.setTabbar({
+  selectedId: 'home',
+  tabs,
+  colors: {
+    background: '#F8FFFFFF',
+  },
+});
+```
+
+`glass` can also be set on `setNavbar()` or `setTabbar()` to override the global configuration for one surface.
+
 ## Connect Your Router
 
-Native bars do not navigate by themselves. They emit user intent, then your router changes the web page.
+Native bars emit user intent; your router still changes the web route and then updates the native state.
 
 ```ts
 await NativeNavigation.addListener('navbarBack', () => {
@@ -123,7 +208,7 @@ await NativeNavigation.addListener('tabSelect', ({ id }) => {
 
 ## CSS Insets
 
-With `contentInsetMode: 'css'`, the plugin updates variables on `document.documentElement`.
+With `contentInsetMode: 'css'`, the plugin updates variables on `document.documentElement` whenever the native layout changes.
 
 ```css
 .app-scroll {
@@ -131,10 +216,9 @@ With `contentInsetMode: 'css'`, the plugin updates variables on `document.docume
   overflow: auto;
   padding-top: calc(var(--cap-native-navigation-top) + 24px);
   padding-bottom: calc(var(--cap-native-navigation-bottom) + 24px);
+  scroll-padding-bottom: calc(var(--cap-native-navigation-bottom) + 24px);
 }
 ```
-
-Available variables:
 
 | Variable | Role |
 | --- | --- |
@@ -145,9 +229,11 @@ Available variables:
 | `--cap-native-navbar-height` | Height of the native navbar. |
 | `--cap-native-tabbar-height` | Height of the native tabbar. |
 
+Native Navigation 8.4.1 corrected tabbar insets to report CSS pixels. Version 8.4.5 also prevents Android system-bar insets from being applied twice when the content root is already inset. Upgrade before compensating for either issue in application CSS.
+
 ## Transitions
 
-A native transition wraps a normal web navigation: capture the current state, change the route, then finish the animation.
+A snapshot transition wraps a normal web navigation: capture the current state, change the route, update the native chrome, then finish the animation.
 
 ```ts
 const transition = await NativeNavigation.beginTransition({
@@ -168,23 +254,110 @@ await NativeNavigation.finishTransition({
 });
 ```
 
+Directions are `forward`, `back`, `root`, `tab`, `zoom`, and `none`.
+
+### Zoom transitions
+
+The exported helpers convert an element or `DOMRect` into native viewport coordinates for an Apple-style zoom transition.
+
+```ts
+import {
+  beginZoomTransition,
+  finishZoomTransition,
+} from '@capgo/capacitor-native-navigation';
+
+const card = document.querySelector('[data-photo-card]');
+
+if (card) {
+  const transition = await beginZoomTransition(card, { cornerRadius: 18 });
+
+  router.push('/photo/42');
+  await router.ready?.();
+
+  await finishZoomTransition(undefined, {
+    id: transition.id,
+    cornerRadius: 18,
+  });
+}
+```
+
+### Use with Capacitor Transitions
+
+Use Native Navigation for native bars, safe-area insets, and native intent events. Use [`@capgo/capacitor-transitions`](/docs/transitions) for the WebView page stack underneath.
+
+Pick one animation layer for each navigation. For normal route pushes, let Capacitor Transitions animate the web pages and update the native bars with `setNavbar()` and `setTabbar()`. For a zoom route, use `beginZoomTransition()` and `finishZoomTransition()` and skip the web page transition for that navigation.
+
+## Web Components
+
+The package can register optional custom elements for framework-agnostic declarative setup.
+
+```ts
+import { defineNativeNavigationElements } from '@capgo/capacitor-native-navigation';
+
+defineNativeNavigationElements();
+```
+
+```html
+<cap-native-navigation-provider
+  enabled="true"
+  content-inset-mode="css"
+></cap-native-navigation-provider>
+
+<cap-native-navbar
+  title="Home"
+  subtitle="Native chrome"
+  transparent
+  right-items='[{"id":"compose","title":"Compose","icon":{"ios":{"sfSymbol":"square.and.pencil"}}}]'
+></cap-native-navbar>
+
+<cap-native-tabbar
+  selected-id="home"
+  tabs='[{"id":"home","title":"Home","icon":{"ios":{"sfSymbol":"house.fill"}}}]'
+></cap-native-tabbar>
+```
+
+## Icon Descriptors
+
+Use a shared `svg` or `src`, then add platform-specific fallbacks when needed.
+
+```ts
+const icon = {
+  svg: '<svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/></svg>',
+  width: 24,
+  height: 24,
+  template: true,
+  src: 'shared_asset_name',
+  ios: {
+    sfSymbol: 'house.fill',
+    image: 'BundledAssetName',
+  },
+  android: {
+    resource: 'ic_home',
+    image: 'bundled_drawable_name',
+  },
+};
+```
+
+Inline SVG supports the shapes commonly used by icon sets such as Lucide and Feather: `path`, `line`, `polyline`, `polygon`, `circle`, and `rect`. SVG and image icons are template images by default, so native tint colors can recolor them.
+
 ## Platforms
 
 | Platform | Implementation |
 | --- | --- |
-| iOS | `UINavigationBar` and `UITabBar`. iOS 26+ uses the system Liquid Glass behavior for the tabbar. |
-| Android | AppCompat `Toolbar` and a native tabbar with edge-to-edge placement. |
-| Web | No native bars; useful development fallback with events and inset variables. |
+| iOS | UIKit `UINavigationBar`, `UITabBar`, and `UITabBarController`, with system tab gestures, Liquid Glass, safe areas, and iOS 27 multi-window support. |
+| Android | AppCompat `Toolbar` and a native edge-to-edge tabbar, with optional Material You colors and Liquid Glass-style blur. |
+| Web | Development fallback that mirrors inset variables and events without rendering native bars. |
 
 ## Core API
 
 | Method or event | Usage |
 | --- | --- |
-| `configure()` | Enables the native host and configures insets. |
+| `configure()` | Enables the native host and configures insets, colors, transitions, and glass defaults. |
 | `setNavbar()` | Updates the native navbar. |
-| `setTabbar()` | Updates the native tabbar. |
+| `setTabbar()` | Updates tabs, selection, layout, colors, badges, and icons. |
 | `beginTransition()` | Captures the WebView before a route change. |
 | `finishTransition()` | Animates toward the updated WebView. |
+| `beginZoomTransition()` / `finishZoomTransition()` | Convenience helpers for element-based zoom transitions. |
 | `getPluginVersion()` | Returns the native plugin version marker. |
 | `navbarBack` | Event for the native back button. |
 | `navbarItemTap` | Event for a navbar action button. |
@@ -192,7 +365,16 @@ await NativeNavigation.finishTransition({
 | `safeAreaChanged` | Event for inset changes. |
 | `transitionStart` / `transitionEnd` | Events for the native transition lifecycle. |
 
+## 8.4 Upgrade Notes
+
+- `8.4.0` added tabbar height customization and moved the example integration to Capacitor 8.5's iOS scene lifecycle.
+- `8.4.1` fixed tabbar inset units so they are reported in CSS pixels.
+- `8.4.2` preserves the iOS Liquid Glass tabbar while content scrolls beneath it.
+- `8.4.3` and `8.4.4` restored the Android floating-tabbar shadow, removed an unwanted indicator, and removed the solid band below the bar.
+- `8.4.5` prevents Android system-bar insets from being applied twice.
+
 ## Links
 
 - [GitHub repository](https://github.com/Cap-go/capacitor-native-navigation)
+- [Release 8.4.5](https://github.com/Cap-go/capacitor-native-navigation/releases/tag/8.4.5)
 - [Capgo documentation](https://capgo.app/docs/plugins/native-navigation/)
